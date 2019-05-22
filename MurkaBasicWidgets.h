@@ -26,6 +26,8 @@ class MurkaWidgetButton : public MurkaView {
 public:
 	MurkaWidgetButton() {
 		draw = [](void* data, void* parametersObject, MurkaContext & context)->void* {
+			auto castedParametersObject = ((MurkaWidgetButton*)parametersObject);
+			ofLog() << "calling the button draw...";
 #ifdef MURKA_OF
 			ofPushStyle();
 			ofFill();
@@ -36,10 +38,14 @@ public:
 			ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
 			ofPopStyle();
 
+			ofSetColor(255);
+			ofDrawBitmapStringHighlight(castedParametersObject->Label, context.getSize().x / 2 - 30, 25);
+
 			auto label = ((MurkaWidgetButton*)parametersObject)->Label;
 #endif // MURKA_OF
 
 			if ((context.didClick[0]) && (context.isHovered())) {
+				castedParametersObject->Callback();
 				return new bool(true);
 			} else return false;
 
