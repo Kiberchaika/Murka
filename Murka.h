@@ -40,6 +40,8 @@ public:
 		depth++;
 		previousViewShape = currentViewShape;
 		currentViewShape.position += containerPosition;
+        
+        currentViewShape.size = containerShape;
 
 		ofLog() << "new container position = " << currentViewShape.position.x << " : " << currentViewShape.position.y;
 		ofLog() << "new container size = " << currentViewShape.size.x << " : " << currentViewShape.size.y;
@@ -103,7 +105,7 @@ public:
 
 
 	// This children list contains all the children objects and their respective data
-	std::list <std::tuple<MurkaView, void*>> children; // std::list because we may want to store a pointer to the view
+	std::list <std::tuple<MurkaView*, void*>> children; // std::list because we may want to store a pointer to the view
 
 	MurkaShape shape; // for the widgets that are instantiated
 
@@ -117,8 +119,8 @@ public:
 	void* data = NULL;
 
 	viewDrawFunction draw = [](void* data, void* parametersObject, MurkaContext & context)->void* {
-		//ofLog() << "drawing an empty func...";
-		return false;
+        ofLog() << "drawing an empty func...";
+		return new bool(false);
 	};
 	// draw arguments: data void pointer, parameters void pointer, context object pointer
 
@@ -130,7 +132,7 @@ public:
 
 
 
-class Murka : MurkaView {
+class Murka : public MurkaView {
 public:
 	Murka() {
 		shape.position = { 0.0, 0.0 };
@@ -167,6 +169,7 @@ public:
 	// A recursive draw cycle that starts with this widget
 	void drawCycle(MurkaView* widget, MurkaContext context) {
 		ofLog() << "drawing at context level " << context.depth;
+        context.transformTheRenderIntoThisContextShape();
 
 		context.murkaObject = this;
 		auto result = widget->draw(widget->data, widget, (states[data].widgetParametersObject, context));
@@ -174,14 +177,14 @@ public:
 		//murkaObject->updateStateCallResult(data, result);
 
 
-		context.transformTheRenderIntoThisContextShape();
 			for (auto& i : widget->children) {
 				auto childWidget = std::get<0>(i);
-				context.pushContainer(childWidget.shape.position,
-									  childWidget.shape.size);
-					drawCycle(&childWidget, context);
+                context.pushContainer(childWidget->shape.position,
+                                      childWidget->shape.size);
+                drawCycle(childWidget, context);
 				context.popContainer();
 			}
+        
 		context.transformTheRenderBackFromThisContextShape();
 	}
 
@@ -209,12 +212,12 @@ public:
 
 	// State management
 
-	void addChildToView(MurkaView* parent, MurkaView& child, void* data) {
+	void addChildToView(MurkaView* parent, MurkaView* child, void* data) {
 		parent->children.push_back({ child, data });
 		states[data] = MurkaState();
-		states[data].widgetParametersObject = &child;
-		states[data].drawFunction = child.draw;
-		child.data = data;
+		states[data].widgetParametersObject = child;
+        states[data].drawFunction = child->getDrawFunction(child);
+		child->data = data;
 	}
 
 	MurkaView* getRootView() {

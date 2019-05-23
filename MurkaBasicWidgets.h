@@ -26,8 +26,15 @@ class MurkaWidgetButton : public MurkaView {
 public:
 	MurkaWidgetButton() {
 		draw = [](void* data, void* parametersObject, MurkaContext & context)->void* {
-			auto castedParametersObject = ((MurkaWidgetButton*)parametersObject);
-			ofLog() << "calling the button draw...";
+//            auto castedParametersObject = ((MurkaWidgetButton*)parametersObject);
+            
+            auto castedParametersObject = ((MurkaWidgetButton*)parametersObject);
+            
+            ofLog() << "when called differently, now the label is " << castedParametersObject->Label;
+            
+/*
+            
+//            ofLog() << "calling the button draw...";
 #ifdef MURKA_OF
 			ofPushStyle();
 			ofFill();
@@ -39,7 +46,7 @@ public:
 			ofPopStyle();
 
 			ofSetColor(255);
-			ofDrawBitmapStringHighlight(castedParametersObject->Label, context.getSize().x / 2 - 30, 25);
+			ofDrawBitmapStringHighlight(castedParametersObject->Label, context.getSize().x / 2, 25);
 
 			auto label = ((MurkaWidgetButton*)parametersObject)->Label;
 #endif // MURKA_OF
@@ -47,12 +54,14 @@ public:
 			if ((context.didClick[0]) && (context.isHovered())) {
 				castedParametersObject->Callback();
 				return new bool(true);
-			} else return false;
+			} else return new bool(false);
 
+ */
+            
 		};
 	}
 
-	MurkaWidgetButton(std::string label, std::function<void()> callback, MurkaShape shape) {
+    MurkaWidgetButton(std::string label, std::function<void()> callback, MurkaShape shape): MurkaWidgetButton() {
 		Label = label;
 		Callback = callback;
 	}
@@ -72,7 +81,7 @@ public:
 			ofDrawBitmapStringHighlight("this is the widget of type 1 that refers to the value", *((int*)data), 50, 50);
 #endif // MURKA_OF
 
-			return false;
+			return new bool (false);
 		};
 
 	}
@@ -107,7 +116,7 @@ public:
 			ofDrawBitmapStringHighlight("this is the widget of type 2 that refers to the value", *((float*)data), 50, 50);
 #endif // MURKA_OF
 
-			return false;
+			return new bool(false);
 		};
 
 	}
