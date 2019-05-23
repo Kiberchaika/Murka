@@ -4,7 +4,7 @@
 class MurkaWidgetBlankPanel : public MurkaView {
 public:
 	MurkaWidgetBlankPanel() {
-		draw = [](void* data, void* parametersObject, MurkaContext & context)->void* {
+		draw = [](void* data, void* parametersObject, void* thisWidgetObject, MurkaContext & context)->void* {
 #ifdef MURKA_OF
 			ofPushStyle();
 				ofFill();
@@ -25,14 +25,14 @@ public:
 class MurkaWidgetButton : public MurkaView {
 public:
 	MurkaWidgetButton() {
-		draw = [](void* data, void* parametersObject, MurkaContext & context)->void* {
+		draw = [](void* data, void* parametersObject, void* thisWidgetObject, MurkaContext & context)->void* {
 //            auto castedParametersObject = ((MurkaWidgetButton*)parametersObject);
             
             auto castedParametersObject = ((MurkaWidgetButton*)parametersObject);
             
             ofLog() << "when called differently, now the label is " << castedParametersObject->Label;
             
-/*
+
             
 //            ofLog() << "calling the button draw...";
 #ifdef MURKA_OF
@@ -55,8 +55,6 @@ public:
 				castedParametersObject->Callback();
 				return new bool(true);
 			} else return new bool(false);
-
- */
             
 		};
 	}
@@ -65,6 +63,12 @@ public:
 		Label = label;
 		Callback = callback;
 	}
+    
+    struct Parameters {
+        std::vector<std::string> menuList = {"a", "b", "c"};
+        std::string label;
+    };
+    
 
 	std::function<void()> Callback;
 	std::string Label;
@@ -74,7 +78,7 @@ class MurkaWidgetTypeInt : public MurkaView {
 public:
 	MurkaWidgetTypeInt() {
 
-		draw = [](void* data, void* parametersObject, MurkaContext & context)->void* {
+		draw = [](void* data, void* parametersObject, void* thisWidgetObject, MurkaContext & context)->void* {
 #ifdef MURKA_OF
 			ofSetColor(20, 150, 20);
 			ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
@@ -109,7 +113,7 @@ class MurkaWidgetTypeFloat : public MurkaView {
 public:
 	MurkaWidgetTypeFloat() {
 
-		draw = [](void* data, void* parametersObject, MurkaContext & context)->void* {
+		draw = [](void* data, void* parametersObject, void* thisWidgetObject, MurkaContext & context)->void* {
 #ifdef MURKA_OF
 			ofSetColor(20, 20, 150);
 			ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);

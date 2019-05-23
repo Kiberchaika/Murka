@@ -2,134 +2,22 @@
 
 // Murka is a mixed mode data driven user interface library.
 
-#define MURKA_OF // This defines the oF render
+#define MURKA_OF // This defines the oF render. TODO: move it to ofxMurka.h instead
 
 
 #include <functional>
-#include "ofMain.h"
 #include "MurkaShapes.h"
+#include "MurkaContext.h"
+#include "MurkaView.h"
+
 #include "LayoutGenerator.h"
 
 // Here's the global typedefs for cross-render functionality
 
 #ifdef MURKA_OF
-typedef ofTrueTypeFont* FontObject; // It's important for this object to exist in a render for Murka to work
+    #include "ofMain.h"
+    typedef ofTrueTypeFont* FontObject; // It's important for this object to exist in a render for Murka to work
 #endif
-
-
-
-class MurkaContext {
-public:
-	MurkaContext() {
-
-	}
-
-	MurkaPoint getSize() {
-		return currentViewShape.size;
-	}
-
-	bool isHovered() {
-		return currentViewShape.inside(mousePosition); // using absolute coordinates to calc that
-	}
-
-	void* murkaObject;
-
-	// Pushes a container. Returns a context that you could then use if you want to draw there again later
-	// the draw loop. Gets the context depth up a 1 point.
-	/* MurkaContext */ void pushContainer(MurkaPoint containerPosition, MurkaPoint containerShape) {
-		depth++;
-		previousViewShape = currentViewShape;
-		currentViewShape.position += containerPosition;
-        
-        currentViewShape.size = containerShape;
-
-		ofLog() << "new container position = " << currentViewShape.position.x << " : " << currentViewShape.position.y;
-		ofLog() << "new container size = " << currentViewShape.size.x << " : " << currentViewShape.size.y;
-	}
-
-	// Returns to the previous context state. Gets the context depth down a 1 point.
-
-	/* MurkaContext */ void popContainer() {
-		depth--;
-		currentViewShape = previousViewShape;
-
-	}
-
-	// Utility function to transform the render into the shape of this context.
-	// Helpful to draw the view innards.
-	void transformTheRenderIntoThisContextShape() {
-#ifdef MURKA_OF
-		ofPushMatrix();
-		ofTranslate(currentViewShape.position.x, currentViewShape.position.y);
-#endif // MURKA_OF
-	}
-
-	void transformTheRenderBackFromThisContextShape() {
-#ifdef MURKA_OF
-		ofPopMatrix();
-#endif // MURKA_OF
-	}
-
-
-	// All shapes are absolute
-
-	MurkaShape rootViewShape;
-	MurkaShape previousViewShape;
-	MurkaShape currentViewShape;
-	int depth = 0;
-
-
-	///////////////////////////// TODO: this has to gather all the user input too
-
-	MurkaPoint mousePosition;
-	std::vector<std::tuple<MurkaPoint, bool>> fingerData; // TODO: finger type
-	bool didClick[3];
-};
-
-// Data, parameters and the context are what you put inside. Optional return is put into void*.
-typedef std::function<void* (void*, void*, MurkaContext&)> viewDrawFunction;
-
-class MurkaView {
-public:
-	MurkaView() {
-
-	}
-
-	~MurkaView() {
-		// TODO: delete children
-	}
-
-	static viewDrawFunction getDrawFunction(MurkaView* view) {
-		return (*view).draw;
-	}
-
-
-	// This children list contains all the children objects and their respective data
-	std::list <std::tuple<MurkaView*, void*>> children; // std::list because we may want to store a pointer to the view
-
-	MurkaShape shape; // for the widgets that are instantiated
-
-	//////////////////////////////////////////////// The following is to be overriden by children classes
-
-	// A parameters initialiser. Gets called if Murka wants widget to allocate memory for its parameters.
-	void* returnNewParametersObject() {
-		return new MurkaView();
-	}
-
-	void* data = NULL;
-
-	viewDrawFunction draw = [](void* data, void* parametersObject, MurkaContext & context)->void* {
-        ofLog() << "drawing an empty func...";
-		return new bool(false);
-	};
-	// draw arguments: data void pointer, parameters void pointer, context object pointer
-
-	// create function ("factory"): returns the object initialised with the default parameter set
-
-};
-
-
-
 
 
 class Murka : public MurkaView {
@@ -139,7 +27,9 @@ public:
 		shape.size = { (float)ofGetWidth(), (float)ofGetHeight() }; // the root view's shape
 	}
 
-
+    void setupEvents() {
+        
+    }
 
 	/*
 		for each and every widget, we need this:
@@ -172,7 +62,8 @@ public:
         context.transformTheRenderIntoThisContextShape();
 
 		context.murkaObject = this;
-		auto result = widget->draw(widget->data, widget, (states[data].widgetParametersObject, context));
+//        auto result = widget->draw(widget->data, widget, (states[data].widgetParametersObject, context));
+        
 		//widget->draw(NULL, widget, (states[data].widgetParametersObject, context));
 		//murkaObject->updateStateCallResult(data, result);
 
@@ -217,17 +108,22 @@ public:
 		states[data] = MurkaState();
 		states[data].widgetParametersObject = child;
         states[data].drawFunction = child->getDrawFunction(child);
-		child->data = data;
+//        child->data = data;
 	}
 
 	MurkaView* getRootView() {
 		return (MurkaView*)this;
 	}
 
+    // TODO: MurkaView has to hold a pointer to this descriptor in its children array.
+    // this guarantees that we only allocate data here.
+    
 	struct MurkaState {
 		viewDrawFunction drawFunction;
 		void* latestReturnResult;
 		void* widgetParametersObject;
+        
+        bool wasUsedInLastFrame = true; // if this becomes false, we unallocate it
 	};
 
 	void updateStateCallResult(void* dataPointer, void* result) {

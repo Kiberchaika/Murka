@@ -1,0 +1,78 @@
+#pragma once
+
+#include <functional>
+#include "MurkaShapes.h"
+
+// Here's the global typedefs for cross-render functionality
+
+#ifdef MURKA_OF
+#include "ofMain.h"
+#endif
+
+class MurkaContext {
+public:
+    MurkaContext() {
+        
+    }
+    
+    MurkaPoint getSize() {
+        return currentViewShape.size;
+    }
+    
+    bool isHovered() {
+        return currentViewShape.inside(mousePosition); // using absolute coordinates to calc that
+    }
+    
+    void* murkaObject;
+    
+    // Pushes a container. Returns a context that you could then use if you want to draw there again later
+    // the draw loop. Gets the context depth up a 1 point.
+    /* MurkaContext */ void pushContainer(MurkaPoint containerPosition, MurkaPoint containerShape) {
+        depth++;
+        previousViewShape = currentViewShape;
+        currentViewShape.position += containerPosition;
+        
+        currentViewShape.size = containerShape;
+        
+        ofLog() << "new container position = " << currentViewShape.position.x << " : " << currentViewShape.position.y;
+        ofLog() << "new container size = " << currentViewShape.size.x << " : " << currentViewShape.size.y;
+    }
+    
+    // Returns to the previous context state. Gets the context depth down a 1 point.
+    
+    /* MurkaContext */ void popContainer() {
+        depth--;
+        currentViewShape = previousViewShape;
+        
+    }
+    
+    // Utility function to transform the render into the shape of this context.
+    // Helpful to draw the view innards.
+    void transformTheRenderIntoThisContextShape() {
+#ifdef MURKA_OF
+        ofPushMatrix();
+        ofTranslate(currentViewShape.position.x, currentViewShape.position.y);
+#endif // MURKA_OF
+    }
+    
+    void transformTheRenderBackFromThisContextShape() {
+#ifdef MURKA_OF
+        ofPopMatrix();
+#endif // MURKA_OF
+    }
+    
+    
+    // All shapes are absolute
+    
+    MurkaShape rootViewShape;
+    MurkaShape previousViewShape;
+    MurkaShape currentViewShape;
+    int depth = 0;
+    
+    
+    ///////////////////////////// TODO: this has to gather all the user input too
+    
+    MurkaPoint mousePosition;
+    std::vector<std::tuple<MurkaPoint, bool>> fingerData; // TODO: finger type
+    bool didClick[3];
+};
