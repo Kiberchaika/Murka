@@ -4,41 +4,53 @@
 class MurkaWidgetBlankPanel : public MurkaView {
 public:
 	MurkaWidgetBlankPanel() {
-		draw = [](void* data, void* parametersObject, void* thisWidgetObject, MurkaContext & context)->void* {
-#ifdef MURKA_OF
-			ofPushStyle();
-				ofFill();
-				ofSetColor(100);
-				ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
-				ofSetColor(30);
-				ofNoFill();
-				ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
-			ofPopStyle();
-#endif // MURKA_OF
-
-			return new bool(true);
-		};
+        draw = staticDraw();
 	}
+    
+    static viewDrawFunction staticDraw() {
+        return [](void* dataToControl,
+                  void* parametersObject,
+                  void* thisWidgetObject,
+                  MurkaContext & context,
+                  void* resultObject)  {
+        #ifdef MURKA_OF
+                ofPushStyle();
+                ofFill();
+                ofSetColor(100);
+                ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
+                ofSetColor(30);
+                ofNoFill();
+                ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
+                ofPopStyle();
+        #endif // MURKA_OF
+        
+                return new bool(true);
+            };
+    }
 };
 
 
 class MurkaWidgetButton : public MurkaView {
 public:
 	MurkaWidgetButton() {
-		draw = [](void* data, void* parametersObject, void* thisWidgetObject, MurkaContext & context)->void* {
-//            auto castedParametersObject = ((MurkaWidgetButton*)parametersObject);
+        draw = [](void* dataToControl,
+                  void* parametersObject,
+                  void* thisWidgetObject,
+                  MurkaContext & context,
+                  void* resultObject)  {
+
             
-            auto castedParametersObject = ((MurkaWidgetButton*)parametersObject);
+            auto parameters = ((Parameters*)parametersObject);
             
-            ofLog() << "when called differently, now the label is " << castedParametersObject->Label;
             
 
             
-//            ofLog() << "calling the button draw...";
 #ifdef MURKA_OF
-			ofPushStyle();
+//            ofLog() << "when called differently, now the label is " << castedParametersObject->label;
+
+            ofPushStyle();
 			ofFill();
-			ofSetColor(100);
+			ofSetColor(parameters->r, parameters->g, parameters->b);
 			ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
 			ofSetColor(30);
 			ofNoFill();
@@ -46,31 +58,40 @@ public:
 			ofPopStyle();
 
 			ofSetColor(255);
-			ofDrawBitmapStringHighlight(castedParametersObject->Label, context.getSize().x / 2, 25);
+            ofDrawBitmapStringHighlight(parameters->label, context.getSize().x / 2, 25);
 
 			auto label = ((MurkaWidgetButton*)parametersObject)->Label;
 #endif // MURKA_OF
 
 			if ((context.didClick[0]) && (context.isHovered())) {
-				castedParametersObject->Callback();
+                parameters->Callback();
 				return new bool(true);
 			} else return new bool(false);
             
 		};
 	}
+    
+    // Results object is used for internal state management and is crucial to get right.
+    void* returnNewResultsObject() {
+        return new bool(false);
+    }
+    
+    void* returnNewWidgetObject() {
+        return new MurkaWidgetButton();
+    }
 
     MurkaWidgetButton(std::string label, std::function<void()> callback, MurkaShape shape): MurkaWidgetButton() {
-		Label = label;
-		Callback = callback;
+//        Label = label;
+//        Callback = callback;
 	}
     
     struct Parameters {
-        std::vector<std::string> menuList = {"a", "b", "c"};
+        float r, g, b;
         std::string label;
+        std::function<void()> Callback;
     };
     
 
-	std::function<void()> Callback;
 	std::string Label;
 };
 
@@ -78,11 +99,15 @@ class MurkaWidgetTypeInt : public MurkaView {
 public:
 	MurkaWidgetTypeInt() {
 
-		draw = [](void* data, void* parametersObject, void* thisWidgetObject, MurkaContext & context)->void* {
+        draw = [](void* dataToControl,
+                  void* parametersObject,
+                  void* thisWidgetObject,
+                  MurkaContext & context,
+                  void* resultObject)  {
 #ifdef MURKA_OF
 			ofSetColor(20, 150, 20);
 			ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
-			ofDrawBitmapStringHighlight("this is the widget of type 1 that refers to the value", *((int*)data), 50, 50);
+//            ofDrawBitmapStringHighlight("this is the widget of type 1 that refers to the value", *((int*)data), 50, 50);
 #endif // MURKA_OF
 
 			return new bool (false);
@@ -113,11 +138,15 @@ class MurkaWidgetTypeFloat : public MurkaView {
 public:
 	MurkaWidgetTypeFloat() {
 
-		draw = [](void* data, void* parametersObject, void* thisWidgetObject, MurkaContext & context)->void* {
+        draw = [](void* dataToControl,
+                  void* parametersObject,
+                  void* thisWidgetObject,
+                  MurkaContext & context,
+                  void* resultObject)  {
 #ifdef MURKA_OF
 			ofSetColor(20, 20, 150);
 			ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
-			ofDrawBitmapStringHighlight("this is the widget of type 2 that refers to the value", *((float*)data), 50, 50);
+//            ofDrawBitmapStringHighlight("this is the widget of type 2 that refers to the value", *((float*)data), 50, 50);
 #endif // MURKA_OF
 
 			return new bool(false);
@@ -140,3 +169,4 @@ public:
 		return new MurkaWidgetTypeInt();
 	}
 };
+

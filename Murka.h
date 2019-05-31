@@ -23,8 +23,10 @@
 class Murka : public MurkaView {
 public:
 	Murka() {
+        /* // Should I return to having the root view's shape or nah?
 		shape.position = { 0.0, 0.0 };
 		shape.size = { (float)ofGetWidth(), (float)ofGetHeight() }; // the root view's shape
+         */
 	}
 
     void setupEvents() {
@@ -56,25 +58,25 @@ public:
 	MurkaContext currentContext;
 
 
-	// A recursive draw cycle that starts with this widget
-	void drawCycle(MurkaView* widget, MurkaContext context) {
+	// A recursive OOP draw cycle that starts with this widget
+	void drawCycle(MurkaViewHandler* widget, MurkaContext context) {
 		ofLog() << "drawing at context level " << context.depth;
         context.transformTheRenderIntoThisContextShape();
 
-		context.murkaObject = this;
-//        auto result = widget->draw(widget->data, widget, (states[data].widgetParametersObject, context));
         
-		//widget->draw(NULL, widget, (states[data].widgetParametersObject, context));
-		//murkaObject->updateStateCallResult(data, result);
+        
+		context.murkaObject = this;
+        
+        widget->drawFunction(widget->dataToControl, widget->parametersObject, widget->widgetObject, context, widget->result);
 
-
-			for (auto& i : widget->children) {
-				auto childWidget = std::get<0>(i);
-                context.pushContainer(childWidget->shape.position,
-                                      childWidget->shape.size);
-                drawCycle(childWidget, context);
+			for (auto& i : ((MurkaView*)widget->widgetObject)->children) {
+                context.pushContainer(i->shape.position,
+                                      i->shape.size);
+                    drawCycle(i, context);
 				context.popContainer();
 			}
+  
+        
         
 		context.transformTheRenderBackFromThisContextShape();
 	}
@@ -90,26 +92,57 @@ public:
 	// It should also free the memory used for function responses.
 	void restartContext () {
 		currentContext = MurkaContext();
-		currentContext.rootViewShape = shape;
-		currentContext.currentViewShape = shape;
+        
+#ifdef MURKA_OF
+        currentContext.rootViewShape = MurkaShape{0,
+                                                  0,
+                                                  float(ofGetWidth()),
+                                                  float(ofGetHeight())};
+        currentContext.currentViewShape = currentContext.rootViewShape;
+#endif
 
 	}
 
 	void drawCycle() { // this version is without arguments cause it creates the context
 		restartContext();
 
-		drawCycle(this, currentContext);
+        for (auto& i : children) {
+            currentContext.pushContainer(i->shape.position,
+                                  i->shape.size);
+
+                drawCycle(i, currentContext);
+            currentContext.popContainer();
+            
+        }
 	}
 
 	// State management
 
-	void addChildToView(MurkaView* parent, MurkaView* child, void* data) {
-		parent->children.push_back({ child, data });
-		states[data] = MurkaState();
-		states[data].widgetParametersObject = child;
-        states[data].drawFunction = child->getDrawFunction(child);
-//        child->data = data;
+	MurkaViewHandler* addChildToView(MurkaView* parent, MurkaView* child, void* data, void* parameters, MurkaShape shapeInParentContainer)
+    {
+        
+        MurkaViewHandler newHandler;
+        newHandler.parametersObject = child->returnNewParametersObject();
+        if (parameters != NULL) {
+            newHandler.parametersObject = parameters;
+        }
+        newHandler.drawFunction = child->getDrawFunction(child);
+        newHandler.result = child->returnNewResultsObject();
+        newHandler.manuallyControlled = true;
+        newHandler.widgetObject = child->returnNewWidgetObject();
+        newHandler.shape = shapeInParentContainer;
+        
+        viewHandlers.push_back(newHandler);
+        
+        auto handlerPointer = &(viewHandlers.back());
+        parent->children.push_back(handlerPointer);
+        return handlerPointer;
 	}
+    
+    MurkaViewHandler* addChildToView(MurkaView* child, void* data, void* parameters, MurkaShape shapeInParentContainer)
+    {
+        addChildToView(getRootView(), child, data, parameters, shapeInParentContainer);
+    }
 
 	MurkaView* getRootView() {
 		return (MurkaView*)this;
@@ -118,19 +151,13 @@ public:
     // TODO: MurkaView has to hold a pointer to this descriptor in its children array.
     // this guarantees that we only allocate data here.
     
-	struct MurkaState {
-		viewDrawFunction drawFunction;
-		void* latestReturnResult;
-		void* widgetParametersObject;
-        
-        bool wasUsedInLastFrame = true; // if this becomes false, we unallocate it
-	};
 
-	void updateStateCallResult(void* dataPointer, void* result) {
-		states[dataPointer].latestReturnResult = result;
-	}
 
-	std::map<void*, MurkaState> states;
+//    void updateStateCallResult(void* dataPointer, void* result) {
+//        states[dataPointer].result = result; // !!!TODO!!!: is this ok? should I delete the previous pointer?
+//    }
+
+	std::list<MurkaViewHandler> viewHandlers; // States is a central data holder, a map that maps a data to the widget
 
 	void keyPressed(int key);
 	void keyReleased(int key);

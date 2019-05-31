@@ -4,7 +4,7 @@ struct MurkaPoint {
 	float x, y;
 
 	MurkaPoint operator += (MurkaPoint p2) {
-		return { x + p2.x, y + p2.y };
+		this->operator=({ x + p2.x, y + p2.y });
 	}
 };
 
