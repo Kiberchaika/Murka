@@ -34,8 +34,8 @@ public:
         
         currentViewShape.size = containerShape;
         
-        ofLog() << "new container position = " << currentViewShape.position.x << " : " << currentViewShape.position.y;
-        ofLog() << "new container size = " << currentViewShape.size.x << " : " << currentViewShape.size.y;
+//        ofLog() << "new container position = " << currentViewShape.position.x << " : " << currentViewShape.position.y;
+//        ofLog() << "new container size = " << currentViewShape.size.x << " : " << currentViewShape.size.y;
     }
     
     // Returns to the previous context state. Gets the context depth down a 1 point.

@@ -1,7 +1,7 @@
 #pragma once
 #include "Murka.h"
 
-class MurkaWidgetBlankPanel : public MurkaView {
+class MurkaWidgetBlankPanel : public MurkaDrawFuncGetter<MurkaWidgetBlankPanel> {
 public:
 	MurkaWidgetBlankPanel() {
         draw = staticDraw();
@@ -30,48 +30,51 @@ public:
 };
 
 
-class MurkaWidgetButton : public MurkaView {
+class MurkaWidgetButton : public MurkaDrawFuncGetter<MurkaWidgetButton> {
 public:
 	MurkaWidgetButton() {
-        draw = [](void* dataToControl,
+
+	}
+    
+    static viewDrawFunction staticDraw() {
+        
+        return [](void* dataToControl,
                   void* parametersObject,
                   void* thisWidgetObject,
                   MurkaContext & context,
                   void* resultObject)  {
-
+            
             
             auto parameters = ((Parameters*)parametersObject);
             
-            
-
-            
 #ifdef MURKA_OF
-//            ofLog() << "when called differently, now the label is " << castedParametersObject->label;
-
-            ofPushStyle();
-			ofFill();
-			ofSetColor(parameters->r, parameters->g, parameters->b);
-			ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
-			ofSetColor(30);
-			ofNoFill();
-			ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
-			ofPopStyle();
-
-			ofSetColor(255);
-            ofDrawBitmapStringHighlight(parameters->label, context.getSize().x / 2, 25);
-
-			auto label = ((MurkaWidgetButton*)parametersObject)->Label;
-#endif // MURKA_OF
-
-			if ((context.didClick[0]) && (context.isHovered())) {
-                parameters->Callback();
-				return new bool(true);
-			} else return new bool(false);
             
-		};
-	}
+            ofPushStyle();
+            ofFill();
+            ofSetColor(parameters->r, parameters->g, parameters->b);
+            ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
+            ofSetColor(30);
+            ofNoFill();
+            ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
+            ofPopStyle();
+            
+            ofSetColor(255);
+            ofDrawBitmapStringHighlight(parameters->label, context.getSize().x / 2, 25);
+            
+            auto label = ((Parameters*)parametersObject)->label;
+#endif // MURKA_OF
+            
+            if ((context.didClick[0]) && (context.isHovered())) {
+                parameters->Callback();
+                return new bool(true);
+            } else return new bool(false);
+            
+        };
+    }
+    
     
     // Results object is used for internal state management and is crucial to get right.
+    /*
     void* returnNewResultsObject() {
         return new bool(false);
     }
@@ -79,11 +82,9 @@ public:
     void* returnNewWidgetObject() {
         return new MurkaWidgetButton();
     }
+     */
 
-    MurkaWidgetButton(std::string label, std::function<void()> callback, MurkaShape shape): MurkaWidgetButton() {
-//        Label = label;
-//        Callback = callback;
-	}
+    // Whatever the parameters and the results are, the functions have to be defined here
     
     struct Parameters {
         float r, g, b;
@@ -91,10 +92,15 @@ public:
         std::function<void()> Callback;
     };
     
+    typedef int Results;
+    
+    // Internal state
 
 	std::string Label;
+    float lastTimeClicked = 0;
 };
 
+/*
 class MurkaWidgetTypeInt : public MurkaView {
 public:
 	MurkaWidgetTypeInt() {
@@ -170,3 +176,4 @@ public:
 	}
 };
 
+*/

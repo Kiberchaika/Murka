@@ -10,19 +10,46 @@ typedef std::function<void (void* dataToControl,
                             MurkaContext & context,
                             void* resultObject)> viewDrawFunction;
 
-struct MurkaViewHandler {
+
+// Handler heirarchy
+
+struct MurkaViewHandlerInternal {
     viewDrawFunction drawFunction;
-    void* result = NULL;
-    MurkaShape shape; // optionally this should point to something like a layout generator
-    void* parametersObject = NULL;
+    void* parametersInternal = NULL;
+    void* resultsInternal = NULL;
     void* dataToControl = NULL;
-    void* widgetObject;
+    void* widgetObjectInternal;
+
     
     bool manuallyControlled = false; // false means immediate mode, true means OOP
     bool wasUsedInLastFrame = true; // if this becomes false, we unallocate it
+    
+    // Things to get out from a user's perspective
+    MurkaShape shape; // optionally this should point to something like a layout generator
+    
+
 };
 
-//template<class T>
+template<typename T>
+struct MurkaViewHandler: public MurkaViewHandlerInternal {
+    
+    typename T::Results* results;
+    typename T::Parameters* tParams;
+    T* widgetObject;
+    
+    typename T::Parameters* castParameters(void* p) {
+        return (typename T::Parameters*)p;
+    }
+    
+    typename T::Results* castResults(void *p) {
+        return (typename T::Results*)p;
+    }
+    
+    
+};
+
+// View heirarchy
+
 class MurkaView {
 public:
     MurkaView() {
@@ -37,15 +64,12 @@ public:
         return (*view).draw;
     }
     
-//    static viewDrawFunction getStaticDrawFunction() {
-//        return T::staticDraw();
-//    }
-    
     
     // This children list contains all the children objects and their respective data
 //    std::list <std::tuple<MurkaView*, void*>> children; // std::list because we may want to store a pointer to the view
-    std::vector<MurkaViewHandler*> children; // the actual MurkaViewHandlers are in the base class, not here.
-    
+    std::vector<MurkaViewHandlerInternal*> children; // the actual MurkaViewHandlers are in the base class, not here.
+
+
 //    MurkaShape shape; // for the widgets that are instantiated
     
     //////////////////////////////////////////////// The following is to be overriden by children classes
@@ -79,4 +103,20 @@ public:
     
     // create function ("factory"): returns the object initialised with the default parameter set
     
+};
+
+template<class T>
+class MurkaDrawFuncGetter: public MurkaView {
+public:
+    static viewDrawFunction getStaticDrawFunction() {
+        return T::staticDraw();
+    }
+    
+    void* returnNewResultsObject() {
+        return new typename T::Results();
+    }
+    
+    void* returnNewWidgetObject() {
+        return new T();
+    }
 };
