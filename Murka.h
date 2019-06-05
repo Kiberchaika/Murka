@@ -9,6 +9,7 @@
 #include "MurkaShapes.h"
 #include "MurkaContext.h"
 #include "MurkaView.h"
+#include "MurkaInputEventsRegister.h"
 
 #include "LayoutGenerator.h"
 
@@ -20,59 +21,41 @@
 #endif
 
 
-class Murka : public MurkaDrawFuncGetter<Murka> {
+class Murka : public MurkaViewInterface<Murka>, MurkaInputEventsRegister {
 public:
 	Murka() {
         /* // Should I return to having the root view's shape or nah?
 		shape.position = { 0.0, 0.0 };
 		shape.size = { (float)ofGetWidth(), (float)ofGetHeight() }; // the root view's shape
          */
+        
+        setupEvents();
 	}
 
-    void setupEvents() {
-        
-    }
 
-	/*
-		for each and every widget, we need this:
-
-		WidgetStruct {
-			void* widgetParams;
-			void* widgetDrawFunction;
-		}
-
-		std::map<std::unique_ptr pointerToData, WidgetStruct>
-
-		// ^ we draw a graph with this and when we stumble upon a stack of deferred
-		// draw calls (immediate mode), we either create a data struct for a widget,
-		// or use the one provided in a call itself
-
-		// TODO:
-		// 1) both fully immediate (widget parameters are separated) and half-immediate (widget parameters  are 
-		// allocated by Murka itself) draw calls that do their thing and then call their own draw function
-		// (recursive tree architecture)
-		// 2) panel and widget structures - are they integrated or not? probably they are
-		// hence it's the View, not the Widget
-	*/
 
 	MurkaContext currentContext;
 
     void drawCycle() { // this version is without arguments cause it creates the context
         restartContext();
         
+        currentContext.eventState = eventState;
+        
         for (auto& i : children) {
             currentContext.pushContainer(i->shape.position,
                                          i->shape.size);
+            currentContext.currentWidgetShapeSource = &(i->shape);
             
             drawCycle(i, currentContext);
             currentContext.popContainer();
             
         }
+        
+        clearEvents();
     }
 
 	// A recursive OOP draw cycle that starts with this widget
 	void drawCycle(MurkaViewHandlerInternal* widget, MurkaContext context) {
-//        ofLog() << "drawing at context level " << context.depth;
         context.transformTheRenderIntoThisContextShape();
 
         
@@ -81,16 +64,17 @@ public:
         
         widget->drawFunction(widget->dataToControl, widget->parametersInternal, widget->widgetObjectInternal, context, widget->resultsInternal);
 
-			for (auto& i : ((MurkaView*)widget->widgetObjectInternal)->children) {
-                context.pushContainer(i->shape.position,
-                                      i->shape.size);
-                    drawCycle(i, context);
-				context.popContainer();
-			}
-  
+        context.transformTheRenderBackFromThisContextShape();
+
+        for (auto& i : ((MurkaView*)widget->widgetObjectInternal)->children) {
+            context.pushContainer(i->shape.position,
+                                  i->shape.size);
+            context.currentWidgetShapeSource = &(i->shape);
+                drawCycle(i, context);
+            context.popContainer();
+        }
         
         
-		context.transformTheRenderBackFromThisContextShape();
 	}
 
 	// Calls drawing a view heirarchy with a context. The should change appropriately during this loop,
@@ -116,50 +100,13 @@ public:
 	}
 
 
-/*
-	// State management
-    template <typename Z>
-	MurkaViewHandlerInternal* addChildToView(MurkaView* parent, MurkaDrawFuncGetter<Z>* child, void* data, void* parameters, MurkaShape shapeInParentContainer)
-    {
-        
-        MurkaViewHandlerInternal* newHandler = new MurkaViewHandlerInternal();
-        
-        newHandler->parametersInternal = child->returnNewParametersObject();
-        if ((parameters != NULL) && (newHandler->parametersInternal != NULL)) {
-            newHandler->parametersInternal = parameters;
-        }
-        newHandler->drawFunction = child->getStaticDrawFunction();
-        newHandler->resultsInternal = child->returnNewResultsObject();
-        newHandler->manuallyControlled = true;
-        newHandler->widgetObjectInternal = child->returnNewWidgetObject();
-         
-         
-         
-        newHandler->shape = shapeInParentContainer;
-        
-        
-        viewHandlers.push_back(newHandler);
-        
-        parent->children.push_back(newHandler);
-        return parent->children[parent->children.size() - 1];
-	}
-    
-    template <typename Z>
-    MurkaViewHandlerInternal* addChildToView(MurkaDrawFuncGetter<Z>* child, void* data, void* parameters, MurkaShape shapeInParentContainer)
-    {
-        return addChildToView(getRootView(), child, data, parameters,                           shapeInParentContainer);
-    }
-    
-    */
-    
-    /// TEMPLATING TEST
-    
+
     ////////
     //////// Heirarchy management
     ////////
     
     template <typename Z>
-    MurkaViewHandler<Z>* addChildToViewT(MurkaView* parent, MurkaDrawFuncGetter<Z>* child, void* data, void* parameters, MurkaShape shapeInParentContainer)
+    MurkaViewHandler<Z>* addChildToViewT(MurkaView* parent, MurkaViewInterface<Z>* child, void* data, void* parameters, MurkaShape shapeInParentContainer)
     {
         
         MurkaViewHandler<Z>* newHandler = new MurkaViewHandler<Z>();
@@ -189,9 +136,26 @@ public:
     }
     
     template <typename Z>
-    MurkaViewHandler<Z>* addChildToViewT(MurkaDrawFuncGetter<Z>* child, void* data, void* parameters, MurkaShape shapeInParentContainer)
+    MurkaViewHandler<Z>* addChildToViewT(MurkaViewInterface<Z>* child, void* data, void* parameters, MurkaShape shapeInParentContainer)
     {
         return addChildToViewT(getRootView(), child, data, parameters,                           shapeInParentContainer);
+    }
+
+    // A version that accepts a handler rather than the widget object as parent
+    template <typename Z>
+    MurkaViewHandler<Z>* addChildToViewT(MurkaViewHandlerInternal* parent, MurkaViewInterface<Z>* child, void* data, void* parameters, MurkaShape shapeInParentContainer)
+    {
+        return addChildToViewT((MurkaView*)parent->widgetObjectInternal, child, data, parameters,                           shapeInParentContainer);
+    }
+
+    // A version that accepts parameters reference rather a pointer
+    template <typename Z>
+    MurkaViewHandler<Z>* addChildToViewT(MurkaViewInterface<Z>* child, void* data, typename Z::Parameters parameters, MurkaShape shapeInParentContainer)
+    {
+        auto newParameters = new typename Z::Parameters();
+        *newParameters = parameters;
+        
+        return addChildToViewT(getRootView(), child, data, newParameters,                           shapeInParentContainer);
     }
 
     
@@ -202,14 +166,6 @@ public:
 		return (MurkaView*)this;
 	}
 
-    // TODO: MurkaView has to hold a pointer to this descriptor in its children array.
-    // this guarantees that we only allocate data here.
-    
-
-
-//    void updateStateCallResult(void* dataPointer, void* result) {
-//        states[dataPointer].result = result; // !!!TODO!!!: is this ok? should I delete the previous pointer?
-//    }
 
 	std::list<MurkaViewHandlerInternal*> viewHandlers; // States is a central data holder, a map that maps a data to the widget
 

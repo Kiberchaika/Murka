@@ -2,6 +2,7 @@
 
 #include <functional>
 #include "MurkaShapes.h"
+#include "MurkaInputEventsRegister.h"
 
 // Here's the global typedefs for cross-render functionality
 
@@ -9,41 +10,47 @@
 #include "ofMain.h"
 #endif
 
-class MurkaContext {
+class MurkaContext /* TODO: public MurkaEventState */ {
 public:
     MurkaContext() {
         
     }
     
-    MurkaPoint getSize() {
+    MurkaPoint getSize() const {
         return currentViewShape.size;
     }
     
-    bool isHovered() {
-        return currentViewShape.inside(mousePosition); // using absolute coordinates to calc that
+    bool isHovered() const {
+        return transformedShape.inside(eventState.mousePosition); // using absolute coordinates to calc that
     }
     
     void* murkaObject;
+    MurkaEventState eventState;
+    MurkaEventState previousEventState;
     
     // Pushes a container. Returns a context that you could then use if you want to draw there again later
     // the draw loop. Gets the context depth up a 1 point.
-    /* MurkaContext */ void pushContainer(MurkaPoint containerPosition, MurkaPoint containerShape) {
+    void pushContainer(MurkaPoint containerPosition, MurkaPoint containerShape) {
         depth++;
         previousViewShape = currentViewShape;
         currentViewShape.position += containerPosition;
         
-        currentViewShape.size = containerShape;
+        previousEventState = eventState;
+        eventState = eventState.transformedWith({-containerPosition.x,
+                                                 -containerPosition.y}, 1.0);
         
-//        ofLog() << "new container position = " << currentViewShape.position.x << " : " << currentViewShape.position.y;
-//        ofLog() << "new container size = " << currentViewShape.size.x << " : " << currentViewShape.size.y;
+        
+        currentViewShape.size = containerShape;
+        transformedShape = currentViewShape;
+        transformedShape.position = {0, 0};
     }
     
     // Returns to the previous context state. Gets the context depth down a 1 point.
     
-    /* MurkaContext */ void popContainer() {
+    void popContainer() {
         depth--;
         currentViewShape = previousViewShape;
-        
+        eventState = previousEventState;
     }
     
     // Utility function to transform the render into the shape of this context.
@@ -67,12 +74,16 @@ public:
     MurkaShape rootViewShape;
     MurkaShape previousViewShape;
     MurkaShape currentViewShape;
+    MurkaShape transformedShape;
     int depth = 0;
     
+    MurkaShape* currentWidgetShapeSource;
     
     ///////////////////////////// TODO: this has to gather all the user input too
     
+    /*
     MurkaPoint mousePosition;
     std::vector<std::tuple<MurkaPoint, bool>> fingerData; // TODO: finger type
-    bool didClick[3];
+//    bool didClick[3];
+     */
 };

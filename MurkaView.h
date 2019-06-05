@@ -7,7 +7,7 @@
 typedef std::function<void (void* dataToControl,
                             void* parametersObject,
                             void* thisWidgetObject,
-                            MurkaContext & context,
+                            const MurkaContext & context,
                             void* resultObject)> viewDrawFunction;
 
 
@@ -94,19 +94,15 @@ public:
     viewDrawFunction draw = [](void* dataToControl,
                                void* parametersObject,
                                void* thisWidgetObject,
-                               MurkaContext & context,
+                               const MurkaContext & context,
                                void* resultObject) {
         ofLog() << "drawing an empty func...";
         return new bool(false);
     };
-    // draw arguments: data void pointer, parameters void pointer, context object pointer
-    
-    // create function ("factory"): returns the object initialised with the default parameter set
-    
 };
 
 template<class T>
-class MurkaDrawFuncGetter: public MurkaView {
+class MurkaViewInterface: public MurkaView {
 public:
     static viewDrawFunction getStaticDrawFunction() {
         return T::staticDraw();

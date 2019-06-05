@@ -12,7 +12,7 @@ struct MurkaShape {
 	MurkaPoint position = { 0, 0 };
 	MurkaPoint size = { 0, 0 };
 
-	bool inside(MurkaPoint p) {
+	bool inside(MurkaPoint p) const {
 		return ((p.x > position.x) &&
 			(p.x < position.x + size.x) &&
 			(p.y > position.y) &&
