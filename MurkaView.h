@@ -14,7 +14,7 @@ typedef std::function<void (void* dataToControl,
 // Handler heirarchy
 
 struct MurkaViewHandlerInternal {
-    viewDrawFunction drawFunction;
+//    viewDrawFunction drawFunction;
     void* parametersInternal = NULL;
     void* resultsInternal = NULL;
     void* dataToControl = NULL;
@@ -33,9 +33,17 @@ struct MurkaViewHandlerInternal {
 template<typename T>
 struct MurkaViewHandler: public MurkaViewHandlerInternal {
     
-    typename T::Results* results;
+//    typename T::Results* results;
     typename T::Parameters* tParams;
     T* widgetObject;
+    
+    typename T::Results* castResultsP() {
+        
+    }
+    
+    typename T::Results& getResults() {
+        return *castResults(resultsInternal);
+    }
     
     typename T::Parameters* castParameters(void* p) {
         return (typename T::Parameters*)p;
@@ -66,12 +74,26 @@ public:
     
     
     // This children list contains all the children objects and their respective data
-//    std::list <std::tuple<MurkaView*, void*>> children; // std::list because we may want to store a pointer to the view
     std::vector<MurkaViewHandlerInternal*> children; // the actual MurkaViewHandlers are in the base class, not here.
 
+    bool isChildrenHovered(MurkaContext c) {
+        if (!c.isHovered()) {
+            return false;
+        }
+        
+        for (auto i: children) {
+            auto shape = i->shape;
+            shape.position = i->shape.position;
+            
+            if (shape.inside(c.eventState.mousePosition)) {
+                return true;
+            }
+            
+        }
+        
+        return false;
+    }
 
-//    MurkaShape shape; // for the widgets that are instantiated
-    
     //////////////////////////////////////////////// The following is to be overriden by children classes
     
     // A parameters initialiser. Gets called if Murka wants widget to allocate memory for its parameters.
@@ -99,14 +121,24 @@ public:
         ofLog() << "drawing an empty func...";
         return new bool(false);
     };
+    
+    struct Parameters { };
+    struct Results {};
+    
+    void* parametersInternal;
+    void* resultsInternal;
 };
 
 template<class T>
 class MurkaViewInterface: public MurkaView {
 public:
-    static viewDrawFunction getStaticDrawFunction() {
-        return T::staticDraw();
-    }
+//    static viewDrawFunction getStaticDrawFunction() {
+//        return T::staticDraw();
+//    }
+    
+//    typename T::Results* results(void* resultsObject) {
+//        return *((T::Results*)resultObject);
+//    }
     
     void* returnNewResultsObject() {
         return new typename T::Results();

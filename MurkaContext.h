@@ -79,7 +79,7 @@ public:
     
     MurkaShape* currentWidgetShapeSource;
     
-    ///////////////////////////// TODO: this has to gather all the user input too
+    ///////////////////////////// TODO: make it a child of MurkaEventState again
     
     /*
     MurkaPoint mousePosition;

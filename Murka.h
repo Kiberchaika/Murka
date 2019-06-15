@@ -62,7 +62,7 @@ public:
         
 		context.murkaObject = this;
         
-        widget->drawFunction(widget->dataToControl, widget->parametersInternal, widget->widgetObjectInternal, context, widget->resultsInternal);
+        ((MurkaViewHandler<MurkaView>*)widget)->widgetObject->draw(widget->dataToControl, widget->parametersInternal, widget->widgetObjectInternal, context, widget->resultsInternal);
 
         context.transformTheRenderBackFromThisContextShape();
 
@@ -111,19 +111,20 @@ public:
         
         MurkaViewHandler<Z>* newHandler = new MurkaViewHandler<Z>();
         
-//        newHandler->tParams = Z::parametersCast(child->returnNewParametersObject());
-        newHandler->tParams = newHandler->castParameters(child->returnNewParametersObject());
+        newHandler->tParams = newHandler->castParameters(new typename Z::Parameters());
         if ((parameters != NULL) && (newHandler->tParams != NULL)) {
             newHandler->tParams = newHandler->castParameters(parameters);
             newHandler->parametersInternal = newHandler->tParams;
         }
-        newHandler->drawFunction = child->getStaticDrawFunction();
+
         newHandler->resultsInternal = child->returnNewResultsObject();
         newHandler->manuallyControlled = true;
         newHandler->widgetObject = (Z*)child->returnNewWidgetObject();
         newHandler->widgetObjectInternal = newHandler->widgetObject;
-        
-        
+        newHandler->widgetObject->parametersInternal = (typename Z::Parameters*)newHandler->parametersInternal;
+        newHandler->widgetObject->resultsInternal = (typename Z::Results*)newHandler->resultsInternal;
+        newHandler->dataToControl = data;
+
         
         newHandler->shape = shapeInParentContainer;
         
@@ -143,9 +144,12 @@ public:
 
     // A version that accepts a handler rather than the widget object as parent
     template <typename Z>
-    MurkaViewHandler<Z>* addChildToViewT(MurkaViewHandlerInternal* parent, MurkaViewInterface<Z>* child, void* data, void* parameters, MurkaShape shapeInParentContainer)
+    MurkaViewHandler<Z>* addChildToViewT(MurkaViewHandlerInternal* parent, MurkaViewInterface<Z>* child, void* data, typename Z::Parameters parameters, MurkaShape shapeInParentContainer)
     {
-        return addChildToViewT((MurkaView*)parent->widgetObjectInternal, child, data, parameters,                           shapeInParentContainer);
+        auto newParameters = new typename Z::Parameters();
+        *newParameters = parameters;
+
+        return addChildToViewT((MurkaView*)parent->widgetObjectInternal, child, data, newParameters,                           shapeInParentContainer);
     }
 
     // A version that accepts parameters reference rather a pointer
@@ -176,4 +180,5 @@ public:
 	void mousePressed(int x, int y, int button);
 	void mouseReleased(int x, int y, int button);
 
+    typedef bool Results;
 };

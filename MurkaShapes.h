@@ -7,6 +7,10 @@ struct MurkaPoint {
 		this->operator=({ x + p2.x, y + p2.y });
         return *this;
 	}
+    
+    MurkaPoint operator + (MurkaPoint p2) {
+        return {x + p2.x, y + p2.y};
+    }
 };
 
 struct MurkaShape {
