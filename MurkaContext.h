@@ -30,11 +30,15 @@ public:
     
     // Pushes a container. Returns a context that you could then use if you want to draw there again later
     // the draw loop. Gets the context depth up a 1 point.
-    void pushContainer(MurkaPoint containerPosition, MurkaPoint containerShape) {
+    void pushContainer(MurkaPoint containerPosition, MurkaPoint containerShape, void* murkaView) {
         depth++;
-        previousViewShape = currentViewShape;
-        currentViewShape.position += containerPosition;
         
+        previousMurkaView = currentMurkaView;
+        previousViewShape = currentViewShape;
+        
+        currentViewShape.position += containerPosition;
+        currentMurkaView = murkaView;
+
         previousEventState = eventState;
         eventState = eventState.transformedWith({-containerPosition.x,
                                                  -containerPosition.y}, 1.0);
@@ -51,6 +55,7 @@ public:
         depth--;
         currentViewShape = previousViewShape;
         eventState = previousEventState;
+        currentMurkaView = previousMurkaView;
     }
     
     // Utility function to transform the render into the shape of this context.
@@ -75,11 +80,12 @@ public:
     MurkaShape previousViewShape;
     MurkaShape currentViewShape;
     MurkaShape transformedShape;
+    void* previousMurkaView;
     int depth = 0;
     
     MurkaShape* currentWidgetShapeSource; // this shape pointer points to a shape of the current
     // view that you could use inside the widget to use or reshape it if needed
-    void* latestMurkaView; // the MurkaView that this context once represented
+    void* currentMurkaView; // the MurkaView that this context represents
 
     int getImCounter() {
         imCounter++;

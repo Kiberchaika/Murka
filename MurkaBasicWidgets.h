@@ -111,7 +111,7 @@ public:
     
     static MurkaBlankPanel::Results imDraw(Murka &m, MurkaBlankPanel::Parameters parameters, MurkaShape shape) {
         auto context = &(m.currentContext);
-        auto widgetHandler = getOrCreateImModeWidgetObject(context->getImCounter(), NULL, (MurkaView*)context->latestMurkaView, shape);
+        auto widgetHandler = getOrCreateImModeWidgetObject(context->getImCounter(), NULL, (MurkaView*)context->currentMurkaView, shape);
         auto widgetObject = (MurkaView*)widgetHandler->widgetObjectInternal;
 
         if (!parameters.moveable) {
@@ -120,14 +120,14 @@ public:
         
         MurkaBlankPanel::Results results;
         
-        context->pushContainer(widgetObject->shape.position, widgetObject->shape.size);
+        context->pushContainer(widgetObject->shape.position, widgetObject->shape.size, widgetObject);
 
 
         context->currentWidgetShapeSource = &widgetObject->shape;
         context->transformTheRenderIntoThisContextShape();
         widgetObject->draw(NULL, &parameters, widgetObject, *context, &results);
         
-        context->latestMurkaView = widgetObject;
+        context->currentMurkaView = widgetObject;
         m.latestContext = *context;
         context->transformTheRenderBackFromThisContextShape();
         context->popContainer();
@@ -325,19 +325,18 @@ public:
     
     static MurkaSliderFloat::Results imDraw(Murka &m, void* dataToControl, MurkaSliderFloat::Parameters parameters, MurkaShape shape) {
         auto context = &(m.currentContext);
-        auto widgetHandler = getOrCreateImModeWidgetObject(context->getImCounter(), dataToControl, (MurkaView*)context->latestMurkaView, shape);
+        auto widgetHandler = getOrCreateImModeWidgetObject(context->getImCounter(), dataToControl, (MurkaView*)context->currentMurkaView, shape);
         auto widgetObject = (MurkaView*)widgetHandler->widgetObjectInternal;
         
         MurkaBlankPanel::Results results;
         
-        context->pushContainer(widgetObject->shape.position, widgetObject->shape.size);
-        context->resetImCounter();
+        context->pushContainer(widgetObject->shape.position, widgetObject->shape.size, widgetObject);
         
         context->currentWidgetShapeSource = &widgetObject->shape;
         context->transformTheRenderIntoThisContextShape();
         widgetObject->draw(dataToControl, &parameters, widgetObject, *context, &results);
 
-        context->latestMurkaView = widgetObject;
+        context->currentMurkaView = widgetObject;
         m.latestContext = *context;
         context->transformTheRenderBackFromThisContextShape();
         context->popContainer();
