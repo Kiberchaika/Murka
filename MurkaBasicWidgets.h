@@ -15,9 +15,6 @@ public:
             
             bool inside = context.isHovered() * !isChildrenHovered(context);
             
-            if (context.isHovered()) {
-                ofLog() << "inside and " << (isChildrenHovered(context) ? "children hovered" : "no children hovered");
-            }
 
 #ifdef MURKA_OF
             ofPushStyle();
@@ -31,8 +28,8 @@ public:
             
             ofSetColor(255);
             ofDrawBitmapString(params->label, 0, 0);
-            ofDrawBitmapString("children size: " + ofToString(children.size()), 0, 20);
-            ofDrawBitmapString("imchildren size: " + ofToString(imChildren.size()), 0, 40);
+//            ofDrawBitmapString("children size: " + ofToString(children.size()), 0, 20);
+//            ofDrawBitmapString("imchildren size: " + ofToString(imChildren.size()), 0, 40);
 
 #endif // MURKA_OF
             
