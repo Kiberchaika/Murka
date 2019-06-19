@@ -77,7 +77,23 @@ public:
     MurkaShape transformedShape;
     int depth = 0;
     
-    MurkaShape* currentWidgetShapeSource;
+    MurkaShape* currentWidgetShapeSource; // this shape pointer points to a shape of the current
+    // view that you could use inside the widget to use or reshape it if needed
+    void* latestMurkaView; // the MurkaView that this context once represented
+
+    int getImCounter() {
+        imCounter++;
+        return imCounter;
+    }
+    
+    void resetImCounter() {
+        imCounter = 0;
+    }
+    
+private:
+    int imCounter = 0; // the counter that we use to distinguish new widgets from the ones we
+    // want to reuse in IM mode.
+
     
     ///////////////////////////// TODO: make it a child of MurkaEventState again
     

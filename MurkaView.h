@@ -1,60 +1,9 @@
+#pragma once
 #include <functional>
 #include "MurkaShapes.h"
 #include "MurkaContext.h"
+#include "MurkaViewHandler.h"
 
-
-// Data, parameters and the context are what you put inside. Optional return is put into void*.
-typedef std::function<void (void* dataToControl,
-                            void* parametersObject,
-                            void* thisWidgetObject,
-                            const MurkaContext & context,
-                            void* resultObject)> viewDrawFunction;
-
-
-// Handler heirarchy
-
-struct MurkaViewHandlerInternal {
-//    viewDrawFunction drawFunction;
-    void* parametersInternal = NULL;
-    void* resultsInternal = NULL;
-    void* dataToControl = NULL;
-    void* widgetObjectInternal;
-
-    
-    bool manuallyControlled = false; // false means immediate mode, true means OOP
-    bool wasUsedInLastFrame = true; // if this becomes false, we unallocate it
-    
-    // Things to get out from a user's perspective
-    MurkaShape shape; // optionally this should point to something like a layout generator
-    
-
-};
-
-template<typename T>
-struct MurkaViewHandler: public MurkaViewHandlerInternal {
-    
-//    typename T::Results* results;
-    typename T::Parameters* tParams;
-    T* widgetObject;
-    
-    typename T::Results* castResultsP() {
-        
-    }
-    
-    typename T::Results& getResults() {
-        return *castResults(resultsInternal);
-    }
-    
-    typename T::Parameters* castParameters(void* p) {
-        return (typename T::Parameters*)p;
-    }
-    
-    typename T::Results* castResults(void *p) {
-        return (typename T::Results*)p;
-    }
-    
-    
-};
 
 // View heirarchy
 
@@ -74,7 +23,10 @@ public:
     
     
     // This children list contains all the children objects and their respective data
-    std::vector<MurkaViewHandlerInternal*> children; // the actual MurkaViewHandlers are in the base class, not here.
+    std::vector<MurkaViewHandlerInternal*> children;
+    
+    typedef std::tuple<int, void*> imIdentifier;
+    std::map<imIdentifier, MurkaViewHandler<MurkaView>*> imChildren; // Immediate mode widget objects that were once drawn inside this widget. We hold their state here in the shape of their MurkaViews.
 
     bool isChildrenHovered(MurkaContext c) {
         if (!c.isHovered()) {
@@ -82,15 +34,27 @@ public:
         }
         
         for (auto i: children) {
-            auto shape = i->shape;
-            shape.position = i->shape.position;
+            auto shape = ((MurkaView*)i->widgetObjectInternal)->shape;
+            shape.position = ((MurkaView*)i->widgetObjectInternal)->shape.position;
             
             if (shape.inside(c.eventState.mousePosition)) {
                 return true;
             }
-            
         }
         
+        ofLog() << "imchildren size:" << imChildren.size();
+        
+        int index = 0;
+        std::map<imIdentifier, MurkaViewHandler<MurkaView>*>::iterator it;
+        for (it = imChildren.begin(); it != imChildren.end(); it++) {
+            auto shape = ((MurkaView*)it->second->widgetObjectInternal)->shape;
+            shape.position = ((MurkaView*)it->second->widgetObjectInternal)->shape.position;
+            
+            if (shape.inside(c.eventState.mousePosition)) {
+                return true;
+            }
+        }
+
         return false;
     }
 
@@ -127,18 +91,17 @@ public:
     
     void* parametersInternal;
     void* resultsInternal;
+    
+    MurkaShape shape;
+    
+    ///// IM mode helpers
+    
+    MurkaContext latestContext;
 };
 
 template<class T>
 class MurkaViewInterface: public MurkaView {
 public:
-//    static viewDrawFunction getStaticDrawFunction() {
-//        return T::staticDraw();
-//    }
-    
-//    typename T::Results* results(void* resultsObject) {
-//        return *((T::Results*)resultObject);
-//    }
     
     void* returnNewResultsObject() {
         return new typename T::Results();
@@ -147,4 +110,29 @@ public:
     void* returnNewWidgetObject() {
         return new T();
     }
+    
+    
+    static MurkaViewHandler<T>* getOrCreateImModeWidgetObject(int index, void* data, MurkaView* parentWidget, MurkaShape shape) {
+        auto idTuple = std::make_tuple(index, data);
+        if (parentWidget->imChildren.find(idTuple) != parentWidget->imChildren.end()) {
+            // the widget exists
+            ofLog() << "returning the object";
+            return (MurkaViewHandler<T>*)parentWidget->imChildren[idTuple];
+        } else {
+            auto newWidget = new T();
+            auto resultsObject = newWidget->returnNewResultsObject();
+            newWidget->shape = shape;
+            
+            MurkaViewHandler<T>* newHandler = new MurkaViewHandler<T>();
+            newHandler->resultsInternal = resultsObject;
+            newHandler->dataToControl = data;
+            newHandler->widgetObjectInternal = newWidget;
+            
+            ofLog() << "imchildren size was " << parentWidget->imChildren.size();
+            parentWidget->imChildren[idTuple] = (MurkaViewHandler<MurkaView> *)newHandler;
+            ofLog() << "creating the object..." << " now the imchildren size is " << parentWidget->imChildren.size();
+            return newHandler;
+        }
+    }
+    
 };

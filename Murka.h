@@ -40,11 +40,13 @@ public:
         restartContext();
         
         currentContext.eventState = eventState;
+        currentContext.latestMurkaView = this;
+        latestContext = currentContext;
         
         for (auto& i : children) {
-            currentContext.pushContainer(i->shape.position,
-                                         i->shape.size);
-            currentContext.currentWidgetShapeSource = &(i->shape);
+            currentContext.pushContainer(((MurkaView*)i->widgetObjectInternal)->shape.position,
+                                          ((MurkaView*)i->widgetObjectInternal)->shape.size);
+            currentContext.currentWidgetShapeSource = &( ((MurkaView*)i->widgetObjectInternal)->shape);
             
             drawCycle(i, currentContext);
             currentContext.popContainer();
@@ -58,18 +60,18 @@ public:
 	void drawCycle(MurkaViewHandlerInternal* widget, MurkaContext context) {
         context.transformTheRenderIntoThisContextShape();
 
-        
-        
 		context.murkaObject = this;
+        context.latestMurkaView = ((MurkaViewHandler<MurkaView>*)widget)->widgetObject;
+        ((MurkaViewHandler<MurkaView>*)widget)->widgetObject->latestContext = context;
         
         ((MurkaViewHandler<MurkaView>*)widget)->widgetObject->draw(widget->dataToControl, widget->parametersInternal, widget->widgetObjectInternal, context, widget->resultsInternal);
 
         context.transformTheRenderBackFromThisContextShape();
 
         for (auto& i : ((MurkaView*)widget->widgetObjectInternal)->children) {
-            context.pushContainer(i->shape.position,
-                                  i->shape.size);
-            context.currentWidgetShapeSource = &(i->shape);
+            context.pushContainer(((MurkaView*)i->widgetObjectInternal)->shape.position,
+                                  ((MurkaView*)i->widgetObjectInternal)->shape.size);
+            context.currentWidgetShapeSource = &(((MurkaView*)i->widgetObjectInternal)->shape);
                 drawCycle(i, context);
             context.popContainer();
         }
@@ -99,7 +101,31 @@ public:
 
 	}
 
+    ////////
+    //////// Immediate mode
+    ////////
 
+    MurkaContext getContextFromMurkaView(MurkaView* view) {
+        view->latestContext.resetImCounter();
+        return view->latestContext;
+    }
+
+    MurkaContext getContextFromMurkaViewHandler(MurkaViewHandlerInternal* viewHandler) {
+        ((MurkaViewHandler<MurkaView>*)viewHandler)->widgetObject->latestContext.resetImCounter();
+        return ((MurkaViewHandler<MurkaView>*)viewHandler)->widgetObject->latestContext;
+    }
+    
+    void beginDrawingInView(MurkaViewHandlerInternal* viewHandler) {
+        currentContext = getContextFromMurkaViewHandler(viewHandler);
+    }
+
+    void beginDrawingInView(MurkaView* view) {
+        currentContext = getContextFromMurkaView(view);
+    }
+    
+    void beginDrawingInLatestView() {
+        currentContext = latestContext;
+    }
 
     ////////
     //////// Heirarchy management
@@ -126,12 +152,10 @@ public:
         newHandler->dataToControl = data;
 
         
-        newHandler->shape = shapeInParentContainer;
+        newHandler->widgetObject->shape = shapeInParentContainer;
         
         
-        viewHandlers.push_back((MurkaViewHandlerInternal*)newHandler);
-        
-        auto handlerPointer = (viewHandlers.back());
+        auto handlerPointer = newHandler;
         parent->children.push_back((MurkaViewHandlerInternal*)handlerPointer);
         return (MurkaViewHandler<Z>*)parent->children[parent->children.size() - 1];
     }
@@ -171,9 +195,7 @@ public:
 	}
 
 
-	std::list<MurkaViewHandlerInternal*> viewHandlers; // States is a central data holder, a map that maps a data to the widget
-
-	void keyPressed(int key);
+    void keyPressed(int key);
 	void keyReleased(int key);
 	void mouseMoved(int x, int y);
 	void mouseDragged(int x, int y, int button);
