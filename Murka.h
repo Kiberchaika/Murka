@@ -40,12 +40,12 @@ public:
         restartContext();
         
         currentContext.eventState = eventState;
-        currentContext.currentMurkaView = this;
+        currentContext.latestMurkaView = this;
         latestContext = currentContext;
         
         for (auto& i : children) {
             currentContext.pushContainer(((MurkaView*)i->widgetObjectInternal)->shape.position,
-                                          ((MurkaView*)i->widgetObjectInternal)->shape.size, (MurkaView*)i->widgetObjectInternal);
+                                          ((MurkaView*)i->widgetObjectInternal)->shape.size);
             currentContext.currentWidgetShapeSource = &( ((MurkaView*)i->widgetObjectInternal)->shape);
             
             drawCycle(i, currentContext);
@@ -61,7 +61,7 @@ public:
         context.transformTheRenderIntoThisContextShape();
 
 		context.murkaObject = this;
-        context.currentMurkaView = ((MurkaViewHandler<MurkaView>*)widget)->widgetObject;
+        context.latestMurkaView = ((MurkaViewHandler<MurkaView>*)widget)->widgetObject;
         ((MurkaViewHandler<MurkaView>*)widget)->widgetObject->latestContext = context;
         
         ((MurkaViewHandler<MurkaView>*)widget)->widgetObject->draw(widget->dataToControl, widget->parametersInternal, widget->widgetObjectInternal, context, widget->resultsInternal);
@@ -70,7 +70,7 @@ public:
 
         for (auto& i : ((MurkaView*)widget->widgetObjectInternal)->children) {
             context.pushContainer(((MurkaView*)i->widgetObjectInternal)->shape.position,
-                                  ((MurkaView*)i->widgetObjectInternal)->shape.size, ((MurkaView*)i->widgetObjectInternal));
+                                  ((MurkaView*)i->widgetObjectInternal)->shape.size);
             context.currentWidgetShapeSource = &(((MurkaView*)i->widgetObjectInternal)->shape);
                 drawCycle(i, context);
             context.popContainer();

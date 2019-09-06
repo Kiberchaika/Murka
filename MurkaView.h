@@ -116,6 +116,7 @@ public:
         auto idTuple = std::make_tuple(index, data);
         if (parentWidget->imChildren.find(idTuple) != parentWidget->imChildren.end()) {
             // the widget exists
+            ofLog() << "returning the object";
             return (MurkaViewHandler<T>*)parentWidget->imChildren[idTuple];
         } else {
             auto newWidget = new T();
@@ -127,7 +128,9 @@ public:
             newHandler->dataToControl = data;
             newHandler->widgetObjectInternal = newWidget;
             
+            ofLog() << "imchildren size was " << parentWidget->imChildren.size();
             parentWidget->imChildren[idTuple] = (MurkaViewHandler<MurkaView> *)newHandler;
+            ofLog() << "creating the object..." << " now the imchildren size is " << parentWidget->imChildren.size();
             return newHandler;
         }
     }
