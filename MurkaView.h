@@ -42,6 +42,8 @@ public:
             }
         }
         
+        ofLog() << "imchildren size:" << imChildren.size();
+        
         int index = 0;
         std::map<imIdentifier, MurkaViewHandler<MurkaView>*>::iterator it;
         for (it = imChildren.begin(); it != imChildren.end(); it++) {
