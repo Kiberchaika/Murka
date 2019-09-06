@@ -44,6 +44,8 @@ public:
     // The results type, you also need to define it even if it's nothing.
     typedef bool Results;
     
+    virtual bool wantsClicks() override { return false; } // override this if you want to signal that you don't want clicks
+
 };
     
 class Label : public MurkaViewInterface<Label> {
@@ -99,7 +101,8 @@ public:
     // The results type, you also need to define it even if it's nothing.
     typedef bool Results;
     
-    
+    virtual bool wantsClicks() override { return false; } // override this if you want to signal that you don't want clicks
+
 };
     
 class Checkbox : public MurkaViewInterface<Checkbox> {
@@ -161,8 +164,8 @@ public:
     
     // The two functions needed for optional UI state saving. It's up to you
     // to use those.
-    std::vector<MurkaVar> saveInternalData(int indexX, int indexY) override { }
-    void loadInternalData(std::vector<MurkaVar>) override {}
+//    std::vector<MurkaVar> saveInternalData(int indexX, int indexY) override { }
+//    void loadInternalData(std::vector<MurkaVar>) override {}
     
     
     // Everything else in the class is for handling the internal state. It persist.
@@ -181,7 +184,7 @@ public:
             auto params = (Parameters*)parametersObject;
             BlankPanel* thisWidget = (BlankPanel*)thisWidgetObject;
             
-            bool inside = context.isHovered() * !areChildrenHovered(context);
+            bool inside = context.isHovered() * !areInteractiveChildrenHovered(context);
             
             bool gonnaResize = false;
             if (params->moveable) {

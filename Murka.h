@@ -54,8 +54,8 @@
  
      // The two functions needed for optional UI state saving. It's up to you
      // to use those.
-     std::vector<MurkaVar> saveInternalData(int indexX, int indexY) override { }
-     void loadInternalData(std::vector<MurkaVar>) override {}
+     // std::vector<MurkaVar> saveInternalData(int indexX, int indexY) override { }
+     // void loadInternalData(std::vector<MurkaVar>) override {}
  
  
      // Everything else in the class is for handling the internal state. It persist.
@@ -84,7 +84,7 @@ public:
             -containerPosition.y}, 1.0);
         if (currentContext.parentContext == NULL) {
             currentContext.parentContext = new MurkaContext();
-            ofLog() << "created context...";
+//            ofLog() << "created context...";
         }
         *(currentContext.parentContext) = currentContext;
         currentContext.MurkaEventState::operator=(derivedEventState);

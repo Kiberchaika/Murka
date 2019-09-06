@@ -65,22 +65,24 @@ public:
     // Helpful to draw the view innards.
     void transformTheRenderIntoThisContextShape() const {
 #ifdef MURKA_OF
+//        ofLog() << "pushed matrix";
         ofPushMatrix();
         ofTranslate(currentViewShape.position.x, currentViewShape.position.y);
-#endif // MURKA_OF
+#endif 
     }
     
     void transformTheRenderBackFromThisContextShape() const {
 #ifdef MURKA_OF
+//        ofLog() << "popped matrix";
         ofPopMatrix();
-#endif // MURKA_OF
+#endif
     }
     
     // Utility function to substitute the matrix for the viewport to occlude
     // the drawing outside the widget
     void startViewport() const {
         transformTheRenderBackFromThisContextShape();
-        
+
         ofPushView();
         auto vport = ofGetCurrentViewport();
         ofViewport(ofRectangle(currentViewShape.position.x,
@@ -93,7 +95,7 @@ public:
     
     void endViewport() const {
         ofPopView();
-        
+
         transformTheRenderIntoThisContextShape();
     }
     

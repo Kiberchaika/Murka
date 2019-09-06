@@ -26,8 +26,8 @@ public:
         paragraphFont->load(paragraphFontFilename, paragraphSize);
         headerFont->load(headerFontFilename, headerSize);
         monoFont->load(monoFontFilename, monofontSize);
-        ofLog() << paragraphFont->isLoaded();
-        ofLog() << headerFont->isLoaded();
+//        ofLog() << "is paragraph font loaded?" << paragraphFont->isLoaded();
+//        ofLog() << "is header font loaded?" << headerFont->isLoaded();
 #endif
     }
     

@@ -42,8 +42,10 @@ public:
     
     // TODO : add a flag to a base Murka class to bypass this save/load routine
     
-    virtual std::vector<MurkaVar> saveInternalData(int indexX, int indexY) { return std::vector<MurkaVar>(); }
-    virtual void loadInternalData(std::vector<MurkaVar>) {}
+//    virtual std::vector<MurkaVar> saveInternalData(int indexX, int indexY) { return std::vector<MurkaVar>(); }
+//    virtual void loadInternalData(std::vector<MurkaVar>) {}
+    
+    virtual bool wantsClicks() { return true; } // override this if you want to signal to other widgets that you don't want clicks
     
 public:
     View() {
@@ -71,6 +73,35 @@ public:
     void resetChildrenBounds() {
         childrenBounds = {std::numeric_limits<float>::max(), std::numeric_limits<float>::max(),
             0, 0};
+    }
+
+    bool areInteractiveChildrenHovered(MurkaContext c) {
+        if (!c.isHovered()) {
+            return false;
+        }
+        
+        for (auto i: children) {
+            auto shape = ((View*)i->widgetObjectInternal)->shape;
+            shape.position = ((View*)i->widgetObjectInternal)->shape.position;
+            
+            if ((shape.inside(c.mousePosition)) && (((View*)i->widgetObjectInternal)->wantsClicks())) {
+                return true;
+            }
+        }
+        
+        
+        int index = 0;
+        std::map<imIdentifier, MurkaViewHandler<View>*>::iterator it;
+        for (it = imChildren.begin(); it != imChildren.end(); it++) {
+            auto shape = ((View*)it->second->widgetObjectInternal)->shape;
+            shape.position = ((View*)it->second->widgetObjectInternal)->shape.position;
+            
+            if ((shape.inside(c.mousePosition)) && (((View*)it->second->widgetObjectInternal)->wantsClicks())) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 
     bool areChildrenHovered(MurkaContext c) {
@@ -231,8 +262,6 @@ public:
     
 template<typename T>
 typename T::Results drawWidget(MurkaContext &c, typename T::Parameters parameters, MurkaShape shape) {
-    // transforming back from the previous context
-    c.transformTheRenderBackFromThisContextShape();
 
     //        auto context = &(m.currentContext);
     int counter = c.getImCounter();
@@ -265,17 +294,12 @@ typename T::Results drawWidget(MurkaContext &c, typename T::Parameters parameter
     c.transformTheRenderBackFromThisContextShape();
     c.popContext();
     
-    // transforming back into the previous context
-    c.transformTheRenderIntoThisContextShape();
-
     return results;
 }
 
 template<typename T>
 typename T::Results drawWidget(MurkaContext &c, void* dataToControl, typename T::Parameters parameters, MurkaShape shape) {
     
-    // transforming back from the previous context
-    c.transformTheRenderBackFromThisContextShape();
 
     int counter = c.getImCounter();
     
@@ -307,8 +331,6 @@ typename T::Results drawWidget(MurkaContext &c, void* dataToControl, typename T:
     c.transformTheRenderBackFromThisContextShape();
     c.popContext();
     
-    // transforming back into the previous context
-    c.transformTheRenderIntoThisContextShape();
 
     return results;
 
@@ -319,8 +341,6 @@ typename T::Results drawWidget(MurkaContext &c, void* dataToControl, typename T:
 template<typename T>
 typename T::Results drawWidget(MurkaContext &c, void* dataToControl, typename T::Parameters parameters) {
     
-    c.transformTheRenderBackFromThisContextShape();
-
     int counter = c.getImCounter();
     
     auto parentMView = (View*)c.murkaView;
@@ -341,16 +361,12 @@ typename T::Results drawWidget(MurkaContext &c, void* dataToControl, typename T:
     c.transformTheRenderBackFromThisContextShape();
     c.popContext();
     
-    c.transformTheRenderIntoThisContextShape();
-
     return results;
 }
     
 template<typename T>
 typename T::Results drawWidget(MurkaContext &c, typename T::Parameters parameters) {
     
-    c.transformTheRenderBackFromThisContextShape();
-
     int counter = c.getImCounter();
     
     auto parentMView = (View*)c.murkaView;
@@ -371,8 +387,6 @@ typename T::Results drawWidget(MurkaContext &c, typename T::Parameters parameter
     c.transformTheRenderBackFromThisContextShape();
     c.popContext();
     
-    c.transformTheRenderIntoThisContextShape();
-
     return results;
 }
  
