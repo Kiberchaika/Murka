@@ -46,6 +46,7 @@ public:
             ofColor bgColor = context.getWidgetBackgroundColor() * 255;
             ofColor fgColor = context.getWidgetForegroundColor() * 255;
             
+			ofPushStyle();
             ofFill();
             ofSetColor(bgColor);
             ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
@@ -67,6 +68,7 @@ public:
                 }
             }
             ofFill();
+			ofPopStyle();
 #endif
 
             // text editing logic

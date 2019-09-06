@@ -128,6 +128,7 @@ public:
             if (pushed < 0) pushed = 0;
             pushed /= 0.2;
 
+			ofPushStyle();
             ofSetColor((inside ? fgColor : fgColor / 2) * (1.0 + 0.2 * pushed));
 
             ofNoFill();
@@ -147,6 +148,7 @@ public:
                 *booleanToControl = !*booleanToControl;
                 lastTimeClicked = context.getRunningTime();
             }
+			ofPopStyle();
 #endif
         };
     }
@@ -203,7 +205,6 @@ public:
             ofSetColor(30);
             ofNoFill();
             ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
-            ofPopStyle();
             
             ofSetColor(255);
             ofDrawBitmapString(params->label, 0, 0);
@@ -215,7 +216,8 @@ public:
                 ofDrawLine(context.currentViewShape.size.x - 5, context.currentViewShape.size.y - 5,
                            context.currentViewShape.size.x - 5, context.currentViewShape.size.y - 15);
             }
-            
+			ofPopStyle();
+
 #endif // MURKA_OF
             
             // Moving & resizing logic
@@ -314,12 +316,12 @@ public:
                  ofSetColor(30);
                  ofNoFill();
                  ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
-                 ofPopStyle();
             
                  ofSetColor(255);
                  float offset = parameters->label.length() * 4;
                  ofDrawBitmapString(parameters->label, context.getSize().x / 2 - offset, context.getSize().y / 2 + 5);
-            
+				 ofPopStyle();
+
                  auto label = ((Parameters*)parametersObject)->label;
             
              #endif // MURKA_OF
@@ -426,7 +428,6 @@ public:
             if (inside) {
                 ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
             }
-            ofPopStyle();
             
             ofColor fgColor = context.getWidgetForegroundColor() * 255;
             ofSetColor(inside ? fgColor : fgColor / 2);
@@ -435,7 +436,8 @@ public:
             float offset = resultString.length() * 4;
             
             ofDrawBitmapString(resultString, context.getSize().x / 2 - offset, context.getSize().y / 2 + 5);
-            
+			ofPopStyle();
+
             
 #endif // MURKA_OF
             
