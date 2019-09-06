@@ -270,7 +270,7 @@ public:
     
     typedef bool Results;
     
-    Point initialPosition, initialMousePosition;
+    MurkaPoint initialPosition, initialMousePosition;
     bool dragging = false, resizing = false;
     
     

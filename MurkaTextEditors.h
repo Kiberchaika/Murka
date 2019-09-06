@@ -131,7 +131,7 @@ public:
     
     bool activated = false;
     
-    Point initialPosition, initialMousePosition;
+    MurkaPoint initialPosition, initialMousePosition;
     bool dragging = false;
     int draggingNubmerIndex = 0;
     float changeScale = 1.0;

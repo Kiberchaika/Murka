@@ -280,12 +280,6 @@ public:
         return (MurkaViewHandler<Z>*)parent->children[parent->children.size() - 1];
     }
     
-    template <typename Z>
-    MurkaViewHandler<Z>* addChildToView(MurkaViewInterface<Z>* child, void* data, void* parameters, MurkaShape shapeInParentContainer)
-    {
-        return addChildToView(getRootView(), child, data, parameters,                           shapeInParentContainer);
-    }
-
     // A version that accepts a handler rather than the widget object as parent
     template <typename Z>
     MurkaViewHandler<Z>* addChildToView(MurkaViewHandlerInternal* parent, MurkaViewInterface<Z>* child, void* data, typename Z::Parameters parameters, MurkaShape shapeInParentContainer)
