@@ -1,18 +1,11 @@
 #pragma once
-#include "MurkaShapes.h"
+#include "MurkaTypes.h"
 
-// Data, parameters and the context are what you put inside. Optional return is put into void*.
-typedef std::function<void (void* dataToControl,
-                            void* parametersObject,
-                            void* thisWidgetObject,
-                            const MurkaContext & context,
-                            void* resultObject)> viewDrawFunction;
-
+namespace murka {
 
 // Handler heirarchy
 
 struct MurkaViewHandlerInternal {
-    //    viewDrawFunction drawFunction;
     void* parametersInternal = NULL;
     void* resultsInternal = NULL;
     void* dataToControl = NULL;
@@ -53,3 +46,5 @@ struct MurkaViewHandler: public MurkaViewHandlerInternal {
     
     
 };
+    
+}

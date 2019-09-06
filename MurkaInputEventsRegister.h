@@ -1,10 +1,12 @@
 #pragma once
 
-#include "MurkaShapes.h"
+#include "MurkaTypes.h"
 
 #ifdef MURKA_OF
 #include "ofMain.h"
 #endif
+
+namespace murka {
 
 struct MurkaEventState {
     bool mouseUp = false, mouseDown = false, mouseDragged = false, mouseDownPressed = false;
@@ -102,6 +104,8 @@ public:
     
     void touchDoubleTap(ofTouchEventArgs & args) {}
     
-#endif MURKA_OF
+#endif 
 
 };
+
+}

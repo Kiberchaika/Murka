@@ -1,9 +1,177 @@
 #pragma once
 #include "Murka.h"
 
-class MurkaBlankPanel : public MurkaViewInterface<MurkaBlankPanel> {
+
+namespace murka {
+
+enum TextAlignment {TEXT_LEFT, TEXT_CENTER, TEXT_RIGHT};
+
+class Header : public MurkaViewInterface<Header> {
 public:
-	MurkaBlankPanel() {
+    Header() {
+        draw = [&](void* dataToControl,
+                   void* parametersObject,
+                   void* thisWidgetObject,
+                   const MurkaContext & context,
+                   void* resultObject)  {
+            
+            auto params = (Parameters*)parametersObject;
+            Header* thisWidget = (Header*)thisWidgetObject;
+            
+            bool inside = context.isHovered() * !areChildrenHovered(context);
+            
+            // Your drawing and interaction code goes here.
+            // Don't forget that all of this executes at each frame for each
+            // widget that is drawn on screen.
+            auto font = context.getHeaderFont();
+            
+#ifdef MURKA_OF
+            ofColor fgColor = context.getWidgetForegroundColor() * 255;
+            ofSetColor(fgColor);
+            font->drawString(params->label, 5, 5 + font->getLineHeight());
+#endif
+        };
+    }
+    
+    // Here go parameters and any parameter convenience constructors. You need to define something called Parameters, even if it's NULL.
+    struct Parameters {
+        std::string label;
+        
+        Parameters() {}
+        Parameters(std::string labelText) { label = labelText; } // a convenience initializer
+    };
+    
+    // The results type, you also need to define it even if it's nothing.
+    typedef bool Results;
+    
+};
+    
+class Label : public MurkaViewInterface<Label> {
+public:
+    Label() {
+        draw = [&](void* dataToControl,
+                   void* parametersObject,
+                   void* thisWidgetObject,
+                   const MurkaContext & context,
+                   void* resultObject)  {
+            
+            auto params = (Parameters*)parametersObject;
+            Label* thisWidget = (Label*)thisWidgetObject;
+            
+            bool inside = context.isHovered() * !areChildrenHovered(context);
+            
+            // Your drawing and interaction code goes here.
+            // Don't forget that all of this executes at each frame for each
+            // widget that is drawn on screen.
+            auto font = context.getParagraphFont();
+            
+#ifdef MURKA_OF
+            ofColor fgColor = context.getWidgetForegroundColor() * 255;
+            ofSetColor(fgColor);
+            if (params->alignment == TEXT_LEFT) {
+                font->drawString(params->label, 5, 5 + font->getLineHeight());
+            }
+            if (params->alignment == TEXT_CENTER) {
+                float textX = 5 + (shape.size.x - 10) / 2 - font->getStringBoundingBox(params->label, 0, 0).getWidth() / 2;
+                font->drawString(params->label, textX, 5 + font->getLineHeight());
+            }
+            if (params->alignment == TEXT_RIGHT) {
+                float textX = (shape.size.x - 10) - font->getStringBoundingBox(params->label, 0, 0).getWidth();
+                font->drawString(params->label, textX, 5 + font->getLineHeight());
+            }
+#endif
+        };
+    }
+    
+    // Here go parameters and any parameter convenience constructors. You need to define something called Parameters, even if it's NULL.
+    struct Parameters {
+        std::string label;
+        TextAlignment alignment = TEXT_LEFT;
+        
+        Parameters() {}
+        Parameters(std::string labelText) { label = labelText; } // a convenience initializer
+        Parameters(std::string labelText, TextAlignment align) {
+            label = labelText;
+            alignment = align;
+        } // a convenience initializer
+    };
+    
+    // The results type, you also need to define it even if it's nothing.
+    typedef bool Results;
+    
+    
+};
+    
+class Checkbox : public MurkaViewInterface<Checkbox> {
+public:
+    Checkbox() {
+        draw = [&](void* dataToControl,
+                   void* parametersObject,
+                   void* thisWidgetObject,
+                   const MurkaContext & context,
+                   void* resultObject)  {
+            
+            auto params = (Parameters*)parametersObject;
+            Checkbox* thisWidget = (Checkbox*)thisWidgetObject;
+            
+            bool inside = context.isHovered() * !areChildrenHovered(context);
+            
+            bool* booleanToControl = ((bool*)dataToControl);
+
+#ifdef MURKA_OF
+            ofColor fgColor = context.getWidgetForegroundColor() * 255;
+
+            float pushed = 0.2 - (context.getRunningTime() - lastTimeClicked);
+            if (pushed < 0) pushed = 0;
+            pushed /= 0.2;
+
+            ofSetColor((inside ? fgColor : fgColor / 2) * (1.0 + 0.2 * pushed));
+
+            ofNoFill();
+            ofDrawRectangle(5, 5, 20, 20);
+            if (*booleanToControl) {
+                float symbolOffset = 4;
+                ofDrawLine(5 + symbolOffset, 5 + symbolOffset, 25 - symbolOffset, 25 - symbolOffset);
+                ofDrawLine(25 - symbolOffset, 5 + symbolOffset, 5 + symbolOffset, 25 - symbolOffset);
+            }
+            
+            ofFill();
+            
+            auto font = context.getParagraphFont();
+            font->drawString(params->label, 30, 22);
+            
+            if (inside && context.mouseDownPressed) {
+                *booleanToControl = !*booleanToControl;
+                lastTimeClicked = context.getRunningTime();
+            }
+#endif
+        };
+    }
+    
+    // Here go parameters and any parameter convenience constructors. You need to define something called Parameters, even if it's NULL.
+    struct Parameters {
+        std::string label;
+        
+        Parameters() {}
+        Parameters(std::string Label) { label = Label; } // a convenience initializer
+    };
+    
+    // The results type, you also need to define it even if it's nothing.
+    typedef bool Results;
+    
+    // The two functions needed for optional UI state saving. It's up to you
+    // to use those.
+    std::vector<MurkaVar> saveInternalData(int indexX, int indexY) override { }
+    void loadInternalData(std::vector<MurkaVar>) override {}
+    
+    
+    // Everything else in the class is for handling the internal state. It persist.
+    double lastTimeClicked = 0;
+};
+
+class BlankPanel : public MurkaViewInterface<BlankPanel> {
+public:
+	BlankPanel() {
         draw = [&](void* dataToControl,
                   void* parametersObject,
                   void* thisWidgetObject,
@@ -11,18 +179,23 @@ public:
                   void* resultObject)  {
             
             auto params = (Parameters*)parametersObject;
-            MurkaBlankPanel* thisWidget = (MurkaBlankPanel*)thisWidgetObject;
+            BlankPanel* thisWidget = (BlankPanel*)thisWidgetObject;
             
-            bool inside = context.isHovered() * !isChildrenHovered(context);
+            bool inside = context.isHovered() * !areChildrenHovered(context);
             
-            if (context.isHovered()) {
-                ofLog() << "inside and " << (isChildrenHovered(context) ? "children hovered" : "no children hovered");
+            bool gonnaResize = false;
+            if (params->moveable) {
+                if ((context.mousePosition.x < context.currentViewShape.size.x - 30) &&
+                    (context.mousePosition.y < context.currentViewShape.size.y - 30)) {
+                    gonnaResize = false;
+                } else gonnaResize = true;
             }
 
 #ifdef MURKA_OF
+            
             ofPushStyle();
             ofFill();
-            ofSetColor(params->r, params->g, params->b, 100 + 125 * (context.eventState.mouseDown && inside && params->moveable));
+            ofSetColor(params->r, params->g, params->b, 100);
             ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
             ofSetColor(30);
             ofNoFill();
@@ -31,19 +204,8 @@ public:
             
             ofSetColor(255);
             ofDrawBitmapString(params->label, 0, 0);
-            ofDrawBitmapString("children size: " + ofToString(children.size()), 0, 20);
-            ofDrawBitmapString("imchildren size: " + ofToString(imChildren.size()), 0, 40);
-
-#endif // MURKA_OF
             
-            bool gonnaResize = false;
-            if (params->moveable)
-            if ((context.eventState.mousePosition.x < context.currentViewShape.size.x - 30) &&
-                (context.eventState.mousePosition.y < context.currentViewShape.size.y - 30)) {
-                gonnaResize = false;
-            } else gonnaResize = true;
-            
-#ifdef MURKA_OF
+            // Drawing symbols to show that we're going to resize this widget
             if ((gonnaResize) && (inside)) {
                 ofDrawLine(context.currentViewShape.size.x - 5, context.currentViewShape.size.y - 5,
                            context.currentViewShape.size.x - 15, context.currentViewShape.size.y - 5);
@@ -51,40 +213,39 @@ public:
                            context.currentViewShape.size.x - 5, context.currentViewShape.size.y - 15);
             }
             
-//            if ((inside) && (!gonnaResize)) {
-//                ofDrawLine(context.currentViewShape.size.x, context.eventState.mousePosition.y,
-//                           0, context.eventState.mousePosition.y);
-//                ofDrawLine(context.eventState.mousePosition.x, context.currentViewShape.size.y,
-//                           context.eventState.mousePosition.x, 0);
-//            }
-            
 #endif // MURKA_OF
             
+            // Moving & resizing logic
+            
             if (params->moveable)
-            if (inside && context.eventState.mouseDownPressed && (!thisWidget->dragging) && (!thisWidget->resizing)) {
+            if (inside && context.mouseDownPressed && (!thisWidget->dragging) && (!thisWidget->resizing)) {
                 if (gonnaResize) thisWidget->resizing = true;
                 else thisWidget->dragging = true;
             }
             
             if (((thisWidget->dragging) || (thisWidget->resizing))  &&
-                !context.eventState.mouseDown) {
+                !context.mouseDown) {
                 thisWidget->dragging = false;
                 thisWidget->resizing = false;
             }
             
             if (thisWidget->dragging) {
-                shape.position.x -= context.eventState.mouseDelta.x;
-                shape.position.y -= context.eventState.mouseDelta.y;
+                shape.position.x -= context.mouseDelta.x;
+                shape.position.y -= context.mouseDelta.y;
             }
             
             if (thisWidget->resizing) {
-                shape.size.x -= context.eventState.mouseDelta.x;
-                shape.size.y -= context.eventState.mouseDelta.y;
+                shape.size.x -= context.mouseDelta.x;
+                shape.size.y -= context.mouseDelta.y;
                 
+                if (shape.size.x < params->minimumWidth) {
+                    shape.size.x = params->minimumWidth;
+                }
+                if (shape.size.y < params->minimumHeight) {
+                    shape.size.y = params->minimumHeight;
+                }
             }
             
-            
-            //                return new bool(true); // should I add the return here tho?
         };
 	}
     
@@ -92,54 +253,30 @@ public:
     ///
     
     struct Parameters {
-        float r, g, b;
+        float r = 45, g = 45, b = 45;
         std::string label;
         
         bool moveable = true;
+        float minimumWidth = 200, minimumHeight = 200;
         
         Parameters() {}
         Parameters(float R, float G, float B, const char* Label) { r = R; g = G; b = B; label = Label; }
         Parameters(const char* Label, bool Moveable) { label = Label; moveable = Moveable;}
+        Parameters(const char* Label, bool Moveable, float minWidth, float minHeight) { label = Label; moveable = Moveable; minimumWidth = minWidth; minimumHeight = minHeight; }
     };
     
     typedef bool Results;
     
-    MurkaPoint initialPosition, initialMousePosition;
+    Point initialPosition, initialMousePosition;
     bool dragging = false, resizing = false;
     
-    // Immediate mode methods
     
-    static MurkaBlankPanel::Results imDraw(Murka &m, MurkaBlankPanel::Parameters parameters, MurkaShape shape) {
-        auto context = &(m.currentContext);
-        auto widgetHandler = getOrCreateImModeWidgetObject(context->getImCounter(), NULL, (MurkaView*)context->latestMurkaView, shape);
-        auto widgetObject = (MurkaView*)widgetHandler->widgetObjectInternal;
-
-        if (!parameters.moveable) {
-            widgetObject->shape = shape;
-        }
-        
-        MurkaBlankPanel::Results results;
-        
-        context->pushContainer(widgetObject->shape.position, widgetObject->shape.size);
-
-
-        context->currentWidgetShapeSource = &widgetObject->shape;
-        context->transformTheRenderIntoThisContextShape();
-        widgetObject->draw(NULL, &parameters, widgetObject, *context, &results);
-        
-        context->latestMurkaView = widgetObject;
-        m.latestContext = *context;
-        context->transformTheRenderBackFromThisContextShape();
-        context->popContainer();
-
-        return results;
-    }
 };
 
 
-class MurkaWidgetButton : public MurkaViewInterface<MurkaWidgetButton> {
+class Button : public MurkaViewInterface<Button> {
 public:
-	MurkaWidgetButton() {
+	Button() {
         draw = [&](void* dataToControl,
                    void* parametersObject,
                    void* thisWidgetObject,
@@ -148,35 +285,39 @@ public:
             
              
              auto parameters = ((Parameters*)parametersObject);
-             Results& results = castResults();
+             auto &castedResults = *(castResults(resultObject));
+
+             bool inside = context.isHovered();
+             Button* thisWidget = (Button*)thisWidgetObject;
             
-             bool inside = context.transformedShape.inside(context.eventState.mousePosition);
-             MurkaWidgetButton* thisWidget = (MurkaWidgetButton*)thisWidgetObject;
-             
-             if ((context.eventState.mouseDown) && (context.isHovered())) {
-                 results = true;
-             } else results = false;
+
+             if ((context.mouseDownPressed) && (context.isHovered())) {
+                castedResults = true;
+                lastTimeClicked = context.getRunningTime();
+             } else castedResults = false;
             
-            
-             
              #ifdef MURKA_OF
+            
+                 float pushed = 0.2 - (context.getRunningTime() - lastTimeClicked);
+                 if (pushed < 0) pushed = 0;
+                 pushed /= 0.2;
              
-             ofPushStyle();
-             ofFill();
-             if (inside) {
-                 ofSetColor(parameters->r, parameters->g, parameters->b);
-             } else ofSetColor(75);
-             ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
-             ofSetColor(30);
-             ofNoFill();
-             ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
-             ofPopStyle();
-             
-             ofSetColor(255);
-             float offset = parameters->label.length() * 4;
-             ofDrawBitmapString(parameters->label, context.getSize().x / 2 - offset, 25);
-             
-             auto label = ((Parameters*)parametersObject)->label;
+                 ofPushStyle();
+                 ofFill();
+                 if (inside) {
+                     ofSetColor(ofColor(parameters->r, parameters->g, parameters->b) * (1.0 + 0.2 * pushed));
+                 } else ofSetColor(75 * (1.0 + 0.2 * pushed));
+                 ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
+                 ofSetColor(30);
+                 ofNoFill();
+                 ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
+                 ofPopStyle();
+            
+                 ofSetColor(255);
+                 float offset = parameters->label.length() * 4;
+                 ofDrawBitmapString(parameters->label, context.getSize().x / 2 - offset, context.getSize().y / 2 + 5);
+            
+                 auto label = ((Parameters*)parametersObject)->label;
             
              #endif // MURKA_OF
             
@@ -216,8 +357,9 @@ public:
     
     // Helpers that didn't work in templated class yet :(
     
-    Results& castResults() {
-        return  *((Results*)resultsInternal);
+    Results* castResults(void* results) {
+        auto resultsPointer = (Results*)results;
+        return resultsPointer;
     }
     
     Parameters& castParameters() {
@@ -227,11 +369,9 @@ public:
 };
 
 
-class MurkaSliderFloat : public MurkaViewInterface<MurkaSliderFloat> {
+class SliderFloat : public MurkaViewInterface<SliderFloat> {
 public:
-    MurkaSliderFloat() {
-        debug = ofRandom(1000);
-        
+    SliderFloat() {
         draw = [&](void* dataToControl,
                    void* parametersObject,
                    void* thisWidgetObject,
@@ -242,19 +382,19 @@ public:
             auto parameters = ((Parameters*)parametersObject);
             Results& results = castResults();
             
-            bool inside = context.transformedShape.inside(context.eventState.mousePosition);
-            MurkaWidgetButton* thisWidget = (MurkaWidgetButton*)thisWidgetObject;
+            bool inside = context.isHovered();
+            Button* thisWidget = (Button*)thisWidgetObject;
             
-            if ((context.eventState.mouseDownPressed) && (context.isHovered())) {
+            if ((context.mouseDownPressed) && (context.isHovered())) {
                 dragging = true;
             }
             
-            if ((dragging) && (!context.eventState.mouseDown)) {
+            if ((dragging) && (!context.mouseDown)) {
                 dragging = false;
             }
             
             if (dragging) {
-                float newValue = context.eventState.mousePosition.x / context.currentViewShape.size.x;
+                float newValue = context.mousePosition.x / context.currentViewShape.size.x;
                 
                 if (newValue > parameters->maxValue) newValue = parameters->maxValue;
                 if (newValue < parameters->minValue) newValue = parameters->minValue;
@@ -271,6 +411,12 @@ public:
                        parameters->g + (inside ? 20 : 0),
                        parameters->b + (inside ? 20 : 0), 200);
             float currentValue = *((float*)dataToControl);
+            if (currentValue > parameters->maxValue) {
+                currentValue = parameters->maxValue;
+            }
+            if (currentValue < parameters->minValue) {
+                currentValue = parameters->minValue;
+            }
             ofDrawRectangle(0, 0, context.getSize().x * ((currentValue - parameters->minValue) / parameters->maxValue), context.getSize().y);
             ofSetColor(80);
             ofNoFill();
@@ -279,11 +425,13 @@ public:
             }
             ofPopStyle();
             
-            ofSetColor(255);
-            auto label = ((Parameters*)parametersObject)->label + ofToString(debug);
+            ofColor fgColor = context.getWidgetForegroundColor() * 255;
+            ofSetColor(inside ? fgColor : fgColor / 2);
+            auto label = ((Parameters*)parametersObject)->label;
             auto resultString = label + ": " + ofToString(*((float*)dataToControl));
             float offset = resultString.length() * 4;
-            ofDrawBitmapString(resultString, context.getSize().x / 2 - offset, 25);
+            
+            ofDrawBitmapString(resultString, context.getSize().x / 2 - offset, context.getSize().y / 2 + 5);
             
             
 #endif // MURKA_OF
@@ -319,31 +467,6 @@ public:
     std::string Label;
     float lastTimeClicked = 0;
     bool dragging = false;
-    int debug = 0;
-    
-    // Im mode
-    
-    static MurkaSliderFloat::Results imDraw(Murka &m, void* dataToControl, MurkaSliderFloat::Parameters parameters, MurkaShape shape) {
-        auto context = &(m.currentContext);
-        auto widgetHandler = getOrCreateImModeWidgetObject(context->getImCounter(), dataToControl, (MurkaView*)context->latestMurkaView, shape);
-        auto widgetObject = (MurkaView*)widgetHandler->widgetObjectInternal;
-        
-        MurkaBlankPanel::Results results;
-        
-        context->pushContainer(widgetObject->shape.position, widgetObject->shape.size);
-        context->resetImCounter();
-        
-        context->currentWidgetShapeSource = &widgetObject->shape;
-        context->transformTheRenderIntoThisContextShape();
-        widgetObject->draw(dataToControl, &parameters, widgetObject, *context, &results);
-
-        context->latestMurkaView = widgetObject;
-        m.latestContext = *context;
-        context->transformTheRenderBackFromThisContextShape();
-        context->popContainer();
-        
-        return results;
-    }
     
     // Helpers that didn't work in templated class yet :(
     
@@ -356,3 +479,5 @@ public:
     }
     
 };
+
+}
