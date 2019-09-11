@@ -44,6 +44,10 @@ public:
     FontObject* getMonospaceFont() const {
         return ((MurkaAssets*)assetsObject)->monoFont;
     }
+    
+    FontObject* getFont(std::string fontId) const {
+        return ((MurkaAssets*)assetsObject)->fontMap[fontId];
+    }
 
     //
     

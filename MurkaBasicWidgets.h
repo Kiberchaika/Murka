@@ -26,9 +26,19 @@ public:
             auto font = context.getHeaderFont();
             
 #ifdef MURKA_OF
-            ofColor fgColor = context.getWidgetForegroundColor() * 255;
+            ofColor fgColor = params->customColor ? params->color * 255 : context.getWidgetForegroundColor() * 255;
             ofSetColor(fgColor);
-            font->drawString(params->label, 5, 5 + font->getLineHeight());
+            if (params->alignment == TEXT_LEFT) {
+                font->drawString(params->label, 5, 5 + font->getLineHeight());
+            }
+            if (params->alignment == TEXT_CENTER) {
+                float textX = 5 + (shape.size.x - 10) / 2 - font->getStringBoundingBox(params->label, 0, 0).getWidth() / 2;
+                font->drawString(params->label, textX, 5 + font->getLineHeight());
+            }
+            if (params->alignment == TEXT_RIGHT) {
+                float textX = (shape.size.x - 10) - font->getStringBoundingBox(params->label, 0, 0).getWidth();
+                font->drawString(params->label, textX, 5 + font->getLineHeight());
+            }
 #endif
         };
     }
@@ -37,8 +47,31 @@ public:
     struct Parameters {
         std::string label;
         
+        TextAlignment alignment = TEXT_LEFT;
+        
+        MurkaColor color = {0.98, 0.98, 0.98};
+        
+        bool customColor = false;
+        
         Parameters() {}
         Parameters(std::string labelText) { label = labelText; } // a convenience initializer
+        Parameters(std::string labelText, MurkaColor color_) {
+            label = labelText;
+            color = color_;
+            customColor = true;
+        } // a convenience initializer
+        
+        Parameters(std::string labelText, TextAlignment align) {
+            label = labelText;
+            alignment = align;
+        } // a convenience initializer
+        
+        Parameters(std::string labelText, MurkaColor color_, TextAlignment align) {
+            label = labelText;
+            alignment = align;
+            color = color_;
+            customColor = true;
+        } // a convenience initializer
     };
     
     // The results type, you also need to define it even if it's nothing.
@@ -68,7 +101,7 @@ public:
             auto font = context.getParagraphFont();
             
 #ifdef MURKA_OF
-            ofColor fgColor = context.getWidgetForegroundColor() * 255;
+            ofColor fgColor = params->customColor ? params->color * 255 : context.getWidgetForegroundColor() * 255;
             ofSetColor(fgColor);
             if (params->alignment == TEXT_LEFT) {
                 font->drawString(params->label, 5, 5 + font->getLineHeight());
@@ -90,11 +123,28 @@ public:
         std::string label;
         TextAlignment alignment = TEXT_LEFT;
         
+        MurkaColor color = {0.98, 0.98, 0.98};
+        
+        bool customColor = false;
+        
         Parameters() {}
         Parameters(std::string labelText) { label = labelText; } // a convenience initializer
+        Parameters(std::string labelText, MurkaColor color_) {
+            label = labelText;
+            color = color_;
+            customColor = true;
+        } // a convenience initializer
+        
         Parameters(std::string labelText, TextAlignment align) {
             label = labelText;
             alignment = align;
+        } // a convenience initializer
+        
+        Parameters(std::string labelText, MurkaColor color_, TextAlignment align) {
+            label = labelText;
+            alignment = align;
+            color = color_;
+            customColor = true;
         } // a convenience initializer
     };
     
@@ -200,7 +250,7 @@ public:
             
             ofPushStyle();
             ofFill();
-            ofSetColor(params->r, params->g, params->b, 100);
+            ofSetColor(params->r, params->g, params->b, 255);
             ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
             ofSetColor(30);
             ofNoFill();

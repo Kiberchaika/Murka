@@ -16,6 +16,8 @@ public:
     FontObject* headerFont = NULL;
     FontObject* monoFont = NULL;
     
+    std::map<std::string, FontObject*> fontMap;
+    
     void setupFonts(std::string paragraphFontFilename, float paragraphSize,
                     std::string headerFontFilename, float headerSize,
                     std::string monoFontFilename, float monofontSize) {
@@ -31,8 +33,15 @@ public:
 #endif
     }
     
+    void addFont(std::string fontId, std::string fontName, float fontSize) {
+#ifdef MURKA_OF
+        fontMap[fontId] = new FontObject();
+        fontMap[fontId]->load(fontName, fontSize);
+#endif
+    }
+    
     MurkaColor widgetBgColor = {0.1, 0.1, 0.1};
-    MurkaColor widgetFgColor = {0.8, 0.8, 0.8};
+    MurkaColor widgetFgColor = {0.98, 0.98, 0.98};
     
     float getFontLineHeight(FontObject* font) {
         if (font == NULL) {

@@ -64,7 +64,9 @@ public:
     // This children list contains all the children objects and their respective data
     std::vector<MurkaViewHandlerInternal*> children;
     
-    typedef std::tuple<int, void*> imIdentifier;
+    // This tuple is how Murka identifies the IM mode widget object.
+    // Int stands for object drawing index, void* is a pointer to data, string is typeid
+    typedef std::tuple<int, void*, std::string> imIdentifier;
     std::map<imIdentifier, MurkaViewHandler<View>*> imChildren; // Immediate mode widget objects that were once drawn inside this widget. We hold their state here in the shape of their MurkaViews.
     
     MurkaShape childrenBounds = {std::numeric_limits<float>::max(), std::numeric_limits<float>::max(),
@@ -183,7 +185,11 @@ public:
     }
     
     static MurkaViewHandler<T>* getOrCreateImModeWidgetObject(int index, void* data, View* parentWidget, MurkaShape shape) {
-        auto idTuple = std::make_tuple(index, data);
+        
+//        ofLog() << typeid(T).name();
+//        ofLog() << "parent:" << typeid(parentWidget).name();
+        
+        auto idTuple = std::make_tuple(index, data, typeid(T).name());
         if (parentWidget->imChildren.find(idTuple) != parentWidget->imChildren.end()) {
             // the widget exists
             
