@@ -102,7 +102,11 @@ public:
             currentShapeStructure.push_back(elem);
         }
     }
-    
+
+    float getLayoutLineHeight() {
+        return currentLineHeight;
+    }
+
     void setLayoutLineHeight(float height) {
         baseLayoutLineHeight = height;
         

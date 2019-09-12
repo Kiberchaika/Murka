@@ -186,9 +186,6 @@ public:
     
     static MurkaViewHandler<T>* getOrCreateImModeWidgetObject(int index, void* data, View* parentWidget, MurkaShape shape) {
         
-//        ofLog() << typeid(T).name();
-//        ofLog() << "parent:" << typeid(parentWidget).name();
-        
         auto idTuple = std::make_tuple(index, data, typeid(T).name());
         if (parentWidget->imChildren.find(idTuple) != parentWidget->imChildren.end()) {
             // the widget exists

@@ -220,6 +220,10 @@ public:
        ((View*)currentContext.murkaView)->layoutGenerator.setLayoutStructure(list);
     }
     
+    float getLayoutLineHeight() {
+        return ((View*)currentContext.murkaView)->layoutGenerator.getLayoutLineHeight();
+    }
+    
     void setLayoutLinearOffset(float offset) {
         ((View*)currentContext.murkaView)->layoutGenerator.setLinearOffset(offset);
     }

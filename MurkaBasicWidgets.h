@@ -104,16 +104,24 @@ public:
             ofColor fgColor = params->customColor ? params->color * 255 : context.getWidgetForegroundColor() * 255;
             ofSetColor(fgColor);
             if (params->alignment == TEXT_LEFT) {
-                font->drawString(params->label, 5, 5 + font->getLineHeight());
+                font->drawString(params->label, 5, font->getLineHeight());
             }
             if (params->alignment == TEXT_CENTER) {
                 float textX = 5 + (shape.size.x - 10) / 2 - font->getStringBoundingBox(params->label, 0, 0).getWidth() / 2;
-                font->drawString(params->label, textX, 5 + font->getLineHeight());
+                font->drawString(params->label, textX, font->getLineHeight());
             }
             if (params->alignment == TEXT_RIGHT) {
                 float textX = (shape.size.x - 10) - font->getStringBoundingBox(params->label, 0, 0).getWidth();
-                font->drawString(params->label, textX, 5 + font->getLineHeight());
+                font->drawString(params->label, textX, font->getLineHeight());
             }
+            
+            // Testing vertical centering
+//            ofSetColor(255);
+//            ofDrawLine(0, 0, context.getSize().x, 0);
+//            ofSetColor(255, 0, 0);
+//            ofDrawLine(0, context.getSize().y / 2, context.getSize().x, context.getSize().y / 2);
+//            ofSetColor(255);
+//            ofDrawLine(0, context.getSize().y, context.getSize().x, context.getSize().y);
 #endif
         };
     }
@@ -250,11 +258,13 @@ public:
             
             ofPushStyle();
             ofFill();
-            ofSetColor(params->r, params->g, params->b, 255);
+            ofSetColor(params->r, params->g, params->b, params->a);
             ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
-            ofSetColor(30);
-            ofNoFill();
-            ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
+            if (params->drawBorder) {
+                ofSetColor(30);
+                ofNoFill();
+                ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
+            }
             
             ofSetColor(255);
             ofDrawBitmapString(params->label, 0, 0);
@@ -308,7 +318,8 @@ public:
     ///
     
     struct Parameters {
-        float r = 45, g = 45, b = 45;
+        float r = 45, g = 45, b = 45, a = 255;
+        bool drawBorder = true;
         std::string label;
         
         bool moveable = true;
