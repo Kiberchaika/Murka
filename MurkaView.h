@@ -164,6 +164,7 @@ public:
     
     void* parametersInternal;
     void* resultsInternal;
+    std::string dataTypeName = "";
     
     MurkaShape shape = {0,0, 1, 2};
     
@@ -277,32 +278,33 @@ typename T::Results drawWidget(MurkaContext &c, typename T::Parameters parameter
     typename T::Results results = typename T::Results();
     
     c.pushContext(widgetHandler);
-    c.transformTheRenderIntoThisContextShape();
-    widgetObject->layoutGenerator.restart(((View*)widgetHandler->widgetObjectInternal)->shape/*,  widgetObject->childrenBounds */);
-        widgetObject->draw(NULL, &parameters, widgetObject, c, &results);
-    
-    /*
-    //DEBUG - drawing the children frame that we had at the last frame end
-    ofSetColor(255, 100, 0);
-        ofNoFill();
+    if (c.transformTheRenderIntoThisContextShape()) {
+        widgetObject->layoutGenerator.restart(((View*)widgetHandler->widgetObjectInternal)->shape/*,  widgetObject->childrenBounds */);
+            widgetObject->draw(NULL, &parameters, widgetObject, c, &results);
+        
+        /*
+        //DEBUG - drawing the children frame that we had at the last frame end
+        ofSetColor(255, 100, 0);
+            ofNoFill();
 
-    ofDrawRectangle(((View*)c.murkaView)->childrenBounds.position.x, ((View*)c.murkaView)->childrenBounds.position.y, ((View*)c.murkaView)->childrenBounds.size.x, ((View*)c.murkaView)->childrenBounds.size.y);
-        ofFill();
-    //////
-     */
+        ofDrawRectangle(((View*)c.murkaView)->childrenBounds.position.x, ((View*)c.murkaView)->childrenBounds.position.y, ((View*)c.murkaView)->childrenBounds.size.x, ((View*)c.murkaView)->childrenBounds.size.y);
+            ofFill();
+        //////
+         */
 
-    widgetObject->resetChildrenBounds();
-
-    
-    c.transformTheRenderBackFromThisContextShape();
+        
+        c.transformTheRenderBackFromThisContextShape();
+    }
     c.popContext();
-    
+        
+    widgetObject->resetChildrenBounds();
+        
+
     return results;
 }
 
-template<typename T>
-typename T::Results drawWidget(MurkaContext &c, void* dataToControl, typename T::Parameters parameters, MurkaShape shape) {
-    
+template<typename T, class B>
+typename T::Results drawWidget(MurkaContext &c, B* dataToControl, typename T::Parameters parameters, MurkaShape shape) {
 
     int counter = c.getImCounter();
     
@@ -310,29 +312,30 @@ typename T::Results drawWidget(MurkaContext &c, void* dataToControl, typename T:
     auto widgetHandler = T::getOrCreateImModeWidgetObject(counter, NULL, (View*)c.murkaView, shape);
     auto widgetObject = (View*)widgetHandler->widgetObjectInternal;
     
+    widgetObject->dataTypeName = typeid(*dataToControl).name();
     
     typename T::Results results;
     
     c.pushContext(widgetHandler);
-    c.transformTheRenderIntoThisContextShape();
+    if (c.transformTheRenderIntoThisContextShape()) {
     
-    widgetObject->layoutGenerator.restart(shape /*, widgetObject->childrenBounds*/);
-    widgetObject->draw(dataToControl, &parameters, widgetObject, c, &results);
-    
-    //DEBUG
-    /*
-    ofSetColor(255, 100, 0);
-        ofNoFill();
-    ofDrawRectangle(((View*)c.murkaView)->childrenBounds.position.x, ((View*)c.murkaView)->childrenBounds.position.y, ((View*)c.murkaView)->childrenBounds.size.x, ((View*)c.murkaView)->childrenBounds.size.y);
-        ofFill();
-     */
-    //////
+        widgetObject->layoutGenerator.restart(shape /*, widgetObject->childrenBounds*/);
+        widgetObject->draw(dataToControl, &parameters, widgetObject, c, &results);
+        
+        //DEBUG
+        /*
+        ofSetColor(255, 100, 0);
+            ofNoFill();
+        ofDrawRectangle(((View*)c.murkaView)->childrenBounds.position.x, ((View*)c.murkaView)->childrenBounds.position.y, ((View*)c.murkaView)->childrenBounds.size.x, ((View*)c.murkaView)->childrenBounds.size.y);
+            ofFill();
+         */
+        //////
+        
+        c.transformTheRenderBackFromThisContextShape();
+    }
+    c.popContext();
 
     widgetObject->resetChildrenBounds();
-
-    
-    c.transformTheRenderBackFromThisContextShape();
-    c.popContext();
     
 
     return results;
@@ -353,16 +356,21 @@ typename T::Results drawWidget(MurkaContext &c, void* dataToControl, typename T:
     auto widgetHandler = T::getOrCreateImModeWidgetObject(counter, NULL, (View*)c.murkaView, shapeOffering);
     auto widgetObject = (View*)widgetHandler->widgetObjectInternal;
     
+    widgetObject->dataTypeName = typeid(*dataToControl).name();
+
     typename T::Results results;
     
     c.pushContext(widgetHandler);
-    c.transformTheRenderIntoThisContextShape();
-    
-    widgetObject->layoutGenerator.restart(shapeOffering /*, widgetObject->childrenBounds*/);
-    widgetObject->draw(dataToControl, &parameters, widgetObject, c, &results);
-    
-    c.transformTheRenderBackFromThisContextShape();
+    if (c.transformTheRenderIntoThisContextShape()) {
+        
+        widgetObject->layoutGenerator.restart(shapeOffering /*, widgetObject->childrenBounds*/);
+        widgetObject->draw(dataToControl, &parameters, widgetObject, c, &results);
+        
+        c.transformTheRenderBackFromThisContextShape();
+    }
     c.popContext();
+    
+    widgetObject->resetChildrenBounds();
     
     return results;
 }
@@ -382,13 +390,16 @@ typename T::Results drawWidget(MurkaContext &c, typename T::Parameters parameter
     typename T::Results results;
     
     c.pushContext(widgetHandler);
-    c.transformTheRenderIntoThisContextShape();
-    
-    widgetObject->layoutGenerator.restart(shapeOffering /*, widgetObject->childrenBounds*/);
-    widgetObject->draw(NULL, &parameters, widgetObject, c, &results);
-    
-    c.transformTheRenderBackFromThisContextShape();
+    if (c.transformTheRenderIntoThisContextShape()) {
+        
+        widgetObject->layoutGenerator.restart(shapeOffering /*, widgetObject->childrenBounds*/);
+        widgetObject->draw(NULL, &parameters, widgetObject, c, &results);
+        
+        c.transformTheRenderBackFromThisContextShape();
+    }
     c.popContext();
+    
+    widgetObject->resetChildrenBounds();
     
     return results;
 }

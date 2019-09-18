@@ -101,8 +101,8 @@ public:
         currentContext = *(currentContext.parentContext);
     }
     
-    void transformRenderIntoCurrentContext() {
-        currentContext.transformTheRenderIntoThisContextShape();
+    bool transformRenderIntoCurrentContext() {
+        return currentContext.transformTheRenderIntoThisContextShape();
     }
 
     void transformRenderBackFromLastContext() {

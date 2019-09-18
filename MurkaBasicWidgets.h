@@ -362,6 +362,8 @@ public:
                 lastTimeClicked = context.getRunningTime();
              } else castedResults = false;
             
+             auto font = context.getMonospaceFont();
+            
              #ifdef MURKA_OF
             
                  float pushed = 0.2 - (context.getRunningTime() - lastTimeClicked);
@@ -379,8 +381,13 @@ public:
                  ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
             
                  ofSetColor(255);
-                 float offset = parameters->label.length() * 4;
-                 ofDrawBitmapString(parameters->label, context.getSize().x / 2 - offset, context.getSize().y / 2 + 5);
+            
+                 float offset = font->stringWidth(parameters->label) / 2;
+            
+                 font->drawString(parameters->label, context.getSize().x / 2 - offset, context.getSize().y / 2 + font->getLineHeight() / 4);
+
+//                 float offset = parameters->label.length() * 4;
+//                 ofDrawBitmapString(parameters->label, context.getSize().x / 2 - offset, context.getSize().y / 2 + 5);
 				 ofPopStyle();
 
                  auto label = ((Parameters*)parametersObject)->label;
@@ -467,6 +474,8 @@ public:
                 *((float*)dataToControl) = newValue;
             }
             
+            auto font = context.getMonospaceFont();
+            
 #ifdef MURKA_OF
             
             ofPushStyle();
@@ -494,9 +503,11 @@ public:
             ofSetColor(inside ? fgColor : fgColor / 2);
             auto label = ((Parameters*)parametersObject)->label;
             auto resultString = label + ": " + ofToString(*((float*)dataToControl));
-            float offset = resultString.length() * 4;
             
-            ofDrawBitmapString(resultString, context.getSize().x / 2 - offset, context.getSize().y / 2 + 5);
+            
+            float offset = font->stringWidth(resultString) / 2;
+            
+            font->drawString(resultString, context.getSize().x / 2 - offset, context.getSize().y / 2  + font->getLineHeight() / 4);
 			ofPopStyle();
 
             

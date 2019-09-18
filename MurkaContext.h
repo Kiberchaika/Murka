@@ -65,20 +65,45 @@ public:
     MurkaShape currentViewShape;
     
     
+    MurkaShape getCroppedViewport(MurkaShape parent, MurkaShape view) const {
+        MurkaPoint pos = {parent.position.x + view.position.x, parent.position.y + view.position.y};
+        MurkaPoint size = {std::min(view.size.x, parent.size.x - view.position.x), std::min(view.size.y, parent.size.y - view.position.y)};
+        return MurkaShape(pos.x, pos.y, size.x, size.y);
+    }
+    
     // Utility function to transform the render into the shape of this context.
     // Helpful to draw the view innards.
-    void transformTheRenderIntoThisContextShape() const {
+    // Returns false if the view is not visible
+    bool transformTheRenderIntoThisContextShape() const {
+        MurkaShape relativeShape = currentViewShape;
+        relativeShape.position.x -= parentContext->currentViewShape.position.x;
+        relativeShape.position.y -= parentContext->currentViewShape.position.y;
+        
+        auto viewport = getCroppedViewport(parentContext->currentViewShape, relativeShape);
+        
+        if (viewport.size.y <= 0) {
+            return false;
+        }
 #ifdef MURKA_OF
 //        ofLog() << "pushed matrix";
-        ofPushMatrix();
-        ofTranslate(currentViewShape.position.x, currentViewShape.position.y);
-#endif 
+        
+        ofPushView();
+        ofViewport(viewport.position.x, viewport.position.y, viewport.size.x, viewport.size.y);
+        ofSetupScreen();
+        
+//        ofPushMatrix();
+//        ofTranslate(currentViewShape.position.x, currentViewShape.position.y);
+#endif
+        
+        return true;
     }
     
     void transformTheRenderBackFromThisContextShape() const {
 #ifdef MURKA_OF
 //        ofLog() << "popped matrix";
-        ofPopMatrix();
+        
+        ofPopView();
+//        ofPopMatrix();
 #endif
     }
     
