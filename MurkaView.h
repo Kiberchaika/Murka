@@ -344,8 +344,8 @@ typename T::Results drawWidget(MurkaContext &c, B* dataToControl, typename T::Pa
     
 // Immediate mode automatic layout
 
-template<typename T>
-typename T::Results drawWidget(MurkaContext &c, void* dataToControl, typename T::Parameters parameters) {
+template<typename T, class B>
+typename T::Results drawWidget(MurkaContext &c, B* dataToControl, typename T::Parameters parameters) {
     
     int counter = c.getImCounter();
     

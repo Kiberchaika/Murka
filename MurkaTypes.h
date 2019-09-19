@@ -9,7 +9,7 @@
 #ifdef MURKA_OF
 #include "ofMain.h"
 #include "ofxFontStash.h"
-typedef ofTrueTypeFont FontObject; // It's important for this object to exist in a render for Murka to work
+typedef ofxFontStash FontObject; // It's important for this object to exist in a render for Murka to work
 #endif
 
 
