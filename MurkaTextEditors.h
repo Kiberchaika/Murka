@@ -155,13 +155,13 @@ public:
             
             std::string* stringData = ((std::string*)dataToControl);
             
-            context.startViewport();
+            params->useCustomFont ? font = params->customFont : font = context.getParagraphFont();
             
 #ifdef MURKA_OF
             MurkaColor c = context.getWidgetForegroundColor();
             ofColor bgColor = context.getWidgetBackgroundColor() * 255;
             ofColor fgColor = context.getWidgetForegroundColor() * 255;
-            auto font = context.getParagraphFont();
+            
             
             ofFill();
             ofSetColor(bgColor);
@@ -172,15 +172,16 @@ public:
             ofDrawRectangle(1, 1, context.getSize().x-2, context.getSize().y-2);
             
             recalcGlyphLengths(*stringData, &context);
-            font->drawString(*stringData, 10, 22);
+            
+            float offset = 10;
+            font->drawString(*stringData, 10 - managedOffset, 22);
             
             bool didSetCursorPosition = false;
-            float offset = 10;
             float cursorPositionInPixels = 0;
             float sumGlyphWidths;
             for (int i = 0; i < (*stringData).size(); i++) {
                 
-                MurkaShape glyphShape = MurkaShape(offset, 0, currentGlyphLengths[i], 30);
+                MurkaShape glyphShape = MurkaShape(offset - managedOffset, 0, currentGlyphLengths[i], 30);
                 
                 
                 bool insideGlyph = glyphShape.inside(context.mousePosition);
@@ -192,9 +193,11 @@ public:
                     if (((context.mousePosition.x - offset) / currentGlyphLengths[i]) < 0.5) {
                         cursorPosition = i;
                         didSetCursorPosition = true;
+//                        ofLog() << "set cursor position";
                     } else {
                         cursorPosition = i + 1;
                         didSetCursorPosition = true;
+//                        ofLog() << "set cursor position";
                     }
                 }
                 if (cursorPosition == i) cursorPositionInPixels = offset;
@@ -203,6 +206,7 @@ public:
             sumGlyphWidths = offset;
             
             if ((inside) && (context.mouseDownPressed) && (!didSetCursorPosition)) {
+//                ofLog() << "didn't set cursor position";
                 cursorPosition = (*stringData).size();
             }
             
@@ -211,9 +215,22 @@ public:
             }
             
             if (activated) {
+                // Moving the internal window so the cursor is always visible
+                if (cursorPositionInPixels < managedOffset) {
+                    managedOffset = cursorPositionInPixels - 5;
+                    
+                }
+                
+                if (cursorPositionInPixels > (context.getSize().x + managedOffset)) {
+                    managedOffset = cursorPositionInPixels - context.getSize().x + 5;
+                }
+            }
+
+            if (activated) {
                 float timeMod = context.getRunningTime() / 1.0 - int(context.getRunningTime() / 1.0);
                 if (timeMod > 0.5)
-                    ofDrawLine(cursorPositionInPixels, 3, cursorPositionInPixels, 30);
+                    ofDrawLine(cursorPositionInPixels - managedOffset, 3,
+                               cursorPositionInPixels - managedOffset, 30);
             }
             
 #endif
@@ -258,22 +275,42 @@ public:
                 }
             }
             
-            context.endViewport();
         };
     }
     
     // Here go parameters and any parameter convenience constructors. You need to define it, even if it's NULL.
-    typedef bool Parameters;
+    struct Parameters {
+        bool useCustomFont = false;
+        
+        FontObject* customFont;
+        
+        bool drawBounds = true;
+        
+        Parameters() {
+            
+        }
+    };
+    
+    FontObject* font;
     
     // The results type, you also need to define it even if it's nothing.
     typedef bool Results;
     
     // Everything else is for handling the internal state
     
+    float managedOffset = 0;
+
     void recalcGlyphLengths(std::string text, const MurkaContext* context) {
         if (currentGlyphLengths.size() < text.size()) {
             currentGlyphLengths.resize(text.size());
         }
+        
+        auto symbolsBoundingBoxes = font->getStringSymbolsBoundingBoxes(text, 0, 0, true);
+
+        for (int i = 0; i < text.size(); i++) {
+            currentGlyphLengths[i] = symbolsBoundingBoxes[i].width;
+        }
+        /*
         auto font = context->getParagraphFont();
         for (int i = 0; i < text.size(); i++) {
             if (i > 0) {
@@ -283,6 +320,7 @@ public:
                 currentGlyphLengths[i] = font->stringWidth(text.substr(0, 1));
             }
         }
+         */
     }
     
     std::vector<float> currentGlyphLengths;
