@@ -240,8 +240,8 @@ public:
     //////// Object oriented view heirarchy management
     ////////
     
-    template <typename Z>
-    MurkaViewHandler<Z>* addChildToView(View* parent, MurkaViewInterface<Z>* child, void* data, void* parameters, MurkaShape shapeInParentContainer)
+    template <typename Z, class B>
+    MurkaViewHandler<Z>* addChildToView(View* parent, MurkaViewInterface<Z>* child, B data, void* parameters, MurkaShape shapeInParentContainer)
     {
         
         MurkaViewHandler<Z>* newHandler = new MurkaViewHandler<Z>();
@@ -259,6 +259,8 @@ public:
         newHandler->widgetObject->parametersInternal = (typename Z::Parameters*)newHandler->parametersInternal;
         newHandler->widgetObject->resultsInternal = (typename Z::Results*)newHandler->resultsInternal;
         newHandler->dataToControl = data;
+        
+        newHandler->widgetObject->dataTypeName = typeid(data).name();
 
         
         newHandler->widgetObject->shape = shapeInParentContainer;
@@ -285,8 +287,8 @@ public:
     }
     
     // A version that accepts a handler rather than the widget object as parent
-    template <typename Z>
-    MurkaViewHandler<Z>* addChildToView(MurkaViewHandlerInternal* parent, MurkaViewInterface<Z>* child, void* data, typename Z::Parameters parameters, MurkaShape shapeInParentContainer)
+    template <typename Z, class B>
+    MurkaViewHandler<Z>* addChildToView(MurkaViewHandlerInternal* parent, MurkaViewInterface<Z>* child, B data, typename Z::Parameters parameters, MurkaShape shapeInParentContainer)
     {
         auto newParameters = new typename Z::Parameters();
         *newParameters = parameters;
@@ -295,8 +297,8 @@ public:
     }
 
     // A version that accepts parameters reference rather a pointer
-    template <typename Z>
-    MurkaViewHandler<Z>* addChildToView(MurkaViewInterface<Z>* child, void* data, typename Z::Parameters parameters, MurkaShape shapeInParentContainer)
+    template <typename Z, class B>
+    MurkaViewHandler<Z>* addChildToView(MurkaViewInterface<Z>* child, B data, typename Z::Parameters parameters, MurkaShape shapeInParentContainer)
     {
         auto newParameters = new typename Z::Parameters();
         *newParameters = parameters;

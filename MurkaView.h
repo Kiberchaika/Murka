@@ -312,7 +312,7 @@ typename T::Results drawWidget(MurkaContext &c, B* dataToControl, typename T::Pa
     auto widgetHandler = T::getOrCreateImModeWidgetObject(counter, NULL, (View*)c.murkaView, shape);
     auto widgetObject = (View*)widgetHandler->widgetObjectInternal;
     
-    widgetObject->dataTypeName = typeid(*dataToControl).name();
+    widgetObject->dataTypeName = typeid(dataToControl).name();
     
     typename T::Results results;
     
@@ -356,7 +356,7 @@ typename T::Results drawWidget(MurkaContext &c, B* dataToControl, typename T::Pa
     auto widgetHandler = T::getOrCreateImModeWidgetObject(counter, NULL, (View*)c.murkaView, shapeOffering);
     auto widgetObject = (View*)widgetHandler->widgetObjectInternal;
     
-    widgetObject->dataTypeName = typeid(*dataToControl).name();
+    widgetObject->dataTypeName = typeid(dataToControl).name();
 
     typename T::Results results;
     
