@@ -6,6 +6,7 @@
 #include "MurkaViewHandler.h"
 #include "MurkaTypes.h"
 #include "MurkaAssets.h"
+#include "MurkaOverlayHolder.h"
 
 // Here's the global typedefs for cross-render functionality
 
@@ -59,11 +60,16 @@ public:
         return currentViewShape.transformedInside(mousePosition); // using absolute coordinates to calc that
     }
     
+    MurkaOverlayHolder* overlayHolder;
     MurkaAssets* assetsObject;
     MurkaContext* parentContext = NULL;
     
     MurkaShape currentViewShape;
     
+    // to add an overlay, give a lambda with the overlays call and an object that asked for it
+    void addOverlay(std::function<void()> func, void* object) {
+        overlayHolder->addOverlay(func, object);
+    }
     
     MurkaShape getCroppedViewport(MurkaShape parent, MurkaShape view) const {
         MurkaPoint pos = {parent.position.x + view.position.x, parent.position.y + view.position.y};
@@ -74,12 +80,18 @@ public:
     // Utility function to transform the render into the shape of this context.
     // Helpful to draw the view innards.
     // Returns false if the view is not visible
-    bool transformTheRenderIntoThisContextShape() const {
+    bool transformTheRenderIntoThisContextShape(bool noCrop = false) const {
         MurkaShape relativeShape = currentViewShape;
         relativeShape.position.x -= parentContext->currentViewShape.position.x;
         relativeShape.position.y -= parentContext->currentViewShape.position.y;
         
         auto viewport = getCroppedViewport(parentContext->currentViewShape, relativeShape);
+        
+        if (noCrop) {
+            viewport = relativeShape;
+            viewport.position.x += parentContext->currentViewShape.position.x;
+            viewport.position.y += parentContext->currentViewShape.position.y;
+        }
         
         if (viewport.size.y <= 0) {
             return false;

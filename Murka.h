@@ -65,7 +65,7 @@
 
 namespace murka {
 
-class Murka : public MurkaViewInterface<Murka>, MurkaInputEventsRegister, public MurkaAssets {
+class Murka : public MurkaViewInterface<Murka>, MurkaInputEventsRegister, public MurkaAssets, public MurkaOverlayHolder {
 public:
 	Murka() {
         setupEvents();
@@ -91,6 +91,7 @@ public:
         currentContext.currentViewShape.position += containerPosition;
         currentContext.currentViewShape.size = ((View*)viewSource->widgetObjectInternal)->shape.size;
         currentContext.murkaView = ((View*)viewSource->widgetObjectInternal);
+        currentContext.overlayHolder = this;
         
         ((View*)viewSource->widgetObjectInternal)->latestContext = currentContext;
         
@@ -111,7 +112,7 @@ public:
     
 
 
-    void drawCycle() { // this version is without arguments cause it creates the context
+    void begin() { // this version is without arguments cause it creates the context
         
         restartContext();
         
@@ -120,6 +121,16 @@ public:
                 drawCycleRecursive(i);
             popContext();
         }
+    }
+    
+    void end() {
+        disableViewportCrop = true;
+        for (auto &overlay: overlays) {
+            overlay.func();
+        }
+
+        disableViewportCrop = false;
+        overlays.clear();
     }
 
 	// A recursive OOP draw cycle that starts with this widget
@@ -169,6 +180,7 @@ public:
         *((MurkaEventState*)&currentContext) = eventState;
         currentContext.assetsObject = this;
         currentContext.murkaView = this;
+        currentContext.overlayHolder = this;
         
 #ifdef MURKA_OF
         currentContext.currentViewShape = MurkaShape{0,

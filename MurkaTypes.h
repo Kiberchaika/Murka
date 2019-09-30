@@ -14,20 +14,21 @@ typedef ofxFontStash FontObject; // It's important for this object to exist in a
 
 
 struct MurkaColor {
-    double r = 0, g = 0, b = 0;
+    double r = 0, g = 0, b = 0, a = 1;
     
     MurkaColor(float R, float G, float B) {r = R; g = G; b = B; }
-    
+    MurkaColor(float R, float G, float B, float A) {r = R; g = G; b = B; a = A;}
+
     MurkaColor operator *(int multiplier) {
-        return MurkaColor(r * float(multiplier), g * float(multiplier), b * float(multiplier));
+        return MurkaColor(r * float(multiplier), g * float(multiplier), b * float(multiplier), a * float(multiplier));
     }
 
     MurkaColor operator *(float multiplier) {
-        return MurkaColor(r * multiplier, g * multiplier, b * multiplier);
+        return MurkaColor(r * multiplier, g * multiplier, b * multiplier, a * multiplier);
     }
 
 #ifdef MURKA_OF
-    operator ofColor() { return ofColor(r, g, b); }
+    operator ofColor() { return ofColor(r, g, b, a); }
 #endif
 };
 

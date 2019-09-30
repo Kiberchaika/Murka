@@ -101,6 +101,10 @@ public:
             auto font = context.getParagraphFont();
             
 #ifdef MURKA_OF
+            ofColor bgColor = params->backgroundColor * 255;
+            ofFill();
+            ofSetColor(bgColor);
+            ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
             ofColor fgColor = params->customColor ? params->color * 255 : context.getWidgetForegroundColor() * 255;
             ofSetColor(fgColor);
             if (params->alignment == TEXT_LEFT) {
@@ -132,6 +136,7 @@ public:
         TextAlignment alignment = TEXT_LEFT;
         
         MurkaColor color = {0.98, 0.98, 0.98};
+        MurkaColor backgroundColor = {0., 0., 0., 0.};
         
         bool customColor = false;
         
@@ -141,6 +146,13 @@ public:
             label = labelText;
             color = color_;
             customColor = true;
+        } // a convenience initializer
+        
+        Parameters(std::string labelText, MurkaColor color_, MurkaColor backgroundColor_) {
+            label = labelText;
+            color = color_;
+            customColor = true;
+            backgroundColor = backgroundColor_;
         } // a convenience initializer
         
         Parameters(std::string labelText, TextAlignment align) {

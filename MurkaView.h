@@ -262,6 +262,7 @@ public:
 
 };
 
+
 // Immediate mode custom layout
     
 template<typename T>
@@ -278,7 +279,7 @@ typename T::Results drawWidget(MurkaContext &c, typename T::Parameters parameter
     typename T::Results results = typename T::Results();
     
     c.pushContext(widgetHandler);
-    if (c.transformTheRenderIntoThisContextShape()) {
+    if (c.transformTheRenderIntoThisContextShape(c.overlayHolder->disableViewportCrop)) {
         widgetObject->layoutGenerator.restart(((View*)widgetHandler->widgetObjectInternal)->shape/*,  widgetObject->childrenBounds */);
             widgetObject->draw(NULL, &parameters, widgetObject, c, &results);
         
@@ -312,12 +313,12 @@ typename T::Results drawWidget(MurkaContext &c, B* dataToControl, typename T::Pa
     auto widgetHandler = T::getOrCreateImModeWidgetObject(counter, NULL, (View*)c.murkaView, shape);
     auto widgetObject = (View*)widgetHandler->widgetObjectInternal;
     
-    widgetObject->dataTypeName = typeid(dataToControl).name();
+    widgetObject->dataTypeName = typeid(*dataToControl).name();
     
     typename T::Results results;
     
     c.pushContext(widgetHandler);
-    if (c.transformTheRenderIntoThisContextShape()) {
+    if (c.transformTheRenderIntoThisContextShape(c.overlayHolder->disableViewportCrop)) {
     
         widgetObject->layoutGenerator.restart(shape /*, widgetObject->childrenBounds*/);
         widgetObject->draw(dataToControl, &parameters, widgetObject, c, &results);
@@ -356,12 +357,12 @@ typename T::Results drawWidget(MurkaContext &c, B* dataToControl, typename T::Pa
     auto widgetHandler = T::getOrCreateImModeWidgetObject(counter, NULL, (View*)c.murkaView, shapeOffering);
     auto widgetObject = (View*)widgetHandler->widgetObjectInternal;
     
-    widgetObject->dataTypeName = typeid(dataToControl).name();
+    widgetObject->dataTypeName = typeid(*dataToControl).name();
 
     typename T::Results results;
     
     c.pushContext(widgetHandler);
-    if (c.transformTheRenderIntoThisContextShape()) {
+    if (c.transformTheRenderIntoThisContextShape(c.overlayHolder->disableViewportCrop)) {
         
         widgetObject->layoutGenerator.restart(shapeOffering /*, widgetObject->childrenBounds*/);
         widgetObject->draw(dataToControl, &parameters, widgetObject, c, &results);
@@ -390,7 +391,7 @@ typename T::Results drawWidget(MurkaContext &c, typename T::Parameters parameter
     typename T::Results results;
     
     c.pushContext(widgetHandler);
-    if (c.transformTheRenderIntoThisContextShape()) {
+    if (c.transformTheRenderIntoThisContextShape(c.overlayHolder->disableViewportCrop)) {
         
         widgetObject->layoutGenerator.restart(shapeOffering /*, widgetObject->childrenBounds*/);
         widgetObject->draw(NULL, &parameters, widgetObject, c, &results);
