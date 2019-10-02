@@ -9,7 +9,7 @@
 namespace murka {
 
 struct MurkaEventState {
-    bool mouseUp = false, mouseDown = false, mouseDragged = false, mouseDownPressed = false;
+    bool mouseReleased = false, mouseDown = false, mouseDragged = false, mouseDownPressed = false;
     MurkaPoint mouseDraggedStartPoint = {0, 0}; // TODO: how?
     MurkaPoint mousePosition = {0, 0};
     MurkaPoint mouseDelta = {0, 0};
@@ -82,7 +82,7 @@ public:
     
     void mouseReleased(ofMouseEventArgs & args) {
         eventState.mousePosition = {args.x, args.y};
-        eventState.mouseUp = true;
+        eventState.mouseReleased = true;
         eventState.mouseDown = false;
     }
     

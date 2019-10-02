@@ -43,6 +43,10 @@ struct MurkaPoint {
     MurkaPoint operator + (MurkaPoint p2) {
         return {x + p2.x, y + p2.y};
     }
+    
+#ifdef MURKA_OF
+    operator ofPoint() { return ofPoint(x, y); }
+#endif
 };
 
 struct MurkaShape {
@@ -71,6 +75,14 @@ struct MurkaShape {
             (size.y != b.size.y)) {
             return true;
         } else return false;
+    }
+    
+    MurkaShape operator / (float b) {
+        return {position.x / b, position.y / b, size.x / b, size.y / b};
+    }
+    
+    MurkaShape operator / (MurkaPoint b) {
+        return {position.x / b.x, position.y / b.y, size.x / b.x, size.y / b.y};
     }
     
 	MurkaShape() {
