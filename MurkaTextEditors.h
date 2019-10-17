@@ -182,14 +182,14 @@ public:
             recalcGlyphLengths(displayString, &context);
             
             float offset = 10;
-            font->drawString(displayString, 10 - managedOffset, 22);
+            font->drawString(displayString, 10 - managedOffset, context.getSize().y / 2  + font->getLineHeight() / 4);
             
             bool didSetCursorPosition = false;
             float cursorPositionInPixels = 0;
             float sumGlyphWidths;
             for (int i = 0; i < displayString.size(); i++) {
                 
-                MurkaShape glyphShape = MurkaShape(offset - managedOffset, 0, currentGlyphLengths[i], 30);
+                MurkaShape glyphShape = MurkaShape(offset - managedOffset, 0, currentGlyphLengths[i], context.getSize().y);
                 
                 
                 bool insideGlyph = glyphShape.inside(context.mousePosition);
@@ -445,3 +445,4 @@ public:
 };
 
 }
+

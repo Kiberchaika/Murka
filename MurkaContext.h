@@ -7,6 +7,7 @@
 #include "MurkaTypes.h"
 #include "MurkaAssets.h"
 #include "MurkaOverlayHolder.h"
+#include "Murka.h"
 
 // Here's the global typedefs for cross-render functionality
 
@@ -168,12 +169,21 @@ public:
 
     double getRunningTime() const {return runningTime;}
     
+    void setUIScale(float scale) {
+        uiScale = scale;
+    }
+    
+    float getUIScale() {
+        return uiScale;
+    }
+    
 private:
     int imCounter = 0; // the counter that we use to distinguish new widgets from the ones we
     // want to reuse in IM mode.
 
     double runningTime;
 
+    float uiScale;
 };
 
 }

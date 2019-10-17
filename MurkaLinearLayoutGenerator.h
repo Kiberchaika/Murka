@@ -75,7 +75,7 @@ public:
     
     bool extendingVertically = true;
     
-	void restart(MurkaShape externalBounds) {
+	void restart(MurkaShape externalBounds, float uiScale) {
         
         currentShapeStructure.clear();
         setLayoutStructure({1.0});
@@ -84,7 +84,7 @@ public:
         availableShape = externalBounds;
         
         linearOffset = 0;
-        setLayoutLineHeight(MURKA_DEFAULT_AUTOLAYOUT_LINE_HEIGHT);
+        setLayoutLineHeight(MURKA_DEFAULT_AUTOLAYOUT_LINE_HEIGHT * uiScale);
         linearOffset -= currentLineHeight;
         
         cursorX = 0;
@@ -136,7 +136,7 @@ public:
     }
 
     // Going to call this first
-    MurkaShape getNextShapeOffering() {
+    MurkaShape getNextShapeOffering(float uiScale) {
 //        ofLog() << "line X: " << cursorX;
 //        ofLog() << "line Y: " << cursorY;
         
@@ -155,9 +155,9 @@ public:
             }
             if (descriptor.kind == Value) {
                 resultingShape.position.x = remainingLineStart;
-                resultingShape.size.x = descriptor.value;
+                resultingShape.size.x = descriptor.value * uiScale;
                 
-                remainingLineStart += descriptor.value; // increasing the "cursor" X position by the widget width
+                remainingLineStart += descriptor.value * uiScale; // increasing the "cursor" X position by the widget width
             }
         }
 
@@ -171,9 +171,9 @@ public:
             }
             if (descriptor.kind == Value) {
                 resultingShape.position.x = remainingLineEnd - descriptor.value;
-                resultingShape.size.x = descriptor.value;
+                resultingShape.size.x = descriptor.value * uiScale;
                 
-                remainingLineEnd -= descriptor.value; // increasing the "cursor" X position by the widget width
+                remainingLineEnd -= descriptor.value * uiScale; // increasing the "cursor" X position by the widget width
             }
         }
 
@@ -182,10 +182,10 @@ public:
             nextLine();
         }
 
-        resultingShape.position.x += spacing;
-        resultingShape.position.y += spacing;
-        resultingShape.size.x -= spacing * 2;
-        resultingShape.size.y -= spacing * 2;
+        resultingShape.position.x += spacing * uiScale;
+        resultingShape.position.y += spacing * uiScale;
+        resultingShape.size.x -= (spacing * 2) * uiScale;
+        resultingShape.size.y -= (spacing * 2) * uiScale;
 
         return resultingShape;
     }

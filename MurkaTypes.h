@@ -77,6 +77,10 @@ struct MurkaShape {
         } else return false;
     }
     
+    MurkaShape operator * (float b) {
+        return {position.x * b, position.y * b, size.x * b, size.y * b};
+    }
+    
     MurkaShape operator / (float b) {
         return {position.x / b, position.y / b, size.x / b, size.y / b};
     }

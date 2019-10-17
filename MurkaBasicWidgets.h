@@ -283,7 +283,8 @@ public:
             }
             
             ofSetColor(255);
-            ofDrawBitmapString(params->label, 0, 0);
+            auto font = context.getMonospaceFont();
+            font->drawString(params->label, 0, font->getLineHeight());
             
             // Drawing symbols to show that we're going to resize this widget
             if ((gonnaResize) && (inside)) {
@@ -469,7 +470,9 @@ public:
             
             
             auto parameters = ((Parameters*)parametersObject);
-            Results& results = castResults();
+            Results* results = (Results*)resultObject;
+            
+            *results = false;
             
             bool inside = context.isHovered();
             Button* thisWidget = (Button*)thisWidgetObject;
@@ -480,10 +483,12 @@ public:
             
             if ((dragging) && (!context.mouseDown)) {
                 dragging = false;
+                
+                *results = true;
             }
             
             if (dragging) {
-                float newValue = context.mousePosition.x / context.currentViewShape.size.x;
+                float newValue = (context.mousePosition.x / context.currentViewShape.size.x) * (parameters->maxValue - parameters->minValue) + parameters->minValue;
                 
                 if (newValue > parameters->maxValue) newValue = parameters->maxValue;
                 if (newValue < parameters->minValue) newValue = parameters->minValue;
@@ -508,7 +513,7 @@ public:
             if (currentValue < parameters->minValue) {
                 currentValue = parameters->minValue;
             }
-            ofDrawRectangle(0, 0, context.getSize().x * ((currentValue - parameters->minValue) / parameters->maxValue), context.getSize().y);
+            ofDrawRectangle(0, 0, context.getSize().x * ((currentValue - parameters->minValue) / (parameters->maxValue - parameters->minValue)), context.getSize().y);
             ofSetColor(80);
             ofNoFill();
             if (inside) {

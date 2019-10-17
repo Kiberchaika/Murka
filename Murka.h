@@ -92,6 +92,7 @@ public:
         currentContext.currentViewShape.size = ((View*)viewSource->widgetObjectInternal)->shape.size;
         currentContext.murkaView = ((View*)viewSource->widgetObjectInternal);
         currentContext.overlayHolder = this;
+        currentContext.setUIScale(getUIScale());
         
         ((View*)viewSource->widgetObjectInternal)->latestContext = currentContext;
         
@@ -155,7 +156,7 @@ public:
         ((MurkaViewHandler<View>*)widget)->widgetObject->draw(widget->dataToControl, widget->parametersInternal, widget->widgetObjectInternal, currentContext, widget->resultsInternal);
         
         // restarting layout generator
-        ((MurkaViewHandler<View>*)widget)->widgetObject->layoutGenerator.restart(((MurkaViewHandler<View>*)widget)->widgetObject->shape /*, ((View*)widget->widgetObjectInternal)->childrenBounds */);
+        ((MurkaViewHandler<View>*)widget)->widgetObject->layoutGenerator.restart(((MurkaViewHandler<View>*)widget)->widgetObject->shape, getUIScale());
 //        ((View*)widget->widgetObjectInternal)->childrenBounds = {0, 0, 0, 0};
         
         currentContext.transformTheRenderBackFromThisContextShape();
@@ -191,7 +192,7 @@ public:
 #endif
         currentContext.pushContextInternal = [&](MurkaViewHandlerInternal* mvhi) { pushContext(mvhi); };
         currentContext.popContextInternal = [&]() { popContext(); };
-        
+        currentContext.setUIScale(getUIScale());
 
         latestContext = currentContext;
 
@@ -241,7 +242,7 @@ public:
     }
     
     void setLayoutLineHeight(float height) {
-        ((View*)currentContext.murkaView)->layoutGenerator.setLayoutLineHeight(height);
+        ((View*)currentContext.murkaView)->layoutGenerator.setLayoutLineHeight(height * getUIScale());
     }
     
     void addLayoutSpacing(float spacing) {
@@ -251,6 +252,14 @@ public:
     ////////
     //////// Object oriented view heirarchy management
     ////////
+    
+    void clearChildren() {
+        for (auto &i: children) {
+            ((View*)i->widgetObjectInternal)->clearChildren();
+            delete i;
+        }
+        children.clear();
+    }
     
     template <typename Z, class B>
     MurkaViewHandler<Z>* addChildToView(View* parent, MurkaViewInterface<Z>* child, B data, void* parameters, MurkaShape shapeInParentContainer)
@@ -274,6 +283,7 @@ public:
         
         newHandler->widgetObject->dataTypeName = typeid(data).name();
 
+        shapeInParentContainer = shapeInParentContainer * getUIScale();
         
         newHandler->widgetObject->shape = shapeInParentContainer;
         
@@ -321,7 +331,15 @@ public:
     
     
     ///////////////////
-
+    
+    void setUIScale(float newScale) {
+        uiScale = newScale;
+    }
+    
+    float getUIScale() {
+        return uiScale;
+    }
+    
 	View* getRootView() {
 		return (View*)this;
 	}
@@ -336,6 +354,11 @@ public:
 	void mouseReleased(int x, int y, int button);
 
     typedef bool Results;
+
+private:
+    float uiScale = 1;
+
+
 };
 
 }
