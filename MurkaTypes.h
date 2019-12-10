@@ -33,15 +33,42 @@ struct MurkaColor {
 };
 
 struct MurkaPoint {
-	float x, y;
+	float x = 0, y = 0;
 
 	MurkaPoint operator += (MurkaPoint p2) {
 		this->operator=({ x + p2.x, y + p2.y });
         return *this;
 	}
-    
+
+    MurkaPoint operator -= (MurkaPoint p2) {
+        this->operator=({ x - p2.x, y - p2.y });
+        return *this;
+    }
+
     MurkaPoint operator + (MurkaPoint p2) {
         return {x + p2.x, y + p2.y};
+    }
+    
+    MurkaPoint operator - (MurkaPoint p2) {
+        return {x - p2.x, y - p2.y};
+    }
+    
+    MurkaPoint operator * (float multiplier) {
+        return {x * multiplier, y * multiplier};
+    }
+    
+    MurkaPoint operator / (float divider) {
+        return {x / divider, y / divider};
+    }
+    
+    MurkaPoint (float x_, float y_) {
+        x = x_;
+        y = y_;
+    }
+    
+    MurkaPoint () {
+        x = 0;
+        y = 0;
     }
     
 #ifdef MURKA_OF

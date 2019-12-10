@@ -13,6 +13,7 @@ struct MurkaEventState {
     MurkaPoint mouseDraggedStartPoint = {0, 0}; // TODO: how?
     MurkaPoint mousePosition = {0, 0};
     MurkaPoint mouseDelta = {0, 0};
+    MurkaPoint mouseScroll = {0, 0};
     std::vector<int> keyPresses;
     
     MurkaEventState transformedWith(MurkaPoint translatePosition, float scale) {
@@ -21,7 +22,7 @@ struct MurkaEventState {
 //        newState.mouseDraggedStartPoint += translatePosition;
         
         return newState;
-        // TODO: multiplied by scale
+        // TODO: multiplied by scale?
     }
 };
 
@@ -86,7 +87,9 @@ public:
         eventState.mouseDown = false;
     }
     
-    void mouseScrolled(ofMouseEventArgs & args) {}
+    void mouseScrolled(ofMouseEventArgs & args) {
+        eventState.mouseScroll = {args.scrollX, args.scrollY};
+    }
     
     void mouseEntered(ofMouseEventArgs & args) {}
     
