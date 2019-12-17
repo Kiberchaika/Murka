@@ -99,6 +99,9 @@ public:
             // Don't forget that all of this executes at each frame for each
             // widget that is drawn on screen.
             auto font = context.getParagraphFont();
+            if (params->customFont) {
+                font = params->font;
+            }
             
 #ifdef MURKA_OF
             ofColor bgColor = params->backgroundColor * 255;
@@ -142,7 +145,10 @@ public:
         MurkaColor color = {0.98, 0.98, 0.98};
         MurkaColor backgroundColor = {0., 0., 0., 0.};
         
+        FontObject* font;
+        
         bool customColor = false;
+        bool customFont = false;
         
         Parameters() {}
         Parameters(std::string labelText) { label = labelText; } // a convenience initializer
@@ -169,6 +175,45 @@ public:
             alignment = align;
             color = color_;
             customColor = true;
+        } // a convenience initializer
+        
+        // Custom font initializers
+        Parameters(std::string labelText, FontObject* CustomFont) {
+            label = labelText;
+            font = CustomFont;
+            customFont = true;
+        } // a convenience initializer
+        Parameters(std::string labelText, FontObject* CustomFont, MurkaColor color_) {
+            label = labelText;
+            color = color_;
+            customColor = true;
+            font = CustomFont;
+            customFont = true;
+        } // a convenience initializer
+        
+        Parameters(std::string labelText, FontObject* CustomFont, MurkaColor color_, MurkaColor backgroundColor_) {
+            label = labelText;
+            color = color_;
+            customColor = true;
+            backgroundColor = backgroundColor_;
+            font = CustomFont;
+            customFont = true;
+        } // a convenience initializer
+        
+        Parameters(std::string labelText, FontObject* CustomFont, TextAlignment align) {
+            label = labelText;
+            alignment = align;
+            font = CustomFont;
+            customFont = true;
+        } // a convenience initializer
+        
+        Parameters(std::string labelText, FontObject* CustomFont, MurkaColor color_, TextAlignment align) {
+            label = labelText;
+            alignment = align;
+            color = color_;
+            customColor = true;
+            font = CustomFont;
+            customFont = true;
         } // a convenience initializer
     };
     
@@ -343,6 +388,8 @@ public:
         float minimumWidth = 200, minimumHeight = 200;
         
         Parameters() {}
+        Parameters(float R, float G, float B, float A) { r = R; g = G; b = B; a = A; }
+        Parameters(float R, float G, float B, float A, bool Moveable) { r = R; g = G; b = B; a = A; moveable = Moveable;}
         Parameters(float R, float G, float B, const char* Label) { r = R; g = G; b = B; label = Label; }
         Parameters(const char* Label, bool Moveable) { label = Label; moveable = Moveable;}
         Parameters(const char* Label, bool Moveable, float minWidth, float minHeight) { label = Label; moveable = Moveable; minimumWidth = minWidth; minimumHeight = minHeight; }

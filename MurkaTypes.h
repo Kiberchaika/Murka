@@ -61,6 +61,10 @@ struct MurkaPoint {
         return {x / divider, y / divider};
     }
     
+    bool operator== (MurkaPoint right) {
+        return ((x == right.x) && (y == right.y));
+    }
+    
     MurkaPoint (float x_, float y_) {
         x = x_;
         y = y_;
@@ -126,4 +130,12 @@ struct MurkaShape {
 		size.x = width;
 		size.y = height;
 	}
+
+    template<typename Number>
+    MurkaShape(Number x, Number y, Number width, Number height) {
+        position.x = x;
+        position.y = y;
+        size.x = width;
+        size.y = height;
+    }
 };

@@ -53,6 +53,11 @@ public:
 
     //
     
+    MurkaPoint getPosition() const {
+        return {currentViewShape.position.x + parentContext->currentViewShape.position.x,
+            currentViewShape.position.y + parentContext->currentViewShape.position.y};
+    }
+    
     MurkaPoint getSize() const {
         return currentViewShape.size;
     }
