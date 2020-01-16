@@ -61,7 +61,7 @@ struct MurkaPoint {
         return {x / divider, y / divider};
     }
     
-    bool operator== (MurkaPoint right) {
+    bool operator== (MurkaPoint & right) {
         return ((x == right.x) && (y == right.y));
     }
     
@@ -73,6 +73,10 @@ struct MurkaPoint {
     MurkaPoint () {
         x = 0;
         y = 0;
+    }
+    
+    float length() const  {
+        return sqrt(pow(x, 2) + pow(y, 2));
     }
     
 #ifdef MURKA_OF
@@ -112,6 +116,10 @@ struct MurkaShape {
         return {position.x * b, position.y * b, size.x * b, size.y * b};
     }
     
+    MurkaShape operator * (MurkaPoint b) {
+        return {position.x * b.x, position.y * b.y, size.x * b.x, size.y * b.y};
+    }
+    
     MurkaShape operator / (float b) {
         return {position.x / b, position.y / b, size.x / b, size.y / b};
     }
@@ -123,6 +131,11 @@ struct MurkaShape {
 	MurkaShape() {
 
 	}
+    
+    MurkaShape(MurkaPoint Position, MurkaPoint Size) {
+        position = Position;
+        size = Size;
+    }
 
 	MurkaShape(float x, float y, float width, float height) {
 		position.x = x;

@@ -263,7 +263,7 @@ public:
             auto font = context.getParagraphFont();
             font->drawString(params->label, 30, 22);
             
-            if (inside && context.mouseDownPressed) {
+            if (inside && context.mouseDownPressed[0]) {
                 *booleanToControl = !*booleanToControl;
                 lastTimeClicked = context.getRunningTime();
             }
@@ -345,13 +345,13 @@ public:
             // Moving & resizing logic
             
             if (params->moveable)
-            if (inside && context.mouseDownPressed && (!thisWidget->dragging) && (!thisWidget->resizing)) {
+            if (inside && context.mouseDownPressed[0] && (!thisWidget->dragging) && (!thisWidget->resizing)) {
                 if (gonnaResize) thisWidget->resizing = true;
                 else thisWidget->dragging = true;
             }
             
             if (((thisWidget->dragging) || (thisWidget->resizing))  &&
-                !context.mouseDown) {
+                !context.mouseDown[0]) {
                 thisWidget->dragging = false;
                 thisWidget->resizing = false;
             }
@@ -421,7 +421,7 @@ public:
              Button* thisWidget = (Button*)thisWidgetObject;
             
 
-             if ((context.mouseDownPressed) && (context.isHovered())) {
+             if ((context.mouseDownPressed[0]) && (context.isHovered())) {
                 castedResults = true;
                 lastTimeClicked = context.getRunningTime();
              } else castedResults = false;
@@ -524,11 +524,11 @@ public:
             bool inside = context.isHovered();
             Button* thisWidget = (Button*)thisWidgetObject;
             
-            if ((context.mouseDownPressed) && (context.isHovered())) {
+            if ((context.mouseDownPressed[0]) && (context.isHovered())) {
                 dragging = true;
             }
             
-            if ((dragging) && (!context.mouseDown)) {
+            if ((dragging) && (!context.mouseDown[0])) {
                 dragging = false;
                 
                 *results = true;

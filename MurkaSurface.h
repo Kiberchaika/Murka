@@ -12,7 +12,7 @@ public:
         
     }
     
-    struct DragContext {
+    struct GestureContext {
         float deltaX = 0., deltaY = 0.;
         float startX, startY;
         bool panActive = false;
@@ -29,9 +29,31 @@ public:
         bool inside = c.isHovered();
         
         auto transformedCursorPosition = getTransformedPointerPosition(c.mousePosition); // TODO: change this for multitouch
+        
+        if ((c.trackpadGesturePerformed) && (c.mouseScroll.length() > 0)) {
+            performingMultitouchZoomNow = true;
+        }
+        
+#ifdef MURKA_OF
+        float currentTime = ofGetElapsedTimef(); // time in seconds
+#endif
+        
+        if (c.mouseScroll.length() != 0.0) {
+            lastMouseScrollTime = currentTime;
+        }
+        
+        if ((performingMultitouchZoomNow) && ((currentTime - lastMouseScrollTime) > 0.2)) { // if it's more than 0.2 secs till the last scroll info
+            ofLog() << "STOPPD PERFORMING MULTITOUCH; " << c.mouseScroll.y << " : " << c.mouseScroll.x;
+            performingMultitouchZoomNow = false; // this means the trackpad gesture stopped. Need this due to how trackpad zoom acceleration works on OSX
+        }
+        
+        if (c.mouseReleased[0]) {
+            ofLog() << "left mouse button released...";
+            surface.pointerUpCallback(0, transformedCursorPosition);
+        }
 
-        if (c.mouseDownPressed && inside) {
-            pointerDownCallback();
+        if (c.mouseDownPressed[0] && inside) {
+            surface.pointerDownCallback(0, transformedCursorPosition);
             
             float time = ofGetElapsedTimef();
             float timeSinceLastClick = time - lastClickTime;
@@ -39,7 +61,7 @@ public:
             
             bool doubleClick = false;
             if (timeSinceLastClick < DOUBLECLICK_TIME) {
-                doubleClickCallback();
+                surface.doubleClickCallback(transformedCursorPosition);
                 doubleClick = true;
             }
             
@@ -49,7 +71,7 @@ public:
                 draggingData.startY = transformedCursorPosition.y;
                 draggingData.panOffsetStart = panOffset;
                 draggingData.screenSpaceStart = c.mousePosition;
-                if (clickShouldStartPanning()) {
+                if (surface.clickShouldStartPanning) {
                     draggingData.panActive = true;
                 } else {
                     draggingData.internalDragCaptureActive = true;
@@ -73,101 +95,100 @@ public:
             draggingData.deltaX = draggingData.startX - transformedCursorPosition.x;
             draggingData.deltaY = draggingData.startY - transformedCursorPosition.y;
             
-            if (!c.mouseDown) {
+            if (!c.mouseDown[0]) {
                 if (draggingData.panActive) {
                     ofLog() << "stopping pan.";
                 }
                 draggingData.panActive = false;
                 draggingData.internalDragCaptureActive = false;
                 
-                pointerUpCallback();
-            } else {
-                dragUpdate(draggingData);
+//                pointerUpCallback(0);
             }
             
             if (draggingData.panActive) {
                 panOffset = draggingData.panOffsetStart + draggingData.widgetSpaceDelta;
+                limitPan();
             }
             
+        }
+        
+        if ((c.pinchMagnification != 0) && (inside)) {
+            zoom(-c.pinchMagnification * 150 * scale, c);
         }
         
         if (((c.mouseScroll.y != 0) ||
             (c.mouseScroll.x != 0)) && inside) {
             // Scrolling somewhere
             
-            if (scrollwheelShouldZoom()) {
-                auto previousScale = scale;
-                
-                scale -= c.mouseScroll.y * zoomSpeed;
-                if (scale < 0.1) scale = 0.1;
-                if (scale > 3.0) scale = 3.0;
-                
-                auto scaleDiff = scale - previousScale;
-                
-                MurkaPoint zoomPosition = {c.getSize().x / 2,
-                                           c.getSize().y / 2};
-                
-                MurkaPoint mouseDiff = {0, 0};
-                
-                MurkaPoint zoomPositionInSurfaceSpaceNow = {(zoomPosition.x + panOffset.x) * scale,
-                    (zoomPosition.y + panOffset.y) * scale
-                };
-                MurkaPoint zoomPositionInSurfaceSpaceBefore = {(zoomPosition.x + panOffset.x) * previousScale,
-                    (zoomPosition.y + panOffset.y) * previousScale
-                };
-
-                mouseDiff = zoomPositionInSurfaceSpaceNow - zoomPositionInSurfaceSpaceBefore;
-                
-                if (scaleDiff != 0.0) {
-                    MurkaPoint zoomTargetPoint = MurkaPoint(c.mousePosition.x + panOffset.x,
-                                                            c.mousePosition.y + panOffset.y) / previousScale;
-
-                    panOffset += MurkaPoint(zoomTargetPoint.x,
-                                            zoomTargetPoint.y) * scaleDiff;
-                    limitPan(); // probably should limit zoom/scale in relation to pan too, not only pan
+            if (!performingMultitouchZoomNow) { // checking if this was trackpad gesture
+//                ofLog() << "no multitouch.";
+                if (surface.scrollwheelShouldZoom) {
+                    zoom(c.mouseScroll.y, c);
+                } else
+                if (surface.scrollwheelShouldPan) {
+                    panOffset -= MurkaPoint(c.mouseScroll.x, c.mouseScroll.y);
+                    limitPan();
                 }
-            } else
-            if (scrollwheelShouldPan()) {
-                panOffset -= MurkaPoint(c.mouseScroll.x, c.mouseScroll.y);
+            } else { // this was a trackpad swipe gesture, we should def pan then
+                panOffset -= MurkaPoint(c.mouseScroll.x, c.mouseScroll.y) * 3;
                 limitPan();
             }
         }
          
         
         latestContextDebug = c;
+        surface = SurfaceControl();
+    }
+    
+    void zoom(float zoomScale, const MurkaContext & c) {
+        auto previousScale = scale;
+        
+        scale -= zoomScale * zoomSpeed;
+        if (scale < 0.1) scale = 0.1;
+        if (scale > 3.0) scale = 3.0;
+        
+        auto scaleDiff = scale - previousScale;
+        
+        MurkaPoint zoomPosition = {c.getSize().x / 2,
+                                   c.getSize().y / 2};
+        
+        MurkaPoint mouseDiff = {0, 0};
+        
+        MurkaPoint zoomPositionInSurfaceSpaceNow = {(zoomPosition.x + panOffset.x) * scale,
+            (zoomPosition.y + panOffset.y) * scale
+        };
+        MurkaPoint zoomPositionInSurfaceSpaceBefore = {(zoomPosition.x + panOffset.x) * previousScale,
+            (zoomPosition.y + panOffset.y) * previousScale
+        };
+
+        mouseDiff = zoomPositionInSurfaceSpaceNow - zoomPositionInSurfaceSpaceBefore;
+        
+        if (scaleDiff != 0.0) {
+            MurkaPoint zoomTargetPoint = MurkaPoint(c.mousePosition.x + panOffset.x,
+                                                    c.mousePosition.y + panOffset.y) / previousScale;
+
+            panOffset += MurkaPoint(zoomTargetPoint.x,
+                                    zoomTargetPoint.y) * scaleDiff;
+            limitPan(); // probably should limit zoom/scale in relation to pan too, not only pan
+        }
     }
     
     MurkaContext latestContextDebug;
-    
-    virtual bool scrollwheelShouldZoom() {
-        return false;
-    }
 
-    virtual bool scrollwheelShouldPan() {
-        return false;
-    }
+    // Surface parameters
     
-    virtual bool clickShouldStartPanning() {
-        return true;
-    }
-
-    virtual void pointerDownCallback() {
-        ofLog() << "clickd from base class";
-    }
-    
-    virtual bool isAnythingSelected() {};
-    
-    virtual void pointerUpCallback() {
+    struct SurfaceControl {
+        bool scrollwheelShouldZoom = false;
+        bool scrollwheelShouldPan = false;
+        bool clickShouldStartPanning = false;
         
-    }
+        std::function<void(MurkaPoint)> doubleClickCallback = [](MurkaPoint p){};
+        std::function<void(int, MurkaPoint)> pointerDownCallback = [](int button, MurkaPoint p){};
+        std::function<void(int, MurkaPoint)> pointerUpCallback = [](int button, MurkaPoint p){};
+    };
     
-    virtual void dragUpdate(DragContext & c) {
-        
-    }
+    SurfaceControl surface;
     
-    virtual void doubleClickCallback() {
-        ofLog() << "doubleclick!";
-    }
     
     MurkaPoint getTransformedPointerPosition(MurkaPoint pointer) {
         return {(pointer.x + panOffset.x) / scale,
@@ -200,7 +221,7 @@ public:
     }
     
     void drawDebugGrid() {
-            ofSetColor(130);
+            ofSetColor(80);
             ofSetLineWidth(4);
             ofDrawLine(-10000, 0 - panOffset.y, 10000, 0 - panOffset.y);
             ofDrawLine(0 - panOffset.x, -10000, 0 - panOffset.x, 10000);
@@ -248,6 +269,7 @@ public:
     //        ofDrawBitmapString("scale: " + ofToString(scale), 50, 50);
         }
     
+    bool performingMultitouchZoomNow = false;
     
     MurkaPoint panOffset = {0, 0};
     float scale = 1.0;
@@ -255,6 +277,7 @@ public:
     float zoomSpeed = 0.01;
     
     double lastClickTime = 0; // TODO: this, but for multitouch
+    double lastMouseScrollTime = 0;
     
-    DragContext draggingData;
+    GestureContext draggingData;
 };

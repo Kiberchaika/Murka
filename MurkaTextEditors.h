@@ -309,6 +309,8 @@ public:
     }
     
     void updateExternalData(void* dataToControl, bool clamp = false) {
+            ofLog() << "datatype: " << dataTypeName;
+            ofLog() << "stringtype: " << typeid(std::string*).name();
             if (dataTypeName == typeid(std::string*).name()) {
                 *((std::string*)dataToControl) = displayString;
             }

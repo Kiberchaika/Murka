@@ -4,16 +4,29 @@
 
 #ifdef MURKA_OF
 #include "ofMain.h"
+
+#ifdef TARGET_OSX
+#include "mac/ofxMacTrackpad.h"
 #endif
+
+#endif
+
+
 
 namespace murka {
 
 struct MurkaEventState {
-    bool mouseReleased = false, mouseDown = false, mouseDragged = false, mouseDownPressed = false;
+    bool mouseReleased[3] = {false, false, false},
+         mouseDown[3] = {false, false, false},
+         mouseDragged[3] = {false, false, false},
+         mouseDownPressed[3] = {false, false, false};
     MurkaPoint mouseDraggedStartPoint = {0, 0}; // TODO: how?
     MurkaPoint mousePosition = {0, 0};
     MurkaPoint mouseDelta = {0, 0};
     MurkaPoint mouseScroll = {0, 0};
+    MurkaPoint swipeDelta = {0, 0};
+    bool trackpadGesturePerformed = false;
+    float pinchMagnification = 0;
     std::vector<int> keyPresses;
     
     MurkaEventState transformedWith(MurkaPoint translatePosition, float scale) {
@@ -36,6 +49,18 @@ public:
         ofRegisterKeyEvents(this);
         ofRegisterMouseEvents(this);
         ofRegisterTouchEvents(this);
+        
+#ifdef TARGET_OSX
+        ofAddListener(ofxMacTrackpad::pinch, this, &MurkaInputEventsRegister::didPinch);
+        ofAddListener(ofxMacTrackpad::swipe, this, &MurkaInputEventsRegister::didSwipe);
+        ofAddListener(ofxMacTrackpad::multitouch, this, &MurkaInputEventsRegister::didMultitouch);
+
+        ofxMacTrackpad::startListening();
+        
+        ofSetBackgroundAuto(true);
+
+#endif
+
     }
     
     MurkaEventState eventState;
@@ -43,11 +68,15 @@ public:
     void clearEvents() {
         // mouse persistence
         MurkaPoint mousePosition = eventState.mousePosition;
-        bool mouseDown = eventState.mouseDown;
+        bool mouseDown[3] = {eventState.mouseDown[0],
+                             eventState.mouseDown[1],
+                             eventState.mouseDown[2]};
         
         eventState = MurkaEventState();
         eventState.mousePosition = mousePosition;
-        eventState.mouseDown = mouseDown;
+        eventState.mouseDown[0] = mouseDown[0];
+        eventState.mouseDown[1] = mouseDown[1];
+        eventState.mouseDown[2] = mouseDown[2];
     }
     
 
@@ -60,10 +89,24 @@ public:
     void keyReleased(ofKeyEventArgs & args) {
     }
     
+    // Trackpad events
+    
+    void didPinch(ofxMacTrackpad::PinchArg &arg) {
+        eventState.pinchMagnification = arg.magnification;
+    }
+    
+    void didSwipe(ofxMacTrackpad::SwipeArg &arg) {
+        eventState.swipeDelta = {arg.delta.x, arg.delta.y};
+    }
+
+    void didMultitouch(ofxMacTrackpad::TouchArg &arg) {
+        eventState.trackpadGesturePerformed = true;
+    }
+
     // Mouse events
     
     void mouseDragged(ofMouseEventArgs & args) {
-        eventState.mouseDragged = true;
+        eventState.mouseDragged[args.button] = true;
         eventState.mouseDelta = {eventState.mousePosition.x - args.x,
                                  eventState.mousePosition.y - args.y};
         eventState.mousePosition = {args.x, args.y};
@@ -77,21 +120,31 @@ public:
     
     void mousePressed(ofMouseEventArgs & args) {
         eventState.mousePosition = {args.x, args.y};
-        eventState.mouseDown = true;
-        eventState.mouseDownPressed = true;
+        eventState.mouseDown[args.button] = true;
+        eventState.mouseDownPressed[args.button] = true;
     }
     
     void mouseReleased(ofMouseEventArgs & args) {
         eventState.mousePosition = {args.x, args.y};
-        eventState.mouseReleased = true;
-        eventState.mouseDown = false;
+        eventState.mouseReleased[args.button] = true;
+        eventState.mouseDown[args.button] = false;
     }
     
     void mouseScrolled(ofMouseEventArgs & args) {
         eventState.mouseScroll = {args.scrollX, args.scrollY};
     }
     
-    void mouseEntered(ofMouseEventArgs & args) {}
+    void mouseEntered(ofMouseEventArgs & args) {
+#ifdef MURKA_OF
+
+                
+#ifdef TARGET_OSX
+        ofxMacTrackpad::startListening();
+#endif
+        
+        
+#endif
+    }
     
     void mouseExited(ofMouseEventArgs & args) {}
     
