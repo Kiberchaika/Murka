@@ -91,7 +91,8 @@ public:
     
     // Trackpad events
     
-    void didPinch(ofxMacTrackpad::PinchArg &arg) {
+#ifdef TARGET_OSX
+	void didPinch(ofxMacTrackpad::PinchArg &arg) {
         eventState.pinchMagnification = arg.magnification;
     }
     
@@ -102,6 +103,7 @@ public:
     void didMultitouch(ofxMacTrackpad::TouchArg &arg) {
         eventState.trackpadGesturePerformed = true;
     }
+#endif
 
     // Mouse events
     
