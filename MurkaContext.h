@@ -77,10 +77,22 @@ public:
         overlayHolder->addOverlay(func, object);
     }
     
-    MurkaShape getCroppedViewport(MurkaShape parent, MurkaShape view) const {
-        MurkaPoint pos = {parent.position.x + view.position.x, parent.position.y + view.position.y};
-        MurkaPoint size = {std::min(view.size.x, parent.size.x - view.position.x), std::min(view.size.y, parent.size.y - view.position.y)};
-        return MurkaShape(pos.x, pos.y, size.x, size.y);
+    std::pair<MurkaShape, MurkaPoint> getCroppedViewport(MurkaShape parent, MurkaShape view) const {
+        MurkaPoint pos = {std::max(parent.position.x + view.position.x, parent.position.x),
+                          std::max(parent.position.y + view.position.y, parent.position.y)};
+        MurkaPoint negativePosition = {view.position.x < 0 ? view.position.x : 0,
+                                       view.position.y < 0 ? view.position.y : 0};
+        MurkaPoint size = {std::min(view.size.x + negativePosition.x, parent.size.x - view.position.x),
+                           std::min(view.size.y + negativePosition.y, parent.size.y - view.position.y)};
+        
+        if ((view.position.x > parent.size.x) ||
+            (view.position.y > parent.size.y) ||
+            (view.position.x < 0 - view.size.x) ||
+            (view.position.y < 0 - view.size.y)) {
+            return std::make_pair(MurkaShape(0,0,0,0), MurkaPoint(0, 0));
+        }
+
+        return std::make_pair(MurkaShape(pos.x, pos.y, size.x, size.y), negativePosition);
     }
     
     // Utility function to transform the render into the shape of this context.
@@ -91,7 +103,9 @@ public:
         relativeShape.position.x -= parentContext->currentViewShape.position.x;
         relativeShape.position.y -= parentContext->currentViewShape.position.y;
         
-        auto viewport = getCroppedViewport(parentContext->currentViewShape, relativeShape);
+        auto croppedViewport = getCroppedViewport(parentContext->currentViewShape, relativeShape);
+        auto viewport = croppedViewport.first;
+        auto offset = croppedViewport.second;
         
         if (noCrop) {
             viewport = relativeShape;
@@ -103,14 +117,13 @@ public:
             return false;
         }
 #ifdef MURKA_OF
-//        ofLog() << "pushed matrix";
         
         ofPushView();
         ofViewport(viewport.position.x, viewport.position.y, viewport.size.x, viewport.size.y);
         ofSetupScreen();
-        
-//        ofPushMatrix();
-//        ofTranslate(currentViewShape.position.x, currentViewShape.position.y);
+        ofPushMatrix();
+        ofTranslate(offset.x, offset.y); // this is needed to crop the
+        // views that are only partly visible
 #endif
         
         return true;
@@ -118,10 +131,9 @@ public:
     
     void transformTheRenderBackFromThisContextShape() const {
 #ifdef MURKA_OF
-//        ofLog() << "popped matrix";
         
+        ofPopMatrix();
         ofPopView();
-//        ofPopMatrix();
 #endif
     }
     

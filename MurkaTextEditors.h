@@ -73,13 +73,13 @@ public:
 
             // text editing logic
             
-            if (context.mouseDownPressed) {
+            if (context.mouseDownPressed[0]) {
                 if (inside) {
                     activated = true;
                 } else activated = false;
             }
 
-            if (inside && context.mouseDownPressed && (!thisWidget->dragging)) {
+            if (inside && context.mouseDownPressed[0] && (!thisWidget->dragging)) {
                 draggingNubmerIndex = highlightedNumber;
                 std::string numberString = ofToString(*numberData, params->floatPrecision);
                 if (draggingNubmerIndex < dotIndex) {
@@ -90,7 +90,7 @@ public:
                 dragging = true;
             }
                 
-            if (thisWidget->dragging  && !context.mouseDown) {
+            if (thisWidget->dragging  && !context.mouseDown[0]) {
                 thisWidget->dragging = false;
             }
 
@@ -197,7 +197,7 @@ public:
                 //                    ofSetColor(insideGlyph ? fgColor : fgColor / 2);
                 //                    ofDrawRectangle(offset, 0, currentGlyphLengths[i], 30);
                 //                    ofFill();
-                if ((insideGlyph) && (context.mouseDownPressed)) {
+                if ((insideGlyph) && (context.mouseDownPressed[0])) {
                     if (((context.mousePosition.x - offset) / currentGlyphLengths[i]) < 0.5) {
                         cursorPosition = i;
                         didSetCursorPosition = true;
@@ -213,7 +213,7 @@ public:
             }
             sumGlyphWidths = offset;
             
-            if ((inside) && (context.mouseDownPressed) && (!didSetCursorPosition)) {
+            if ((inside) && (context.mouseDownPressed[0]) && (!didSetCursorPosition)) {
 //                ofLog() << "didn't set cursor position";
                 cursorPosition = displayString.size();
             }
@@ -244,7 +244,7 @@ public:
             
 #endif
             // activation & deactivation
-            if (context.mouseDownPressed) {
+            if (context.mouseDownPressed[0]) {
                 if (inside) {
                     activated = true;
                     
@@ -297,7 +297,7 @@ public:
             // Deactivating the widget and updating the data
             
             if (activated)
-            if ((enterPressed) || (context.mouseDownPressed && !inside)) {
+            if ((enterPressed) || (context.mouseDownPressed[0] && !inside)) {
                 activated = false;
                 
                 updateExternalData(dataToControl, params->clampNumber);

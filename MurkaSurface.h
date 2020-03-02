@@ -48,7 +48,6 @@ public:
         }
         
         if (c.mouseReleased[0]) {
-            ofLog() << "left mouse button released...";
             surface.pointerUpCallback(0, transformedCursorPosition);
         }
 
@@ -59,10 +58,8 @@ public:
             float timeSinceLastClick = time - lastClickTime;
             lastClickTime = time;
             
-            bool doubleClick = false;
             if (timeSinceLastClick < DOUBLECLICK_TIME) {
                 surface.doubleClickCallback(transformedCursorPosition);
-                doubleClick = true;
             }
             
             
