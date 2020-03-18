@@ -61,16 +61,14 @@ struct MurkaPoint {
         return {x / divider, y / divider};
     }
     
-#ifndef TARGET_WIN32
     bool operator== (MurkaPoint & right) {
         return ((x == right.x) && (y == right.y));
     }
 
 	
-	const bool operator== (const MurkaPoint right) {
+	bool operator== (const MurkaPoint right) const {
 		return ((x == right.x) && (y == right.y));
 	}
-#endif
 	
 
     MurkaPoint (float x_, float y_) {
