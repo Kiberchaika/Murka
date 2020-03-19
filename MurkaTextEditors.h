@@ -170,6 +170,7 @@ public:
             ofColor fgColor = context.getWidgetForegroundColor() * 255;
             
             if (params->drawBounds) {
+                ofPushStyle();
                 ofFill();
                 ofSetColor(bgColor);
                 ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
@@ -177,6 +178,7 @@ public:
                 ofSetColor(inside ? fgColor : fgColor / 2);
                 if (activated) ofSetColor(fgColor * 1.2);
                 ofDrawRectangle(1, 1, context.getSize().x-2, context.getSize().y-2);
+                ofPopStyle();
             }
             
             recalcGlyphLengths(displayString, &context);
