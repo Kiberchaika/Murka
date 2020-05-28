@@ -264,9 +264,7 @@ public:
 
                     auto selectionShape = returnSelectionVisualShape();
                     ofSetColor(120, 120, 120, 255);
-//                    ofDrawCircle(10 - cameraPanInsideWidget + selectionShape.x(), 0, 5);
-//                    ofSetColor(200, 30, 30, 120);
-                    ofDrawRectangle(10 - cameraPanInsideWidget + selectionShape.x(), 5, selectionShape.width(), context.getSize().y - 15);
+                    ofDrawRectangle(10 - cameraPanInsideWidget + selectionShape.x(), 4, selectionShape.width(), context.getSize().y - 8);
                 }
                 
                 ofNoFill();
