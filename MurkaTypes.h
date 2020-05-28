@@ -138,6 +138,11 @@ struct MurkaShape {
 
 	}
     
+    float& x () {return position.x; }
+    float& y () {return position.y; }
+    float& width () { return size.x; }
+    float& height () { return size.y; }
+    
     MurkaShape(MurkaPoint Position, MurkaPoint Size) {
         position = Position;
         size = Size;

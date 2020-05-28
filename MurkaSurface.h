@@ -43,7 +43,6 @@ public:
         }
         
         if ((performingMultitouchZoomNow) && ((currentTime - lastMouseScrollTime) > 0.2)) { // if it's more than 0.2 secs till the last scroll info
-            ofLog() << "STOPPD PERFORMING MULTITOUCH; " << c.mouseScroll.y << " : " << c.mouseScroll.x;
             performingMultitouchZoomNow = false; // this means the trackpad gesture stopped. Need this due to how trackpad zoom acceleration works on OSX
         }
         
@@ -94,7 +93,7 @@ public:
             
             if (!c.mouseDown[0]) {
                 if (draggingData.panActive) {
-                    ofLog() << "stopping pan.";
+//                    ofLog() << "stopping pan.";
                 }
                 draggingData.panActive = false;
                 draggingData.internalDragCaptureActive = false;
