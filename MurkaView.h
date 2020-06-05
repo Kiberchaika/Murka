@@ -15,6 +15,8 @@ typedef std::function<void (void* dataToControl,
                             MurkaContext & context,
                             void* resultObject)> viewDrawFunction;
 
+#define MURKA_VIEW_DRAW_FUNCTION void draw(void* dataToControl, void* parametersObject, void* thisWidgetObject, MurkaContext & context, void* resultObject)
+
 // View heirarchy
 
 class View {
@@ -132,14 +134,18 @@ public:
         return new View();
     }
     
-    viewDrawFunction draw = [](void* dataToControl,
-                               void* parametersObject,
-                               void* thisWidgetObject,
-                            MurkaContext & context,
-                               void* resultObject) {
+//    viewDrawFunction draw = [](void* dataToControl,
+//                               void* parametersObject,
+//                               void* thisWidgetObject,
+//                            MurkaContext & context,
+//                               void* resultObject) {
+//        ofLog() << "drawing an empty func...";
+//        return new bool(false);
+//    };
+    
+    virtual MURKA_VIEW_DRAW_FUNCTION {
         ofLog() << "drawing an empty func...";
-        return new bool(false);
-    };
+    }
     
     struct Parameters { };
     struct Results {};

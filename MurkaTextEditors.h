@@ -7,108 +7,102 @@ namespace murka {
 
 class DraggableNumberEditor : public MurkaViewInterface<DraggableNumberEditor> {
 public:
-    DraggableNumberEditor() {
-        draw = [&](void* dataToControl,
-                   void* parametersObject,
-                   void* thisWidgetObject,
-                   const MurkaContext & context,
-                   void* resultObject)  {
-            
-            auto params = (Parameters*)parametersObject;
-            DraggableNumberEditor* thisWidget = (DraggableNumberEditor*)thisWidgetObject;
-            
-            bool inside = context.isHovered() * !areChildrenHovered(context);
-            
-            
-            double* numberData = ((double*)dataToControl);
-            
-            context.startViewport();
-            
-            auto font = context.getMonospaceFont();
-            float monospaceSymbolWidth = float(font->stringWidth("x"));
-            int highlightedNumber = (context.mousePosition.x - float(10)) / monospaceSymbolWidth;
+    MURKA_VIEW_DRAW_FUNCTION  {
+        
+        auto params = (Parameters*)parametersObject;
+        DraggableNumberEditor* thisWidget = (DraggableNumberEditor*)thisWidgetObject;
+        
+        bool inside = context.isHovered() * !areChildrenHovered(context);
+        
+        
+        double* numberData = ((double*)dataToControl);
+        
+        context.startViewport();
+        
+        auto font = context.getMonospaceFont();
+        float monospaceSymbolWidth = float(font->stringWidth("x"));
+        int highlightedNumber = (context.mousePosition.x - float(10)) / monospaceSymbolWidth;
 
 #ifdef MURKA_OF
 
-            std::string numberString = ofToString(*numberData, params->floatPrecision);
-            int dotIndex = numberString.size();
-            for (int i = 0; i < numberString.size(); i++) {
-                if (numberString[i] == '.') {
-                    dotIndex = i;
-                }
+        std::string numberString = ofToString(*numberData, params->floatPrecision);
+        int dotIndex = numberString.size();
+        for (int i = 0; i < numberString.size(); i++) {
+            if (numberString[i] == '.') {
+                dotIndex = i;
             }
-            
-            if (highlightedNumber == dotIndex) highlightedNumber = dotIndex + 1;
-            if (highlightedNumber >= numberString.size()) highlightedNumber = numberString.size() - 1;
-            
+        }
+        
+        if (highlightedNumber == dotIndex) highlightedNumber = dotIndex + 1;
+        if (highlightedNumber >= numberString.size()) highlightedNumber = numberString.size() - 1;
+        
 
-            MurkaColor c = context.getWidgetForegroundColor();
-            ofColor bgColor = context.getWidgetBackgroundColor() * 255;
-            ofColor fgColor = context.getWidgetForegroundColor() * 255;
-            
-			ofPushStyle();
-            ofFill();
-            ofSetColor(bgColor);
-            ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
-            ofNoFill();
-            ofSetColor(inside ? fgColor : fgColor / 2);
-            if (activated) ofSetColor(fgColor * 1.2);
-            ofDrawRectangle(1, 1, context.getSize().x-2, context.getSize().y-2);
+        MurkaColor c = context.getWidgetForegroundColor();
+        ofColor bgColor = context.getWidgetBackgroundColor() * 255;
+        ofColor fgColor = context.getWidgetForegroundColor() * 255;
+        
+        ofPushStyle();
+        ofFill();
+        ofSetColor(bgColor);
+        ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
+        ofNoFill();
+        ofSetColor(inside ? fgColor : fgColor / 2);
+        if (activated) ofSetColor(fgColor * 1.2);
+        ofDrawRectangle(1, 1, context.getSize().x-2, context.getSize().y-2);
 
-            font->drawString(ofToString(*numberData, params->floatPrecision), 10, 22);
+        font->drawString(ofToString(*numberData, params->floatPrecision), 10, 22);
 
-            ofNoFill();
-            if ((inside || dragging) && (highlightedNumber != -1)) {
-                if (!dragging) {
-                    ofDrawLine(10 + highlightedNumber * monospaceSymbolWidth, 28,
-                               10 + highlightedNumber * monospaceSymbolWidth + monospaceSymbolWidth, 28);
-                } else {
-                    ofDrawLine(10 + draggingNubmerIndex * monospaceSymbolWidth, 28,
-                               10 + draggingNubmerIndex * monospaceSymbolWidth + monospaceSymbolWidth, 28);
-                }
+        ofNoFill();
+        if ((inside || dragging) && (highlightedNumber != -1)) {
+            if (!dragging) {
+                ofDrawLine(10 + highlightedNumber * monospaceSymbolWidth, 28,
+                           10 + highlightedNumber * monospaceSymbolWidth + monospaceSymbolWidth, 28);
+            } else {
+                ofDrawLine(10 + draggingNubmerIndex * monospaceSymbolWidth, 28,
+                           10 + draggingNubmerIndex * monospaceSymbolWidth + monospaceSymbolWidth, 28);
             }
-            ofFill();
-			ofPopStyle();
+        }
+        ofFill();
+        ofPopStyle();
 #endif
 
-            // text editing logic
+        // text editing logic
+        
+        if (context.mouseDownPressed[0]) {
+            if (inside) {
+                activated = true;
+            } else activated = false;
+        }
+
+        if (inside && context.mouseDownPressed[0] && (!thisWidget->dragging)) {
+            draggingNubmerIndex = highlightedNumber;
+            std::string numberString = ofToString(*numberData, params->floatPrecision);
+            if (draggingNubmerIndex < dotIndex) {
+                changeScale = 1. / pow(0.1, dotIndex - draggingNubmerIndex - 1);
+            } else {
+                changeScale = 1. / pow(0.1, dotIndex - draggingNubmerIndex);
+            }
+            dragging = true;
+        }
             
-            if (context.mouseDownPressed[0]) {
-                if (inside) {
-                    activated = true;
-                } else activated = false;
-            }
+        if (thisWidget->dragging  && !context.mouseDown[0]) {
+            thisWidget->dragging = false;
+        }
 
-            if (inside && context.mouseDownPressed[0] && (!thisWidget->dragging)) {
-                draggingNubmerIndex = highlightedNumber;
-                std::string numberString = ofToString(*numberData, params->floatPrecision);
-                if (draggingNubmerIndex < dotIndex) {
-                    changeScale = 1. / pow(0.1, dotIndex - draggingNubmerIndex - 1);
-                } else {
-                    changeScale = 1. / pow(0.1, dotIndex - draggingNubmerIndex);
-                }
-                dragging = true;
+        if (thisWidget->dragging) {
+            float delta = (context.mouseDelta.y) / 10;
+            float change = changeScale * delta;
+            *numberData += change;
+            if (*numberData < params->minValue) {
+                *numberData = params->minValue;
             }
-                
-            if (thisWidget->dragging  && !context.mouseDown[0]) {
-                thisWidget->dragging = false;
+            if (*numberData > params->maxValue) {
+                *numberData = params->maxValue;
             }
+        }
 
-            if (thisWidget->dragging) {
-                float delta = (context.mouseDelta.y) / 10;
-                float change = changeScale * delta;
-                *numberData += change;
-                if (*numberData < params->minValue) {
-                    *numberData = params->minValue;
-                }
-                if (*numberData > params->maxValue) {
-                    *numberData = params->maxValue;
-                }
-            }
-
-            context.endViewport();
-        };
-    }
+        context.endViewport();
+    };
     
     // Here go parameters and any parameter convenience constructors. You need to define something called Parameters, even if it's NULL.
     struct Parameters {
@@ -205,381 +199,377 @@ public:
         
 #ifdef TARGET_WIN32
 #endif
-        
+        }
+
         //
         
-        draw = [&](void* dataToControl,
-                   void* parametersObject,
-                   void* thisWidgetObject,
-                   MurkaContext & context,
-                   void* resultObject)  {
+    MURKA_VIEW_DRAW_FUNCTION  {
 
-            auto params = (Parameters*)parametersObject;
-            PlainTextField* thisWidget = (PlainTextField*)thisWidgetObject;
-            
-            bool inside = context.isHovered() * !areChildrenHovered(context);
-            
-            std::string* stringData;
-            float* floatData;
-            double* doubleData;
-            int* intData;
-            
-            if (!activated) { // while not activated
-                updateInternalRepresenation(dataToControl, params->precision, params->clampNumber, params->minNumber, params->maxNumber);
-            }
+        auto params = (Parameters*)parametersObject;
+        PlainTextField* thisWidget = (PlainTextField*)thisWidgetObject;
+        
+        bool inside = context.isHovered() * !areChildrenHovered(context);
+        
+        std::string* stringData;
+        float* floatData;
+        double* doubleData;
+        int* intData;
+        
+        if (!activated) { // while not activated
+            updateInternalRepresenation(dataToControl, params->precision, params->clampNumber, params->minNumber, params->maxNumber);
+        }
 
-            params->useCustomFont ? font = params->customFont : font = context.getParagraphFont();
-            
-            bool doubleClick = false;
+        params->useCustomFont ? font = params->customFont : font = context.getParagraphFont();
+        
+        bool doubleClick = false;
 
-            // activation & deactivation & doubleclick
-            if (context.mouseDownPressed[0]) {
-                if (inside && !activated) {
-                    activated = true;
-                    
-                    updateInternalRepresenation(dataToControl, params->precision, params->clampNumber, params->minNumber, params->maxNumber);
-                    
-                }
+        // activation & deactivation & doubleclick
+        if (context.mouseDownPressed[0]) {
+            if (inside && !activated) {
+                activated = true;
                 
-                if (((ofGetElapsedTimef() - lastLeftMousebuttonClicktime) < 0.2) && (activated)) {
-                    doubleClick = true;
-                }
-
-                lastLeftMousebuttonClicktime = ofGetElapsedTimef();
+                updateInternalRepresenation(dataToControl, params->precision, params->clampNumber, params->minNumber, params->maxNumber);
+                
             }
+            
+            if (((ofGetElapsedTimef() - lastLeftMousebuttonClicktime) < 0.2) && (activated)) {
+                doubleClick = true;
+            }
+
+            lastLeftMousebuttonClicktime = ofGetElapsedTimef();
+        }
 
 #ifdef MURKA_OF
-            MurkaColor c = context.getWidgetForegroundColor();
-            ofColor bgColor = context.getWidgetBackgroundColor() * 255;
-            ofColor fgColor = context.getWidgetForegroundColor() * 255;
+        MurkaColor c = context.getWidgetForegroundColor();
+        ofColor bgColor = context.getWidgetBackgroundColor() * 255;
+        ofColor fgColor = context.getWidgetForegroundColor() * 255;
+        
+        if (params->drawBounds) {
+            ofPushStyle();
+            ofFill();
+            ofSetColor(bgColor);
+            ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
             
-            if (params->drawBounds) {
-                ofPushStyle();
-                ofFill();
-                ofSetColor(bgColor);
-                ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
-                
-                
-                if (isSelectingTextNow()) {
+            
+            if (isSelectingTextNow()) {
 
-                    auto selectionShape = returnSelectionVisualShape();
-                    ofSetColor(120, 120, 120, 255);
-                    ofDrawRectangle(10 - cameraPanInsideWidget + selectionShape.x(), 4, selectionShape.width(), context.getSize().y - 8);
-                }
-                
-                ofNoFill();
-                ofSetColor(inside ? fgColor : fgColor / 2);
-                if (activated) ofSetColor(fgColor * 1.2);
-                ofDrawRectangle(1, 1, context.getSize().x-2, context.getSize().y-2);
-                ofPopStyle();
+                auto selectionShape = returnSelectionVisualShape();
+                ofSetColor(120, 120, 120, 255);
+                ofDrawRectangle(10 - cameraPanInsideWidget + selectionShape.x(), 4, selectionShape.width(), context.getSize().y - 8);
             }
             
-            recalcGlyphLengths(displayString, &context);
+            ofNoFill();
+            ofSetColor(inside ? fgColor : fgColor / 2);
+            if (activated) ofSetColor(fgColor * 1.2);
+            ofDrawRectangle(1, 1, context.getSize().x-2, context.getSize().y-2);
+            ofPopStyle();
+        }
+        
+        recalcGlyphLengths(displayString, &context);
+        
+        float glyphXCoordinate = 10;
+        font->drawString(displayString, 10 - cameraPanInsideWidget, context.getSize().y / 2  + font->getLineHeight() / 4);
+        
+        textHeight = context.getSize().y; // this is cache for text selection rect retrieavl
+        
+        bool didSetCursorPosition = false;
+        float cursorPositionInPixels = 0;
+        float sumGlyphWidths;
+        for (int i = 0; i < displayString.size(); i++) {
             
-            float glyphXCoordinate = 10;
-            font->drawString(displayString, 10 - cameraPanInsideWidget, context.getSize().y / 2  + font->getLineHeight() / 4);
+            MurkaShape glyphShape = MurkaShape(glyphXCoordinate - cameraPanInsideWidget, 0, currentGlyphLengths[i], context.getSize().y);
             
-            textHeight = context.getSize().y; // this is cache for text selection rect retrieavl
+            bool insideGlyph = glyphShape.inside(context.mousePosition);
             
-            bool didSetCursorPosition = false;
-            float cursorPositionInPixels = 0;
-            float sumGlyphWidths;
-            for (int i = 0; i < displayString.size(); i++) {
-                
-                MurkaShape glyphShape = MurkaShape(glyphXCoordinate - cameraPanInsideWidget, 0, currentGlyphLengths[i], context.getSize().y);
-                
-                bool insideGlyph = glyphShape.inside(context.mousePosition);
-                
-                /*
-                ofSetColor(insideGlyph ? fgColor / 2 : fgColor / 4, 100);
-                ofDrawRectangle(glyphXCoordinate - cameraPanInsideWidget, 0, currentGlyphLengths[i], 30);
-                 */
-                
-                MurkaShape currentSymbolShape = {glyphXCoordinate, 0, currentGlyphLengths[i], context.getSize().y};
-                
-                bool safeToUseMouseClickEventsCauseEnoughTimeSinceDoubleClickPassed = ((ofGetElapsedTimef() - lastLeftMousebuttonClicktime) > 0.2);
-                
-                // Setting cursor position inside the string if pressed inside it
-                if ((insideGlyph) && (context.mouseDownPressed[0])) {
-                    if (((context.mousePosition.x - glyphXCoordinate) / currentGlyphLengths[i]) < 0.5) {
-                        cursorPosition = i;
-                        didSetCursorPosition = true;
-                        updateTextSelectionFirst(i);
-                    } else {
-                        cursorPosition = i + 1;
-                        didSetCursorPosition = true;
-                        updateTextSelectionFirst(i + 1);
+            /*
+            ofSetColor(insideGlyph ? fgColor / 2 : fgColor / 4, 100);
+            ofDrawRectangle(glyphXCoordinate - cameraPanInsideWidget, 0, currentGlyphLengths[i], 30);
+             */
+            
+            MurkaShape currentSymbolShape = {glyphXCoordinate, 0, currentGlyphLengths[i], context.getSize().y};
+            
+            bool safeToUseMouseClickEventsCauseEnoughTimeSinceDoubleClickPassed = ((ofGetElapsedTimef() - lastLeftMousebuttonClicktime) > 0.2);
+            
+            // Setting cursor position inside the string if pressed inside it
+            if ((insideGlyph) && (context.mouseDownPressed[0])) {
+                if (((context.mousePosition.x - glyphXCoordinate) / currentGlyphLengths[i]) < 0.5) {
+                    cursorPosition = i;
+                    didSetCursorPosition = true;
+                    updateTextSelectionFirst(i);
+                } else {
+                    cursorPosition = i + 1;
+                    didSetCursorPosition = true;
+                    updateTextSelectionFirst(i + 1);
+                }
+            }
+            
+            // Moving text selection if mouse was already pressed, and moving the cursror too
+            if ((insideGlyph) && (context.mouseDown[0]) && (!context.mouseDownPressed[0])
+                && (safeToUseMouseClickEventsCauseEnoughTimeSinceDoubleClickPassed)) {
+                if (((context.mousePosition.x - glyphXCoordinate) / currentGlyphLengths[i]) < 0.5) {
+                    cursorPosition = i;
+                    didSetCursorPosition = true;
+                    updateTextSelectionSecond(i);
+                    if (doubleClick) {
+                        ofLog() << "updating second even tho its a doubleclick";
+                    }
+                } else {
+                    cursorPosition = i + 1;
+                    didSetCursorPosition = true;
+                    updateTextSelectionSecond(i + 1);
+                    if (doubleClick) {
+                        ofLog() << "updating second even tho its a doubleclick";
                     }
                 }
+            }
+            
+            if (cursorPosition == i) cursorPositionInPixels = glyphXCoordinate;
+            glyphXCoordinate += currentGlyphLengths[i];
+        }
+        sumGlyphWidths = glyphXCoordinate;
+        
+        
+        // Setting cursor position to the end of the string if mouse pressed outside of it
+        if ((inside) && (context.mouseDownPressed[0]) && (!didSetCursorPosition)) {
+            cursorPosition = displayString.size();
+        }
+        
+        if (cursorPosition == displayString.size()) {
+            cursorPositionInPixels = sumGlyphWidths; // this is the full line width
+        }
+        
+        if (activated) {
+            // Moving the internal window so the cursor is always visible
+            if (cursorPositionInPixels < cameraPanInsideWidget) {
+                cameraPanInsideWidget = cursorPositionInPixels - 5;
                 
-                // Moving text selection if mouse was already pressed, and moving the cursror too
-                if ((insideGlyph) && (context.mouseDown[0]) && (!context.mouseDownPressed[0])
-                    && (safeToUseMouseClickEventsCauseEnoughTimeSinceDoubleClickPassed)) {
-                    if (((context.mousePosition.x - glyphXCoordinate) / currentGlyphLengths[i]) < 0.5) {
-                        cursorPosition = i;
-                        didSetCursorPosition = true;
-                        updateTextSelectionSecond(i);
-                        if (doubleClick) {
-                            ofLog() << "updating second even tho its a doubleclick";
-                        }
-                    } else {
-                        cursorPosition = i + 1;
-                        didSetCursorPosition = true;
-                        updateTextSelectionSecond(i + 1);
-                        if (doubleClick) {
-                            ofLog() << "updating second even tho its a doubleclick";
-                        }
-                    }
-                }
-                
-                if (cursorPosition == i) cursorPositionInPixels = glyphXCoordinate;
-                glyphXCoordinate += currentGlyphLengths[i];
-            }
-            sumGlyphWidths = glyphXCoordinate;
-            
-            
-            // Setting cursor position to the end of the string if mouse pressed outside of it
-            if ((inside) && (context.mouseDownPressed[0]) && (!didSetCursorPosition)) {
-                cursorPosition = displayString.size();
             }
             
-            if (cursorPosition == displayString.size()) {
-                cursorPositionInPixels = sumGlyphWidths; // this is the full line width
+            if (cursorPositionInPixels > (context.getSize().x + cameraPanInsideWidget)) {
+                cameraPanInsideWidget = cursorPositionInPixels - context.getSize().x + 5;
             }
-            
-            if (activated) {
-                // Moving the internal window so the cursor is always visible
-                if (cursorPositionInPixels < cameraPanInsideWidget) {
-                    cameraPanInsideWidget = cursorPositionInPixels - 5;
-                    
-                }
-                
-                if (cursorPositionInPixels > (context.getSize().x + cameraPanInsideWidget)) {
-                    cameraPanInsideWidget = cursorPositionInPixels - context.getSize().x + 5;
-                }
-            }
+        }
 
-            // drawing cursor
-            if (activated) {
-                float timeMod = context.getRunningTime() / 1.0 - int(context.getRunningTime() / 1.0);
-                ofSetColor(200);
-                if (timeMod > 0.5)
-                    ofDrawLine(cursorPositionInPixels - cameraPanInsideWidget, 3,
-                               cursorPositionInPixels - cameraPanInsideWidget, 30);
-            }
-            
+        // drawing cursor
+        if (activated) {
+            float timeMod = context.getRunningTime() / 1.0 - int(context.getRunningTime() / 1.0);
+            ofSetColor(200);
+            if (timeMod > 0.5)
+                ofDrawLine(cursorPositionInPixels - cameraPanInsideWidget, 3,
+                           cursorPositionInPixels - cameraPanInsideWidget, 30);
+        }
+        
 #endif
-            
-            
-            bool enterPressed = false;
-            
-            // Text editing logic
-            if (activated) { // remember that drawing occurs even if its not activated
+        
+        
+        bool enterPressed = false;
+        
+        // Text editing logic
+        if (activated) { // remember that drawing occurs even if its not activated
 
-                if (doubleClick) {
-                    updateTextSelectionFirst(0);
-                    updateTextSelectionSecond(displayString.length());
-                    updateTextSelectionRange();
-                }
+            if (doubleClick) {
+                updateTextSelectionFirst(0);
+                updateTextSelectionSecond(displayString.length());
+                updateTextSelectionRange();
+            }
 
-                // Keystrokes support
+            // Keystrokes support
+            
+            if ((copyText.isPressed()) && (activated) && (isSelectingTextNow())) {
+                ofLog() << "copytext!!";
                 
-                if ((copyText.isPressed()) && (activated) && (isSelectingTextNow())) {
-                    ofLog() << "copytext!!";
-                    
+                auto substr = displayString.substr(selectionSymbolsRange.first, selectionSymbolsRange.second - selectionSymbolsRange.first);
+                
+                ofSetClipboardString(substr);
+
+                copyText.fire();
+            } else
+            if ((cutText.isPressed()) && (activated) && (isSelectingTextNow())) {
+                ofLog() << "cutText!!";
+                
+                if (isSelectingTextNow()) { // if we select now, backspace just deletes
                     auto substr = displayString.substr(selectionSymbolsRange.first, selectionSymbolsRange.second - selectionSymbolsRange.first);
                     
                     ofSetClipboardString(substr);
-
-                    copyText.fire();
-                } else
-                if ((cutText.isPressed()) && (activated) && (isSelectingTextNow())) {
-                    ofLog() << "cutText!!";
                     
-                    if (isSelectingTextNow()) { // if we select now, backspace just deletes
-                        auto substr = displayString.substr(selectionSymbolsRange.first, selectionSymbolsRange.second - selectionSymbolsRange.first);
-                        
-                        ofSetClipboardString(substr);
-                        
-                        displayString.replace(selectionSymbolsRange.first, selectionSymbolsRange.second - selectionSymbolsRange.first, "");
-                        cursorPosition = selectionSymbolsRange.first;
+                    displayString.replace(selectionSymbolsRange.first, selectionSymbolsRange.second - selectionSymbolsRange.first, "");
+                    cursorPosition = selectionSymbolsRange.first;
+                    updateTextSelectionFirst(cursorPosition);
+                    updateTextSelectionSecond(cursorPosition);
+                }
+                
+                cutText.fire();
+            } else
+            if ((pasteText.isPressed()) && (activated)) {
+                ofLog() << "pasteText!!";
+                
+                if (isSelectingTextNow()) { // if we select now, it also replaces the selected text
+                    displayString.replace(selectionSymbolsRange.first, selectionSymbolsRange.second - selectionSymbolsRange.first, "");
+                    cursorPosition = selectionSymbolsRange.first;
+                }
+                
+                displayString.insert(cursorPosition, ofGetClipboardString());
+                cursorPosition += ofGetClipboardString().length();
+                
+                pasteText.fire();
+            } else
+            if ((goLeft.isPressed()) && (activated)) {
+                ofLog() << "goLeft!!";
+                
+                cursorPosition = 0;
+                
+                if (!ofGetKeyPressed(OF_KEY_SHIFT)) {
+                    updateTextSelectionFirst(cursorPosition);
+                    updateTextSelectionSecond(cursorPosition);
+                } else { // shift pressed, so we enlarge the selected text shape
+                    if (selectionSymbolsRange.first == selectionSymbol1Index) {
+                        ofLog() << "updating first to left...";
+                        auto second = selectionSymbolsRange.second;
                         updateTextSelectionFirst(cursorPosition);
+                        updateTextSelectionSecond(second);
+                    } else {
+                        ofLog() << "updating second to left...";
                         updateTextSelectionSecond(cursorPosition);
                     }
-                    
-                    cutText.fire();
-                } else
-                if ((pasteText.isPressed()) && (activated)) {
-                    ofLog() << "pasteText!!";
-                    
-                    if (isSelectingTextNow()) { // if we select now, it also replaces the selected text
-                        displayString.replace(selectionSymbolsRange.first, selectionSymbolsRange.second - selectionSymbolsRange.first, "");
-                        cursorPosition = selectionSymbolsRange.first;
-                    }
-                    
-                    displayString.insert(cursorPosition, ofGetClipboardString());
-                    cursorPosition += ofGetClipboardString().length();
-                    
-                    pasteText.fire();
-                } else
-                if ((goLeft.isPressed()) && (activated)) {
-                    ofLog() << "goLeft!!";
-                    
-                    cursorPosition = 0;
-                    
-                    if (!ofGetKeyPressed(OF_KEY_SHIFT)) {
-                        updateTextSelectionFirst(cursorPosition);
-                        updateTextSelectionSecond(cursorPosition);
-                    } else { // shift pressed, so we enlarge the selected text shape
-                        if (selectionSymbolsRange.first == selectionSymbol1Index) {
-                            ofLog() << "updating first to left...";
-                            auto second = selectionSymbolsRange.second;
-                            updateTextSelectionFirst(cursorPosition);
-                            updateTextSelectionSecond(second);
-                        } else {
-                            ofLog() << "updating second to left...";
-                            updateTextSelectionSecond(cursorPosition);
-                        }
-                    }
-                    
+                }
+                
 
-                    goLeft.fire();
-                } else
-                if ((goRight.isPressed()) && (activated)) {
-                    ofLog() << "goRight!!";
+                goLeft.fire();
+            } else
+            if ((goRight.isPressed()) && (activated)) {
+                ofLog() << "goRight!!";
 
-                    cursorPosition = displayString.size();
+                cursorPosition = displayString.size();
 
-                    if (!ofGetKeyPressed(OF_KEY_SHIFT)) {
-                        updateTextSelectionFirst(cursorPosition);
+                if (!ofGetKeyPressed(OF_KEY_SHIFT)) {
+                    updateTextSelectionFirst(cursorPosition);
+                    updateTextSelectionSecond(cursorPosition);
+                } else {
+                    if (selectionSymbolsRange.second == selectionSymbol1Index) {
+                        auto first = selectionSymbolsRange.first;
+                        updateTextSelectionFirst(first);
                         updateTextSelectionSecond(cursorPosition);
                     } else {
-                        if (selectionSymbolsRange.second == selectionSymbol1Index) {
-                            auto first = selectionSymbolsRange.first;
-                            updateTextSelectionFirst(first);
-                            updateTextSelectionSecond(cursorPosition);
-                        } else {
-                            updateTextSelectionSecond(cursorPosition);
-                        }
+                        updateTextSelectionSecond(cursorPosition);
                     }
-                        
-                    goRight.fire();
-                } else
-                if ((selectAll.isPressed()) && (activated)) {
-                    ofLog() << "selectAll!!";
+                }
                     
-                    updateTextSelectionFirst(0);
-                    updateTextSelectionSecond(displayString.length());
-                    
-                    selectAll.fire();
-                } else
-                if (context.keyPresses.size() != 0) {
-                    
-                    for (auto key: context.keyPresses) {
+                goRight.fire();
+            } else
+            if ((selectAll.isPressed()) && (activated)) {
+                ofLog() << "selectAll!!";
+                
+                updateTextSelectionFirst(0);
+                updateTextSelectionSecond(displayString.length());
+                
+                selectAll.fire();
+            } else
+            if (context.keyPresses.size() != 0) {
+                
+                for (auto key: context.keyPresses) {
 //                        ofLog() << key;
+                    
+                    if (key == 13) { // enter
+                        enterPressed = true;
+                    }
+                    
+                    
+                    if ((key >= 32) && (key <= 255)) { // symbol keys
                         
-                        if (key == 13) { // enter
-                            enterPressed = true;
+                        ofLog() << "pressed symbol key " << key;
+                        if (isSelectingTextNow()) {
+                            ofLog() << "   .. and selecting text now ..";
+                            displayString.replace(selectionSymbolsRange.first, selectionSymbolsRange.second - selectionSymbolsRange.first, "");
+                            cursorPosition = selectionSymbolsRange.first;
                         }
                         
                         
-                        if ((key >= 32) && (key <= 255)) { // symbol keys
-                            
-                            ofLog() << "pressed symbol key " << key;
-                            if (isSelectingTextNow()) {
-                                ofLog() << "   .. and selecting text now ..";
-                                displayString.replace(selectionSymbolsRange.first, selectionSymbolsRange.second - selectionSymbolsRange.first, "");
-                                cursorPosition = selectionSymbolsRange.first;
-                            }
-                            
-                            
-                            displayString.insert(displayString.begin() + cursorPosition, char(key));
-                            
-                            cursorPosition += 1;
-                            
+                        displayString.insert(displayString.begin() + cursorPosition, char(key));
+                        
+                        cursorPosition += 1;
+                        
+                        updateTextSelectionFirst(cursorPosition);
+                        updateTextSelectionSecond(cursorPosition);
+                    }
+                    
+                    if (key == 8) { // backspace
+                        if (isSelectingTextNow()) { // if we select now, backspace just deletes
+                            displayString.replace(selectionSymbolsRange.first, selectionSymbolsRange.second - selectionSymbolsRange.first, "");
+                            cursorPosition = selectionSymbolsRange.first;
                             updateTextSelectionFirst(cursorPosition);
                             updateTextSelectionSecond(cursorPosition);
-                        }
-                        
-                        if (key == 8) { // backspace
-                            if (isSelectingTextNow()) { // if we select now, backspace just deletes
-                                displayString.replace(selectionSymbolsRange.first, selectionSymbolsRange.second - selectionSymbolsRange.first, "");
-                                cursorPosition = selectionSymbolsRange.first;
-                                updateTextSelectionFirst(cursorPosition);
-                                updateTextSelectionSecond(cursorPosition);
-                            } else {
-                                if (cursorPosition > 0) {
-                                    displayString.erase(cursorPosition - 1, 1);
-                                    cursorPosition -= 1;
-                                }
+                        } else {
+                            if (cursorPosition > 0) {
+                                displayString.erase(cursorPosition - 1, 1);
+                                cursorPosition -= 1;
                             }
                         }
-                        
-                        if (key == OF_KEY_LEFT) { // left
-                            if (cursorPosition > 0) {
-                                if (isSelectingTextNow()) {
-                                    if (cursorPosition != selectionSymbolsRange.first) {
-                                        cursorPosition = selectionSymbolsRange.first;
-                                    } else {
-                                        cursorPosition --;
-                                    }
+                    }
+                    
+                    if (key == OF_KEY_LEFT) { // left
+                        if (cursorPosition > 0) {
+                            if (isSelectingTextNow()) {
+                                if (cursorPosition != selectionSymbolsRange.first) {
+                                    cursorPosition = selectionSymbolsRange.first;
                                 } else {
                                     cursorPosition --;
                                 }
-                                
-                                if (!ofGetKeyPressed(OF_KEY_SHIFT)) {
-                                    // pressing left collapses the text selection if shift isn't pressed
-                                    updateTextSelectionFirst(cursorPosition);
-                                    updateTextSelectionSecond(cursorPosition);
-                                    updateTextSelectionRange();
-                                } else {
-                                    updateTextSelectionRangeToIncludeCursor();
-                                }
+                            } else {
+                                cursorPosition --;
                             }
                             
+                            if (!ofGetKeyPressed(OF_KEY_SHIFT)) {
+                                // pressing left collapses the text selection if shift isn't pressed
+                                updateTextSelectionFirst(cursorPosition);
+                                updateTextSelectionSecond(cursorPosition);
+                                updateTextSelectionRange();
+                            } else {
+                                updateTextSelectionRangeToIncludeCursor();
+                            }
                         }
-                        if (key == OF_KEY_RIGHT) { // right
-                            if (cursorPosition < displayString.size()) {
-                                if (isSelectingTextNow()) {
-                                    if (cursorPosition != selectionSymbolsRange.second) {
-                                        cursorPosition = selectionSymbolsRange.second;
-                                    } else {
-                                        cursorPosition ++;
-                                    }
+                        
+                    }
+                    if (key == OF_KEY_RIGHT) { // right
+                        if (cursorPosition < displayString.size()) {
+                            if (isSelectingTextNow()) {
+                                if (cursorPosition != selectionSymbolsRange.second) {
+                                    cursorPosition = selectionSymbolsRange.second;
                                 } else {
                                     cursorPosition ++;
                                 }
-
-                                
-                                if (!ofGetKeyPressed(OF_KEY_SHIFT)) {
-                                    // pressing left collapses the text selection if shift isn't pressed
-                                    updateTextSelectionFirst(cursorPosition);
-                                    updateTextSelectionSecond(cursorPosition);
-                                    updateTextSelectionRange();
-                                } else {
-                                    updateTextSelectionRangeToIncludeCursor();
-                                }
+                            } else {
+                                cursorPosition ++;
                             }
+
                             
+                            if (!ofGetKeyPressed(OF_KEY_SHIFT)) {
+                                // pressing left collapses the text selection if shift isn't pressed
+                                updateTextSelectionFirst(cursorPosition);
+                                updateTextSelectionSecond(cursorPosition);
+                                updateTextSelectionRange();
+                            } else {
+                                updateTextSelectionRangeToIncludeCursor();
+                            }
                         }
+                        
                     }
                 }
             }
+        }
+        
+        // Deactivating the widget and updating the data
+        
+        if (activated)
+        if ((enterPressed) || (context.mouseDownPressed[0] && !inside)) {
+            activated = false;
             
-            // Deactivating the widget and updating the data
+            updateExternalData(dataToControl, params->clampNumber);
             
-            if (activated)
-            if ((enterPressed) || (context.mouseDownPressed[0] && !inside)) {
-                activated = false;
-                
-                updateExternalData(dataToControl, params->clampNumber);
-                
-                *(bool*)resultObject = true;
-            }
-            
+            *(bool*)resultObject = true;
+        }
+        
 //            drawWidget<Label>(context, {""});
-        };
-    }
+    };
     
     void updateExternalData(void* dataToControl, bool clamp = false) {
             ofLog() << "datatype: " << dataTypeName;
