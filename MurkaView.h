@@ -22,6 +22,7 @@ typedef std::function<void (void* dataToControl,
 class View {
 public:
     
+    // This variable is needed to support immediate mode widgets resizing themselves while also receiving sizes from outside.
     MurkaShape latestShapeThatCameFromOutside;
     
     
@@ -44,6 +45,9 @@ public:
     // Int stands for object drawing index, void* is a pointer to data, string is typeid
     typedef std::tuple<int, void*, std::string> imIdentifier;
     std::map<imIdentifier, MurkaViewHandler<View>*> imChildren; // Immediate mode widget objects that were once drawn inside this widget. We hold their state here in the shape of their MurkaViews.
+    
+    MurkaViewHandlerInternal* latestDrawnIMModeWidgetObjectHandler;
+
     
     void clearChildren() {
         for (auto &i: children) {
@@ -173,6 +177,11 @@ public:
         return new T();
     }
     
+    
+    static MurkaViewHandler<T>* getLatestDrawn(View* parentWidget) {
+        return (MurkaViewHandler<T>*)parentWidget->latestDrawnIMModeWidgetObjectHandler;
+    }
+    
     static MurkaViewHandler<T>* getOrCreateImModeWidgetObject(int index, void* data, View* parentWidget, MurkaShape shape) {
         
         auto idTuple = std::make_tuple(index, data, typeid(T).name());
@@ -209,7 +218,7 @@ public:
                 parentWidget->childrenBounds.size.y = widget->shape.position.y + widget->shape.size.y - parentWidget->childrenBounds.position.y;
             }
 
-
+            parentWidget->latestDrawnIMModeWidgetObjectHandler = (MurkaViewHandler<T>*)parentWidget->imChildren[idTuple];
             return (MurkaViewHandler<T>*)parentWidget->imChildren[idTuple];
         } else {
             auto newWidget = new T();
@@ -241,6 +250,8 @@ public:
             if ((parentWidget->childrenBounds.size.y + parentWidget->childrenBounds.position.y) < (shape.position.y + shape.size.y)) {
                 parentWidget->childrenBounds.size.y = shape.position.y + shape.size.y - parentWidget->childrenBounds.position.y;
             }
+            
+            parentWidget->latestDrawnIMModeWidgetObjectHandler = newHandler;
             return newHandler;
         }
     }
@@ -249,7 +260,6 @@ public:
     }
 
 };
-
 
 // Immediate mode custom layout
     
@@ -392,5 +402,20 @@ typename T::Results drawWidget(MurkaContext &c, typename T::Parameters parameter
     
     return results;
 }
+
+// Get the latest drawn immediate mode widget
+
+
+template<typename T>
+T* getLatestDrawnWidget(MurkaContext &c) {
+//    auto widgetHandler = T::getOrCreateImModeWidgetObject(0, new View(), new View(), MurkaShape());
+    
+    auto widgetHandler = T::getLatestDrawn((View*)c.murkaView);
+//
+    auto widgetObject = (T*)widgetHandler->widgetObjectInternal;
+//
+    return widgetObject;
+}
+
  
 }
