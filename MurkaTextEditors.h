@@ -170,6 +170,7 @@ class PlainTextField : public MurkaViewInterface<PlainTextField> {
                 result = false; // too little time since it was last pressed
             }
 #endif
+
             return result;
         }
         
@@ -198,6 +199,12 @@ public:
 #endif
         
 #ifdef TARGET_WIN32
+		copyText = KeyStroke({ OF_KEY_CONTROL, 'c' });
+		cutText = KeyStroke({ OF_KEY_CONTROL, 'x' });
+		pasteText = KeyStroke({ OF_KEY_CONTROL, 'v' });
+		goLeft = KeyStroke({ OF_KEY_CONTROL, OF_KEY_LEFT });
+		goRight = KeyStroke({ OF_KEY_CONTROL, OF_KEY_RIGHT });
+		selectAll = KeyStroke({ OF_KEY_CONTROL, 'a' });
 #endif
         }
 
