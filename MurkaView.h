@@ -15,7 +15,6 @@ typedef std::function<void (void* dataToControl,
                             MurkaContext & context,
                             void* resultObject)> viewDrawFunction;
 
-
 // View heirarchy
 
 class View {
@@ -23,27 +22,6 @@ public:
     
     MurkaShape latestShapeThatCameFromOutside;
     
-    struct MurkaVar {
-        enum MurkaVarKind {INT, /* FLOAT, */ DOUBLE, STRING};
-        MurkaVarKind kind;
-        int intValue = 0;
-        double doubleValue = 0;
-        std::string stringValue = "";
-        
-        MurkaVar(int value) { intValue = value; kind = INT; }
-        MurkaVar(double value) { doubleValue = value; kind = DOUBLE; }
-        MurkaVar(std::string value) { stringValue = value; kind = STRING; }
-        
-        operator int() {return intValue; }
-        operator double() {return doubleValue; }
-        operator float() {return float(doubleValue); }
-        operator std::string() {return stringValue; }
-    };
-    
-    // TODO : add a flag to a base Murka class to bypass this save/load routine
-    
-//    virtual std::vector<MurkaVar> saveInternalData(int indexX, int indexY) { return std::vector<MurkaVar>(); }
-//    virtual void loadInternalData(std::vector<MurkaVar>) {}
     
     virtual bool wantsClicks() { return true; } // override this if you want to signal to other widgets that you don't want clicks
     
@@ -54,10 +32,6 @@ public:
     
     ~View() {
         // TODO: delete children
-    }
-    
-    static viewDrawFunction getDrawFunction(View* view) {
-        return (*view).draw;
     }
     
     
