@@ -27,23 +27,14 @@
 
  class Widget : public MurkaViewInterface<Widget> {
  public:
- Widget() {
-     draw = [&](void* dataToControl,
-                void* parametersObject,
-                void* thisWidgetObject,
-                const MurkaContext & context,
-                void* resultObject)  {
- 
+     MURKA_VIEW_DRAW_FUNCTION  {
                     auto params = (Parameters*)parametersObject;
-                    Widget* thisWidget = (Widget*)thisWidgetObject;
- 
                     bool inside = context.isHovered() * !areChildrenHovered(context);
  
                     // Your drawing and interaction code goes here.
                     // Don't forget that all of this executes at each frame for each
                     // widget that is drawn on screen.
                 };
-     }
  
      // Here go parameters and any parameter convenience constructors. You need to define something called Parameters, even if it's NULL.
      struct Parameters {

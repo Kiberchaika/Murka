@@ -313,7 +313,7 @@ typename T::Results drawWidget(MurkaContext &c, B* dataToControl, typename T::Pa
     
     widgetObject->dataTypeName = typeid(dataToControl).name();
     
-    typename T::Results results = T::Results();
+    typename T::Results results = typename T::Results();
     
     c.pushContext(widgetHandler);
     if (c.transformTheRenderIntoThisContextShape(c.overlayHolder->disableViewportCrop)) {
