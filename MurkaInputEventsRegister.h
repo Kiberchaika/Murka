@@ -19,7 +19,8 @@ struct MurkaEventState {
     bool mouseReleased[3] = {false, false, false},
          mouseDown[3] = {false, false, false},
          mouseDragged[3] = {false, false, false},
-         mouseDownPressed[3] = {false, false, false};
+         mouseDownPressed[3] = {false, false, false},
+         doubleClick = false;
     MurkaPoint mouseDraggedStartPoint = {0, 0}; // TODO: how?
     MurkaPoint mousePosition = {0, 0};
     MurkaPoint mouseDelta = {0, 0};
@@ -41,6 +42,7 @@ struct MurkaEventState {
 
 class MurkaInputEventsRegister {
 
+    double lastLeftMousebuttonClicktime = -10000;
 public:
     
 #ifdef MURKA_OF
@@ -124,6 +126,16 @@ public:
         eventState.mousePosition = {args.x, args.y};
         eventState.mouseDown[args.button] = true;
         eventState.mouseDownPressed[args.button] = true;
+        
+        // Doubleclick support
+        
+#ifdef MURKA_OF
+        if ((ofGetElapsedTimef() - lastLeftMousebuttonClicktime) < 0.2) {
+            eventState.doubleClick = true;
+        } else eventState.doubleClick = false;
+        lastLeftMousebuttonClicktime = ofGetElapsedTimef();
+#endif
+
     }
     
     void mouseReleased(ofMouseEventArgs & args) {
