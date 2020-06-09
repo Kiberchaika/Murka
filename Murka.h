@@ -72,6 +72,15 @@ public:
 
 
 	MurkaContext currentContext;
+    std::vector<MurkaContext> contextStack;
+    
+    MurkaContext getParentContext() {
+        if (contextStack.size() == 0) {
+            return MurkaContext();
+            throw ;
+        }
+        return contextStack[contextStack.size() - 1];
+    }
     
     void pushContext(MurkaViewHandlerInternal* viewSource) {
         
@@ -80,11 +89,9 @@ public:
         MurkaPoint containerPosition = ((View*)viewSource->widgetObjectInternal)->shape.position;
         MurkaEventState derivedEventState = currentContext.transformedWith({-containerPosition.x,
             -containerPosition.y}, 1.0);
-        if (currentContext.parentContext == NULL) {
-            currentContext.parentContext = new MurkaContext();
-//            ofLog() << "created context...";
-        }
-        *(currentContext.parentContext) = currentContext;
+
+        contextStack.push_back(currentContext); // this makes it a parent
+        
         currentContext.MurkaEventState::operator=(derivedEventState);
         currentContext.currentViewShape.position += containerPosition;
         currentContext.currentViewShape.size = ((View*)viewSource->widgetObjectInternal)->shape.size;
@@ -98,7 +105,9 @@ public:
     }
     
     void popContext() {
-        currentContext = *(currentContext.parentContext);
+        currentContext = contextStack.back();
+        contextStack.pop_back();
+        
     }
     
     bool transformRenderIntoCurrentContext() {
@@ -137,20 +146,6 @@ public:
         
         currentContext.transformTheRenderIntoThisContextShape();
         
-        // DEBUG
-        /*
-        ofNoFill();
-        ofSetColor(255, 0, 0);
-       
-        ofDrawRectangle(((View*)widget->widgetObjectInternal)->childrenBounds.position.x,
-                        ((View*)widget->widgetObjectInternal)->childrenBounds.position.y,
-                        ((View*)widget->widgetObjectInternal)->childrenBounds.size.x - 1,
-                        ((View*)widget->widgetObjectInternal)->childrenBounds.size.y - 1);
-
-        ofFill();
-         */
-        ////
-        
         ((MurkaViewHandler<View>*)widget)->widgetObject->draw(widget->dataToControl, widget->parametersInternal, widget->widgetObjectInternal, currentContext, widget->resultsInternal);
         
         // restarting layout generator
@@ -171,10 +166,13 @@ public:
 	// it also packs the user input into the context and clears the user input buffer data.
 	// It should also free the memory used for function responses.
 	void restartContext () {
-        if (currentContext.parentContext != NULL) {
-            delete currentContext.parentContext;
-//            ofLog() << "deleted context...";
-        }
+//        if (currentContext.parentContext != NULL) {
+//            delete currentContext.parentContext;
+//        }
+        
+        contextStack.resize(0);
+        
+        
 		currentContext = MurkaContext();
         *((MurkaEventState*)&currentContext) = eventState;
         currentContext.assetsObject = this;
@@ -188,13 +186,28 @@ public:
                                                   float(ofGetHeight())};
 //        currentContext.currentViewShape = currentContext.rootViewShape;
 #endif
-        currentContext.pushContextInternal = [&](MurkaViewHandlerInternal* mvhi) { pushContext(mvhi); };
-        currentContext.popContextInternal = [&]() { popContext(); };
+        currentContext.pushContextInternal = [&](MurkaViewHandlerInternal* mvhi) {
+//            ofLog() << "push context internal... shape x was " << currentContext.currentViewShape.x();
+            
+            pushContext(mvhi);
+            
+//            ofLog() << "push context internal... shape x now " << currentContext.currentViewShape.x();
+        };
+        currentContext.popContextInternal = [&]() {
+//            ofLog() << "pop context internal... shape x was " << currentContext.currentViewShape.x();
+            
+            popContext();
+            
+//            ofLog() << "                        shape x now " << currentContext.currentViewShape.x();
+            
+        };
+        currentContext.getParentContextInternal = [&]()->MurkaContext {
+            return getParentContext();
+        };
         currentContext.setUIScale(getUIScale());
 
         latestContext = currentContext;
 
-        currentContext.parentContext = new MurkaContext();
         clearEvents();
 	}
 

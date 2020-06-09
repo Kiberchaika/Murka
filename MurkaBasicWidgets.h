@@ -84,13 +84,9 @@ public:
     MURKA_VIEW_DRAW_FUNCTION  {
         
         auto params = (Parameters*)parametersObject;
-        Label* thisWidget = (Label*)thisWidgetObject;
         
         bool inside = context.isHovered() * !areChildrenHovered(context);
         
-        // Your drawing and interaction code goes here.
-        // Don't forget that all of this executes at each frame for each
-        // widget that is drawn on screen.
         auto font = context.getParagraphFont();
         if (params->customFont) {
             font = params->font;

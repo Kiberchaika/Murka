@@ -54,8 +54,8 @@ public:
     //
     
     MurkaPoint getPosition() const {
-        return {currentViewShape.position.x + parentContext->currentViewShape.position.x,
-            currentViewShape.position.y + parentContext->currentViewShape.position.y};
+        return {currentViewShape.position.x + getParentContext().currentViewShape.position.x,
+            currentViewShape.position.y + getParentContext().currentViewShape.position.y};
     }
     
     MurkaPoint getSize() const {
@@ -68,7 +68,11 @@ public:
     
     MurkaOverlayHolder* overlayHolder;
     MurkaAssets* assetsObject;
-    MurkaContext* parentContext = NULL;
+    
+//    MurkaContext* parentContext = NULL;
+    MurkaContext getParentContext() const {
+        return getParentContextInternal();
+    }
     
     MurkaShape currentViewShape;
     
@@ -100,17 +104,17 @@ public:
     // Returns false if the view is not visible
     bool transformTheRenderIntoThisContextShape(bool noCrop = false) const {
         MurkaShape relativeShape = currentViewShape;
-        relativeShape.position.x -= parentContext->currentViewShape.position.x;
-        relativeShape.position.y -= parentContext->currentViewShape.position.y;
+        relativeShape.position.x -= getParentContext().currentViewShape.position.x;
+        relativeShape.position.y -= getParentContext().currentViewShape.position.y;
         
-        auto croppedViewport = getCroppedViewport(parentContext->currentViewShape, relativeShape);
+        auto croppedViewport = getCroppedViewport(getParentContext().currentViewShape, relativeShape);
         auto viewport = croppedViewport.first;
         auto offset = croppedViewport.second;
         
         if (noCrop) {
             viewport = relativeShape;
-            viewport.position.x += parentContext->currentViewShape.position.x;
-            viewport.position.y += parentContext->currentViewShape.position.y;
+            viewport.position.x += getParentContext().currentViewShape.position.x;
+            viewport.position.y += getParentContext().currentViewShape.position.y;
         }
         
         if (viewport.size.y <= 0) {
@@ -183,6 +187,7 @@ public:
     
     std::function<void(MurkaViewHandlerInternal*)> pushContextInternal = [](MurkaViewHandlerInternal* mvhi) {};
     std::function<void()> popContextInternal = []() {};
+    std::function<MurkaContext()> getParentContextInternal = []()->MurkaContext { return MurkaContext(); };
 
     double getRunningTime() const {return runningTime;}
     
