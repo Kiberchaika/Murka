@@ -268,14 +268,6 @@ public:
             ofSetColor(bgColor);
             ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
             
-            
-            if (isSelectingTextNow()) {
-
-                auto selectionShape = returnSelectionVisualShape();
-                ofSetColor(120, 120, 120, 255);
-                ofDrawRectangle(10 - cameraPanInsideWidget + selectionShape.x(), 4, selectionShape.width(), context.getSize().y - 8);
-            }
-            
             ofNoFill();
             ofSetColor(inside ? fgColor : fgColor / 2);
             if (activated) ofSetColor(fgColor * 1.2);
@@ -283,9 +275,21 @@ public:
             ofPopStyle();
         }
         
+        if (isSelectingTextNow()) {
+
+            auto selectionShape = returnSelectionVisualShape();
+            MurkaColor selectionColor = (context.getWidgetForegroundColor() * 0.5 +
+                                         context.getWidgetBackgroundColor() * 0.5) * 255;
+            ofColor selectionOfColor = (ofColor)selectionColor;
+            ofSetColor(selectionOfColor, 200);
+            ofDrawRectangle(10 - cameraPanInsideWidget + selectionShape.x(), 4, selectionShape.width(), context.getSize().y - 8);
+        }
+
+        
         recalcGlyphLengths(displayString, &context);
         
         float glyphXCoordinate = 10;
+        ofSetColor(fgColor);
         font->drawString(displayString, 10 - cameraPanInsideWidget, context.getSize().y / 2  + font->getLineHeight() / 4);
         
         if (displayString.size() == 0) {
@@ -588,6 +592,7 @@ public:
         if (activated)
         if ((enterPressed) || (context.mouseDownPressed[0] && !inside)) {
             activated = false;
+            cameraPanInsideWidget = 0;
             
             updateExternalData(dataToControl, params->clampNumber);
             
