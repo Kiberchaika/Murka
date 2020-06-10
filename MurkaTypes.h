@@ -26,6 +26,14 @@ struct MurkaColor {
     MurkaColor operator *(float multiplier) {
         return MurkaColor(r * multiplier, g * multiplier, b * multiplier, a * multiplier);
     }
+    
+    MurkaColor operator *(double multiplier) {
+        return MurkaColor(r * multiplier, g * multiplier, b * multiplier, a * multiplier);
+    }
+    
+    MurkaColor operator +(MurkaColor rightColor) {
+        return MurkaColor(r + rightColor.r, g + rightColor.g, b + rightColor.b, a + rightColor.a);
+    }
 
 #ifdef MURKA_OF
     operator ofColor() { return ofColor(r, g, b, a); }

@@ -133,7 +133,7 @@ public:
     float changeScale = 1.0;
 };
 
-class PlainTextField : public MurkaViewInterface<PlainTextField> {
+class TextField : public MurkaViewInterface<TextField> {
     
     class KeyStroke {
         vector<int> keys;
@@ -186,7 +186,7 @@ class PlainTextField : public MurkaViewInterface<PlainTextField> {
     KeyStroke copyText, cutText, pasteText, goLeft, goRight, selectAll;
     
 public:
-    PlainTextField() {
+    TextField() {
         
         // Setting up keystrokes
 #ifdef TARGET_OSX
@@ -213,7 +213,7 @@ public:
     MURKA_VIEW_DRAW_FUNCTION  {
 
         auto params = (Parameters*)parametersObject;
-        PlainTextField* thisWidget = (PlainTextField*)thisWidgetObject;
+        TextField* thisWidget = (TextField*)thisWidgetObject;
         
         bool inside = context.isHovered() * !areChildrenHovered(context);
         
@@ -221,6 +221,13 @@ public:
         float* floatData;
         double* doubleData;
         int* intData;
+        
+        // Handling "wants clicks"
+        if (!params->activateByDoubleClickOnly) {
+            thisWantsClicks = true;
+        } else {
+            thisWantsClicks = activated;
+        }
         
         if (!activated) { // while not activated
             updateInternalRepresenation(dataToControl, params->precision, params->clampNumber, params->minNumber, params->maxNumber);
@@ -233,7 +240,11 @@ public:
         // activation & deactivation & doubleclick
         if (context.mouseDownPressed[0]) {
             if (inside && !activated) {
-                activated = true;
+                if (params->activateByDoubleClickOnly) {
+                    activated = context.doubleClick;
+                } else { // activate by any click
+                    activated = true;
+                }
                 
                 updateInternalRepresenation(dataToControl, params->precision, params->clampNumber, params->minNumber, params->maxNumber);
                 
@@ -276,6 +287,14 @@ public:
         
         float glyphXCoordinate = 10;
         font->drawString(displayString, 10 - cameraPanInsideWidget, context.getSize().y / 2  + font->getLineHeight() / 4);
+        
+        if (displayString.size() == 0) {
+            // drawing hint
+            MurkaColor hintColor = context.getWidgetForegroundColor() * 0.5 +
+                                   context.getWidgetBackgroundColor() * 0.5;
+            ofSetColor(hintColor * 255);
+            font->drawString(params->hint, 10, context.getSize().y / 2  + font->getLineHeight() / 4);
+        }
         
         textHeight = context.getSize().y; // this is cache for text selection rect retrieavl
         
@@ -358,7 +377,7 @@ public:
         }
 
         // drawing cursor
-        if (activated) {
+        if (activated && !isSelectingTextNow()) {
             float timeMod = context.getRunningTime() / 1.0 - int(context.getRunningTime() / 1.0);
             ofSetColor(200);
             if (timeMod > 0.5)
@@ -666,6 +685,10 @@ public:
         double minNumber = 0, maxNumber = 0;
         int precision = -1;
         
+        bool activateByDoubleClickOnly = false;
+        
+        std::string hint = "";
+        
         Parameters() {
         }
         
@@ -764,6 +787,15 @@ public:
             return {selectionLastSymbolShape.x(), 0, selectionFirstSymbolShape.x() + selectionFirstSymbolShape.width() - selectionLastSymbolShape.x(), 20};
         }
     }
+    
+    bool thisWantsClicks = true;
+    
+    virtual bool wantsClicks() override { // this will signal the parent widget's "inside" function to allow to drag the parent widget around or do something else unless this one is activated; but we allow it to activate
+        
+        return thisWantsClicks;
+        
+    }
+
     
     bool isSelectingTextNow() {
         return (activated && (selectionSymbolsRange.first != selectionSymbolsRange.second));
