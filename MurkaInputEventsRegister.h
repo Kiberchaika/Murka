@@ -26,6 +26,7 @@ struct MurkaEventState {
     MurkaPoint mouseDelta = {0, 0};
     MurkaPoint mouseScroll = {0, 0};
     MurkaPoint swipeDelta = {0, 0};
+    MurkaPoint mouseDeltaSinceMouseLeftPressed = {0, 0};
     bool trackpadGesturePerformed = false;
     float pinchMagnification = 0;
     std::vector<int> keyPresses;
@@ -43,6 +44,7 @@ struct MurkaEventState {
 class MurkaInputEventsRegister {
 
     double lastLeftMousebuttonClicktime = -10000;
+    MurkaPoint mousePositionWhenMouseLeftPressed = {0, 0};
 public:
     
 #ifdef MURKA_OF
@@ -114,6 +116,12 @@ public:
         eventState.mouseDelta = {eventState.mousePosition.x - args.x,
                                  eventState.mousePosition.y - args.y};
         eventState.mousePosition = {args.x, args.y};
+        
+        // Pressed > Released delta support
+        
+        if (args.button == 0) {
+            eventState.mouseDeltaSinceMouseLeftPressed = eventState.mousePosition -  mousePositionWhenMouseLeftPressed;
+        }
     }
     
     void mouseMoved(ofMouseEventArgs & args) {
@@ -126,6 +134,12 @@ public:
         eventState.mousePosition = {args.x, args.y};
         eventState.mouseDown[args.button] = true;
         eventState.mouseDownPressed[args.button] = true;
+        
+        // Pressed > Released delta support
+        
+        if (args.button == 0) {
+            mousePositionWhenMouseLeftPressed = eventState.mousePosition;
+        }
         
         // Doubleclick support
         
@@ -142,6 +156,12 @@ public:
         eventState.mousePosition = {args.x, args.y};
         eventState.mouseReleased[args.button] = true;
         eventState.mouseDown[args.button] = false;
+
+        // Pressed > Released delta support
+        
+        if (args.button == 0) {
+            eventState.mouseDeltaSinceMouseLeftPressed = eventState.mousePosition -  mousePositionWhenMouseLeftPressed;
+        }
     }
     
     void mouseScrolled(ofMouseEventArgs & args) {
