@@ -95,6 +95,7 @@ struct MurkaPoint {
     
 #ifdef MURKA_OF
     operator ofPoint() { return ofPoint(x, y); }
+    operator ofVec2f() { return ofVec2f(x, y); }
 #endif
 };
 
