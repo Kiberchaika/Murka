@@ -236,6 +236,13 @@ public:
         params->useCustomFont ? font = params->customFont : font = context.getParagraphFont();
         
         bool doubleClick = false;
+        
+        // activating if always selected
+        
+        if (params->alwaysActivated) {
+            activated = true;
+            updateExternalData(dataToControl, params->clampNumber);
+        }
 
         // activation & deactivation & doubleclick
         if (context.mouseDownPressed[0]) {
@@ -589,7 +596,7 @@ public:
         
         // Deactivating the widget and updating the data
         
-        if (activated)
+        if ((activated) && (!params->alwaysActivated))
         if ((enterPressed) || (context.mouseDownPressed[0] && !inside)) {
             activated = false;
             cameraPanInsideWidget = 0;
@@ -603,8 +610,8 @@ public:
     };
     
     void updateExternalData(void* dataToControl, bool clamp = false) {
-            ofLog() << "datatype: " << dataTypeName;
-            ofLog() << "stringtype: " << typeid(std::string*).name();
+//            ofLog() << "datatype: " << dataTypeName;
+//            ofLog() << "stringtype: " << typeid(std::string*).name();
             if (dataTypeName == typeid(std::string*).name()) {
                 *((std::string*)dataToControl) = displayString;
             }
@@ -691,6 +698,7 @@ public:
         int precision = -1;
         
         bool activateByDoubleClickOnly = false;
+        bool alwaysActivated = false;
         
         std::string hint = "";
         

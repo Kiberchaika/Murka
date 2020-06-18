@@ -185,7 +185,6 @@ public:
     
     SurfaceControl surface;
     
-    
     MurkaPoint getTransformedPointerPosition(MurkaPoint pointer) {
         return {(pointer.x + panOffset.x) / scale,
                 (pointer.y + panOffset.y) / scale};
