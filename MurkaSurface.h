@@ -119,7 +119,7 @@ public:
             if (!performingMultitouchZoomNow) { // checking if this was trackpad gesture
 //                ofLog() << "no multitouch.";
                 if (surface.scrollwheelShouldZoom) {
-                    zoom(c.mouseScroll.y, c);
+                    zoom(c.mouseScroll.y * 5, c);
                 } else
                 if (surface.scrollwheelShouldPan) {
                     panOffset -= MurkaPoint(c.mouseScroll.x, c.mouseScroll.y);
