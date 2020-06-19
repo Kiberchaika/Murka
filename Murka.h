@@ -118,11 +118,20 @@ public:
         currentContext.transformTheRenderBackFromThisContextShape();
     }
     
-
+    int getMaxHoverIndex() {
+        return maxHoverIndex;
+    }
+    
+    int iterateHoverIndex() {
+        hoverIndex++;
+        return hoverIndex;
+    }
 
     void begin() { // this version is without arguments cause it creates the context
         
         restartContext();
+        
+        hoverIndex = 0;
         
         for (auto& i : children) {
             pushContext(i);
@@ -139,6 +148,8 @@ public:
 
         disableViewportCrop = false;
         overlays.clear();
+        
+        maxHoverIndex = hoverIndex;
     }
 
 	// A recursive OOP draw cycle that starts with this widget
@@ -187,23 +198,25 @@ public:
 //        currentContext.currentViewShape = currentContext.rootViewShape;
 #endif
         currentContext.pushContextInternal = [&](MurkaViewHandlerInternal* mvhi) {
-//            ofLog() << "push context internal... shape x was " << currentContext.currentViewShape.x();
             
             pushContext(mvhi);
             
-//            ofLog() << "push context internal... shape x now " << currentContext.currentViewShape.x();
         };
         currentContext.popContextInternal = [&]() {
-//            ofLog() << "pop context internal... shape x was " << currentContext.currentViewShape.x();
             
             popContext();
-            
-//            ofLog() << "                        shape x now " << currentContext.currentViewShape.x();
             
         };
         currentContext.getParentContextInternal = [&]()->MurkaContext {
             return getParentContext();
         };
+        currentContext.iterateHoverIndex = [&]()->int {
+            return iterateHoverIndex();
+        };
+        currentContext.getMaxHoverIndex = [&]()->int {
+            return getMaxHoverIndex();
+        };
+
         currentContext.setUIScale(getUIScale());
 
         latestContext = currentContext;
@@ -368,7 +381,9 @@ public:
 
 private:
     float uiScale = 1;
-
+    
+    int hoverIndex = 0;
+    int maxHoverIndex = 0;
 
 };
 

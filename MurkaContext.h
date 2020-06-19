@@ -185,6 +185,8 @@ public:
         popContextInternal();
     }
     
+    std::function<int()> getMaxHoverIndex = []()->int {return 0;};
+    std::function<int()> iterateHoverIndex = []()->int {return 0;};
     std::function<void(MurkaViewHandlerInternal*)> pushContextInternal = [](MurkaViewHandlerInternal* mvhi) {};
     std::function<void()> popContextInternal = []() {};
     std::function<MurkaContext()> getParentContextInternal = []()->MurkaContext { return MurkaContext(); };

@@ -64,6 +64,24 @@ public:
         childrenBounds = {std::numeric_limits<float>::max(), std::numeric_limits<float>::max(),
             0, 0};
     }
+    
+    int hoverIndexCache = 0;
+    
+    bool hasMouseFocus(MurkaContext & context) {
+        bool inside = context.isHovered() * !areInteractiveChildrenHovered(context);
+        
+        bool pass = true;
+        if (inside && wantsClicks()) {
+            auto itr = context.iterateHoverIndex();
+            if (hoverIndexCache != context.getMaxHoverIndex()) pass = false;
+                else pass = true;
+                
+            hoverIndexCache = itr;
+        }
+        
+        return pass;
+    }
+
 
     bool areInteractiveChildrenHovered(MurkaContext c) {
         if (!c.isHovered()) {
@@ -404,7 +422,6 @@ typename T::Results drawWidget(MurkaContext &c, typename T::Parameters parameter
 }
 
 // Get the latest drawn immediate mode widget
-
 
 template<typename T>
 T* getLatestDrawnWidget(MurkaContext &c) {
