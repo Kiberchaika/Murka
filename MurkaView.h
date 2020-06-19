@@ -70,7 +70,7 @@ public:
     bool hasMouseFocus(MurkaContext & context) {
         bool inside = context.isHovered() * !areInteractiveChildrenHovered(context);
         
-        bool pass = true;
+        bool pass = false;
         if (inside && wantsClicks()) {
             auto itr = context.iterateHoverIndex();
             if (hoverIndexCache != context.getMaxHoverIndex()) pass = false;
