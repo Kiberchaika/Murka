@@ -5,6 +5,7 @@
 #include "MurkaViewHandler.h"
 #include "Murka.h"
 #include "MurkaLinearLayoutGenerator.h"
+#include "MurkaAnimator.h"
 
 namespace murka {
     
@@ -19,7 +20,7 @@ typedef std::function<void (void* dataToControl,
 
 // View heirarchy
 
-class View {
+class View: public MurkaAnimator {
 public:
     
     // This variable is needed to support immediate mode widgets resizing themselves while also receiving sizes from outside.
@@ -298,6 +299,8 @@ typename T::Results drawWidget(MurkaContext &c, typename T::Parameters parameter
     if (c.transformTheRenderIntoThisContextShape(c.overlayHolder->disableViewportCrop)) {
         widgetObject->layoutGenerator.restart(((View*)widgetHandler->widgetObjectInternal)->shape, c.getUIScale());
             widgetObject->draw(NULL, &parameters, widgetObject, c, &results);
+        widgetObject->animationRestart();
+
         
         /*
         //DEBUG - drawing the children frame that we had at the last frame end
@@ -337,6 +340,7 @@ typename T::Results drawWidget(MurkaContext &c, B* dataToControl, typename T::Pa
     if (c.transformTheRenderIntoThisContextShape(c.overlayHolder->disableViewportCrop)) {
     
         widgetObject->layoutGenerator.restart(shape, c.getUIScale());
+        widgetObject->animationRestart();
         widgetObject->draw(dataToControl, &parameters, widgetObject, c, &results);
         
         //DEBUG
@@ -372,7 +376,7 @@ typename T::Results drawWidget(MurkaContext &c, B* dataToControl, typename T::Pa
     
     auto widgetHandler = T::getOrCreateImModeWidgetObject(counter, NULL, (View*)c.murkaView, shapeOffering);
     auto widgetObject = (View*)widgetHandler->widgetObjectInternal;
-    
+
     widgetObject->dataTypeName = typeid(dataToControl).name();
 
     typename T::Results results;
@@ -381,6 +385,7 @@ typename T::Results drawWidget(MurkaContext &c, B* dataToControl, typename T::Pa
     if (c.transformTheRenderIntoThisContextShape(c.overlayHolder->disableViewportCrop)) {
         
         widgetObject->layoutGenerator.restart(shapeOffering, c.getUIScale());
+        widgetObject->animationRestart();
         widgetObject->draw(dataToControl, &parameters, widgetObject, c, &results);
         
         c.transformTheRenderBackFromThisContextShape();
@@ -410,6 +415,7 @@ typename T::Results drawWidget(MurkaContext &c, typename T::Parameters parameter
     if (c.transformTheRenderIntoThisContextShape(c.overlayHolder->disableViewportCrop)) {
         
         widgetObject->layoutGenerator.restart(shapeOffering, c.getUIScale());
+        widgetObject->animationRestart();
         widgetObject->draw(NULL, &parameters, widgetObject, c, &results);
         
         c.transformTheRenderBackFromThisContextShape();

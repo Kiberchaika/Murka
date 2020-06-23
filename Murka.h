@@ -29,7 +29,7 @@
  public:
      MURKA_VIEW_DRAW_FUNCTION  {
                     auto params = (Parameters*)parametersObject;
-                    bool inside = context.isHovered() * !areChildrenHovered(context);
+                    bool inside = context.isHovered() * !areChildrenHovered(context) * hasMouseFocus(context);
  
                     // Your drawing and interaction code goes here.
                     // Don't forget that all of this executes at each frame for each
@@ -160,8 +160,8 @@ public:
         ((MurkaViewHandler<View>*)widget)->widgetObject->draw(widget->dataToControl, widget->parametersInternal, widget->widgetObjectInternal, currentContext, widget->resultsInternal);
         
         // restarting layout generator
-        ((MurkaViewHandler<View>*)widget)->widgetObject->layoutGenerator.restart(((MurkaViewHandler<View>*)widget)->widgetObject->shape, getUIScale());
-//        ((View*)widget->widgetObjectInternal)->childrenBounds = {0, 0, 0, 0};
+    ((MurkaViewHandler<View>*)widget)->widgetObject->layoutGenerator.restart(((MurkaViewHandler<View>*)widget)->widgetObject->shape, getUIScale());
+        ((MurkaViewHandler<View>*)widget)->widgetObject->animationRestart();;
         
         currentContext.transformTheRenderBackFromThisContextShape();
 
