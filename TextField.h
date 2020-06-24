@@ -122,6 +122,8 @@ public:
                     activated = true;
                 }
                 
+                if (activated) context.claimKeyboardFocus(this);
+                
                 updateInternalRepresenation(dataToControl, params->precision, params->clampNumber, params->minNumber, params->maxNumber);
                 
             }
@@ -469,6 +471,8 @@ public:
         if ((enterPressed) || (context.mouseDownPressed[0] && !inside)) {
             activated = false;
             cameraPanInsideWidget = 0;
+            
+            context.resetKeyboardFocus(this);
             
             updateExternalData(dataToControl, params->clampNumber);
             

@@ -118,6 +118,22 @@ public:
         currentContext.transformTheRenderBackFromThisContextShape();
     }
     
+    View* keyboardFocusHaver = NULL;
+    
+    void setKeyboardFocusHaver(View* newOwner) {
+        keyboardFocusHaver = newOwner;
+    }
+    
+    bool allowedToUseKeyboard(View* asker) {
+        return ((keyboardFocusHaver == asker) || (keyboardFocusHaver == NULL));
+    }
+    
+    void resetKeyboardFocus(View* asker) {
+        if (asker == keyboardFocusHaver) {
+            keyboardFocusHaver = NULL;
+        }
+    }
+    
     int getMaxHoverIndex() {
         return maxHoverIndex;
     }
@@ -198,25 +214,39 @@ public:
 //        currentContext.currentViewShape = currentContext.rootViewShape;
 #endif
         currentContext.pushContextInternal = [&](MurkaViewHandlerInternal* mvhi) {
-            
             pushContext(mvhi);
-            
         };
+        
         currentContext.popContextInternal = [&]() {
-            
             popContext();
-            
         };
+        
         currentContext.getParentContextInternal = [&]()->MurkaContext {
             return getParentContext();
         };
+        
         currentContext.iterateHoverIndex = [&]()->int {
             return iterateHoverIndex();
         };
+        
         currentContext.getMaxHoverIndex = [&]()->int {
             return getMaxHoverIndex();
         };
-
+        
+        currentContext.claimKeyboardFocus = [&](void* asker) {
+            setKeyboardFocusHaver((View*)asker);
+            return;
+        };
+        
+        currentContext.resetKeyboardFocus = [&](void* asker) {
+            resetKeyboardFocus((View*)asker);
+            return;
+        };
+        
+        currentContext.checkKeyboardFocus = [&](void* asker)->bool {
+            return allowedToUseKeyboard((View*)asker);
+        };
+        
         currentContext.setUIScale(getUIScale());
 
         latestContext = currentContext;

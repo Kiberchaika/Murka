@@ -184,7 +184,9 @@ public:
     void popContext() {
         popContextInternal();
     }
-    
+    std::function<void(void*)> claimKeyboardFocus = [](void*) {return; };
+    std::function<void(void*)> resetKeyboardFocus = [](void*) {return; };
+    std::function<bool(void*)> checkKeyboardFocus = [](void*)->bool {return true; }; // aka "widget is allowed to use keyboard"
     std::function<int()> getMaxHoverIndex = []()->int {return 0;};
     std::function<int()> iterateHoverIndex = []()->int {return 0;};
     std::function<void(MurkaViewHandlerInternal*)> pushContextInternal = [](MurkaViewHandlerInternal* mvhi) {};
