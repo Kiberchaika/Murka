@@ -1,5 +1,9 @@
 #pragma once
 
+// TODO: add speed
+// TODO: add easings from this site by converting them to functions of input
+// https://easings.net/#
+
 class MurkaAnimator {
     int AIndex = 0;
     
@@ -26,7 +30,6 @@ public:
             animationsMap[AIndex + 1].target = double(X);
             if (animationsMap[AIndex + 1].target > animationsMap[AIndex + 1].value) {
                 animationsMap[AIndex + 1].value += (animationsMap[AIndex + 1].target - animationsMap[AIndex + 1].value) / 10;
-                ofLog() << animationsMap[AIndex + 1].value;
             } else {
                 animationsMap[AIndex + 1].value -= (animationsMap[AIndex + 1].value - animationsMap[AIndex + 1].target) / 10;
             }
