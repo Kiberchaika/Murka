@@ -143,6 +143,10 @@ struct MurkaShape {
         return {position.x / b.x, position.y / b.y, size.x / b.x, size.y / b.y};
     }
     
+    operator ofRectangle() {
+        return {position.x, position.y, size.x, size.y};
+    }
+    
 	MurkaShape() {
 
 	}
