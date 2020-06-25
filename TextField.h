@@ -137,8 +137,8 @@ public:
 
 #ifdef MURKA_OF
         MurkaColor c = context.getWidgetForegroundColor();
-        ofColor bgColor = context.getWidgetBackgroundColor() * 255;
-        ofColor fgColor = context.getWidgetForegroundColor() * 255;
+        ofColor bgColor = params->widgetBgColor * 255;
+        ofColor fgColor = params->widgetFgColor * 255;
         
         if (params->drawBounds) {
             ofPushStyle();
@@ -493,6 +493,7 @@ public:
 #ifdef MURKA_OF
                 *floatData = ofToFloat(displayString);
 #endif
+                ofLog() << "setting it to " << *floatData;
             }
             if (dataTypeName == typeid(double*).name()) {
                 double* doubleData = ((double*)dataToControl);
@@ -509,12 +510,18 @@ public:
     }
     
     void updateInternalRepresenation(void* dataToControl, int precision, bool clamp = false, double min = 0, double max = 0) {
+
+        bool isItStringData = false;
+        
         // Updating the internal representation now
         if (dataTypeName == typeid(std::string*).name()) {
             std::string* stringData = ((std::string*)dataToControl);
             std::string xxx = *stringData;
             displayString = xxx;
+            
+            isItStringData = true;
         }
+        
         if (dataTypeName == typeid(float*).name()) {
             float* floatData = ((float*)dataToControl);
 #ifdef MURKA_OF
@@ -557,6 +564,15 @@ public:
             }
 #endif
         }
+        
+        if (!isItStringData) {
+            if (displayString.find('.') != std::string::npos) {
+                displayString.erase ( displayString.find_last_not_of('0') + 1, std::string::npos );
+                if (displayString[displayString.length() - 1] == '.') {
+                    displayString.erase(displayString.length() - 1, 1);
+                }
+            }
+        }
     }
     
     struct Parameters {
@@ -574,6 +590,10 @@ public:
         bool alwaysActivated = false;
         
         std::string hint = "";
+        
+        MurkaColor widgetFgColor = {0.98, 0.98, 0.98};
+        MurkaColor widgetBgColor = {0.1, 0.1, 0.1};
+
         
         Parameters() {
         }
