@@ -12,6 +12,8 @@
 typedef ofxFontStash FontObject; // It's important for this object to exist in a render for Murka to work
 #endif
 
+#include <iostream>
+#include <cmath>
 
 struct MurkaColor {
     double r = 0, g = 0, b = 0, a = 1;
@@ -78,6 +80,8 @@ struct MurkaPoint {
 		return ((x == right.x) && (y == right.y));
 	}
 	
+    friend std::ostream& operator<<(std::ostream& os, const MurkaPoint& dt);
+
 
     MurkaPoint (float x_, float y_) {
         x = x_;
@@ -99,15 +103,16 @@ struct MurkaPoint {
 #endif
 };
 
+
 struct MurkaShape {
 	MurkaPoint position = { 0, 0 };
 	MurkaPoint size = { 0, 0 };
 
-	bool inside(MurkaPoint p) const {
-		return ((p.x > position.x) &&
-			(p.x < position.x + size.x) &&
-			(p.y > position.y) &&
-			(p.y < position.y + size.y));
+	bool inside(MurkaPoint p, double enlargeShape = 0) const {
+		return ((p.x > position.x - enlargeShape) &&
+			(p.x < position.x + size.x + enlargeShape * 2) &&
+			(p.y > position.y - enlargeShape) &&
+			(p.y < position.y + size.y + enlargeShape * 2));
 	}
 
     // inside function that ignores position
@@ -126,26 +131,16 @@ struct MurkaShape {
             return true;
         } else return false;
     }
-    
-    MurkaShape operator * (float b) {
-        return {position.x * b, position.y * b, size.x * b, size.y * b};
+
+    bool operator == (const MurkaShape b) const {
+        if ((position.x == b.position.x) &&
+            (position.y == b.position.y) &&
+            (size.x == b.size.x) &&
+            (size.y == b.size.y)) {
+            return true;
+        } else return false;
     }
-    
-    MurkaShape operator * (MurkaPoint b) {
-        return {position.x * b.x, position.y * b.y, size.x * b.x, size.y * b.y};
-    }
-    
-    MurkaShape operator / (float b) {
-        return {position.x / b, position.y / b, size.x / b, size.y / b};
-    }
-    
-    MurkaShape operator / (MurkaPoint b) {
-        return {position.x / b.x, position.y / b.y, size.x / b.x, size.y / b.y};
-    }
-    
-    operator ofRectangle() {
-        return {position.x, position.y, size.x, size.y};
-    }
+
     
 	MurkaShape() {
 
@@ -175,4 +170,26 @@ struct MurkaShape {
         size.x = width;
         size.y = height;
     }
+    
+    MurkaShape operator * (float b) {
+        return {position.x * b, position.y * b, size.x * b, size.y * b};
+    }
+    
+    MurkaShape operator * (MurkaPoint b) {
+        return {position.x * b.x, position.y * b.y, size.x * b.x, size.y * b.y};
+    }
+    
+    MurkaShape operator / (float b) {
+        return {position.x / b, position.y / b, size.x / b, size.y / b};
+    }
+    
+    MurkaShape operator / (MurkaPoint b) {
+        return {position.x / b.x, position.y / b.y, size.x / b.x, size.y / b.y};
+    }
+    
+#ifdef MURKA_OF
+    operator ofRectangle() {
+        return {position.x, position.y, size.x, size.y};
+    }
+#endif
 };
