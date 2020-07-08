@@ -19,6 +19,7 @@ namespace murka {
 
 class MurkaContext: public MurkaEventState {
 public:
+    
     MurkaContext() {
 #ifdef MURKA_OF
         runningTime = ofGetElapsedTimef();

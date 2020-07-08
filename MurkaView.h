@@ -18,7 +18,11 @@ typedef std::function<void (void* dataToControl,
 
 #define MURKA_VIEW_DRAW_FUNCTION void draw(void* dataToControl, void* parametersObject, void* thisWidgetObject, MurkaContext & context, void* resultObject)
 
-// View heirarchy
+// // View heirarchy
+
+// View is non-template class that holds everything that any widget should subclass (wantsClicks) and hold.
+// MurkaViewInterface class is a templated class that wraps View and adds some functions needed for Murka
+// to allocate resources for this widget.
 
 class View: public MurkaAnimator {
 public:
@@ -184,6 +188,11 @@ public:
     MurkaContext latestContext;
 };
 
+// MurkaViewInterface is used to add functions that automatically create resources and widget objects for any widget T.
+// It's meant to be used in a child class definition like this:
+//
+// class Foo : public MurkaViewInterface<Foo>
+
 template<class T>
 class MurkaViewInterface: public View {
 public:
@@ -252,7 +261,8 @@ public:
             
             parentWidget->imChildren[idTuple] = (MurkaViewHandler<View> *)newHandler;
 
-            // Updating children bounds
+            // Updating children bounds (this is needed for automatic scrolling and things like that -
+            // basically informing parent widget of how much space does its children occupy)
             if (parentWidget->childrenBounds.position.x > shape.position.x) {
                 parentWidget->childrenBounds.position.x = shape.position.x;
 //                ofLog() << "updated cb x (1) to " << shape.position.x;
@@ -288,6 +298,7 @@ typename T::Results drawWidget(MurkaContext &c, typename T::Parameters parameter
     //        auto context = &(m.currentContext);
     int counter = c.getImCounter();
 
+    
     auto parentView = (View*)c.murkaView;
     auto widgetHandler = T::getOrCreateImModeWidgetObject(counter, NULL, parentView, shape * c.getUIScale());
     auto widgetObject = (View*)widgetHandler->widgetObjectInternal;

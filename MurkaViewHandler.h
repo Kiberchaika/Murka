@@ -5,6 +5,10 @@ namespace murka {
 
 // Handler heirarchy
 
+// Handler is View that also wraps data to control, parameters and results.
+// This is made for the user to only subclass a super minimal View object,
+// Murka itself manages allocating memory for all of those
+
 struct MurkaViewHandlerInternal {
     void* parametersInternal = NULL;
     void* resultsInternal = NULL;
@@ -26,7 +30,7 @@ struct MurkaViewHandler: public MurkaViewHandlerInternal {
     
     //    typename T::Results* results;
     typename T::Parameters* tParams;
-    T* widgetObject;
+    T* widgetObject; // TODO: check if this widgetObject is redundant, since there is "external" version and it's sometimes NULL if debugger is right
     
     typename T::Results* castResultsP() {
         
