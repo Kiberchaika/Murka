@@ -55,20 +55,29 @@ struct MurkaPoint {
         return *this;
     }
 
-    MurkaPoint operator + (MurkaPoint p2) {
+    MurkaPoint operator + (const MurkaPoint p2) const {
         return {x + p2.x, y + p2.y};
     }
     
-    MurkaPoint operator - (MurkaPoint p2) {
+//    MurkaPoint operator - (MurkaPoint p2) {
+//        return {x - p2.x, y - p2.y};
+//    }
+//
+    MurkaPoint operator - (const MurkaPoint p2) const {
         return {x - p2.x, y - p2.y};
     }
-    
+
     MurkaPoint operator * (float multiplier) {
         return {x * multiplier, y * multiplier};
     }
     
     MurkaPoint operator / (float divider) {
         return {x / divider, y / divider};
+    }
+    
+    MurkaPoint operator-() const
+    {
+        return MurkaPoint(-(this->x), -(this->y) );
     }
     
     bool operator== (MurkaPoint & right) {
@@ -114,6 +123,16 @@ struct MurkaShape {
 			(p.y > position.y - enlargeShape) &&
 			(p.y < position.y + size.y + enlargeShape * 2));
 	}
+    
+    inline bool intersectsWithRectangle(MurkaShape b) {
+        if (b.inside({position.x, position.y}) ||
+            b.inside({position.x + size.x, position.y}) ||
+            b.inside({position.x, position.y + size.y}) ||
+            b.inside({position.x + size.x, position.y + size.y})) {
+            return true;
+        }
+        return false;
+    }
 
     // inside function that ignores position
     bool transformedInside(MurkaPoint p) const {
@@ -185,6 +204,10 @@ struct MurkaShape {
     
     MurkaShape operator / (MurkaPoint b) {
         return {position.x / b.x, position.y / b.y, size.x / b.x, size.y / b.y};
+    }
+    
+    MurkaShape operator - (MurkaShape b) {
+        return {position.x - b.position.x, position.y - b.position.y, size.x - b.size.x, size.y - b.size.y};
     }
     
 #ifdef MURKA_OF

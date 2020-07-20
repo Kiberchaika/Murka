@@ -6,6 +6,7 @@
 #include "Murka.h"
 #include "MurkaLinearLayoutGenerator.h"
 #include "MurkaAnimator.h"
+#include "MosaicLayout.h"
 
 namespace murka {
     
@@ -174,16 +175,17 @@ public:
         ofLog() << "drawing an empty func...";
     }
     
-    struct Parameters { };
+    struct Parameters {};
     struct Results {};
     
     void* parametersInternal;
     void* resultsInternal;
     std::string dataTypeName = "";
     
-    MurkaShape shape = {0,0, 1, 2};
+    MurkaShape shape = {0, 0, 1, 2};
     
-    MurkaLinearLayoutGenerator layoutGenerator;
+    MurkaLinearLayoutGenerator linearLayout;
+    MosaicLayout mosaicLayout;
     
     MurkaContext latestContext;
 };
@@ -308,10 +310,10 @@ typename T::Results drawWidget(MurkaContext &c, typename T::Parameters parameter
     
     c.pushContext(widgetHandler);
     if (c.transformTheRenderIntoThisContextShape(c.overlayHolder->disableViewportCrop)) {
-        widgetObject->layoutGenerator.restart(((View*)widgetHandler->widgetObjectInternal)->shape, c.getUIScale());
+        widgetObject->linearLayout.restart(((View*)widgetHandler->widgetObjectInternal)->shape, c.getUIScale());
             widgetObject->draw(NULL, &parameters, widgetObject, c, &results);
         widgetObject->animationRestart();
-
+        widgetObject->mosaicLayout.restart();
         
         /*
         //DEBUG - drawing the children frame that we had at the last frame end
@@ -350,8 +352,9 @@ typename T::Results drawWidget(MurkaContext &c, B* dataToControl, typename T::Pa
     c.pushContext(widgetHandler);
     if (c.transformTheRenderIntoThisContextShape(c.overlayHolder->disableViewportCrop)) {
     
-        widgetObject->layoutGenerator.restart(shape, c.getUIScale());
+        widgetObject->linearLayout.restart(shape, c.getUIScale());
         widgetObject->animationRestart();
+        widgetObject->mosaicLayout.restart();
         widgetObject->draw(dataToControl, &parameters, widgetObject, c, &results);
         
         //DEBUG
@@ -383,7 +386,7 @@ typename T::Results drawWidget(MurkaContext &c, B* dataToControl, typename T::Pa
     
     auto parentMView = (View*)c.murkaView;
     
-    auto shapeOffering = parentMView->layoutGenerator.getNextShapeOffering(c.getUIScale());
+    auto shapeOffering = parentMView->linearLayout.getNextShapeOffering(c.getUIScale());
     
     auto widgetHandler = T::getOrCreateImModeWidgetObject(counter, NULL, (View*)c.murkaView, shapeOffering);
     auto widgetObject = (View*)widgetHandler->widgetObjectInternal;
@@ -395,8 +398,9 @@ typename T::Results drawWidget(MurkaContext &c, B* dataToControl, typename T::Pa
     c.pushContext(widgetHandler);
     if (c.transformTheRenderIntoThisContextShape(c.overlayHolder->disableViewportCrop)) {
         
-        widgetObject->layoutGenerator.restart(shapeOffering, c.getUIScale());
+        widgetObject->linearLayout.restart(shapeOffering, c.getUIScale());
         widgetObject->animationRestart();
+        widgetObject->mosaicLayout.restart();
         widgetObject->draw(dataToControl, &parameters, widgetObject, c, &results);
         
         c.transformTheRenderBackFromThisContextShape();
@@ -415,7 +419,7 @@ typename T::Results drawWidget(MurkaContext &c, typename T::Parameters parameter
     
     auto parentMView = (View*)c.murkaView;
     
-    auto shapeOffering = parentMView->layoutGenerator.getNextShapeOffering(c.getUIScale());
+    auto shapeOffering = parentMView->linearLayout.getNextShapeOffering(c.getUIScale());
     
     auto widgetHandler = T::getOrCreateImModeWidgetObject(counter, NULL, (View*)c.murkaView, shapeOffering);
     auto widgetObject = (View*)widgetHandler->widgetObjectInternal;
@@ -425,8 +429,9 @@ typename T::Results drawWidget(MurkaContext &c, typename T::Parameters parameter
     c.pushContext(widgetHandler);
     if (c.transformTheRenderIntoThisContextShape(c.overlayHolder->disableViewportCrop)) {
         
-        widgetObject->layoutGenerator.restart(shapeOffering, c.getUIScale());
+        widgetObject->linearLayout.restart(shapeOffering, c.getUIScale());
         widgetObject->animationRestart();
+        widgetObject->mosaicLayout.restart();
         widgetObject->draw(NULL, &parameters, widgetObject, c, &results);
         
         c.transformTheRenderBackFromThisContextShape();

@@ -116,13 +116,19 @@ public:
             (c.mouseScroll.x != 0)) && inside) {
             // Scrolling somewhere
             
+            float osScrollwheelMultiplier = 1; // oF on Windows sends very little values, oF on mac sends pixel values for scroll
+            
+#ifdef TARGET_WIN32
+            osScrollwheelMultiplier = 10;
+#endif
+            
             if (!performingMultitouchZoomNow) { // checking if this was trackpad gesture
 //                ofLog() << "no multitouch.";
                 if (surface.scrollwheelShouldZoom) {
-                    zoom(c.mouseScroll.y * 5, c);
+                    zoom(c.mouseScroll.y * 5 * osScrollwheelMultiplier, c);
                 } else
                 if (surface.scrollwheelShouldPan) {
-                    panOffset -= MurkaPoint(c.mouseScroll.x, c.mouseScroll.y);
+                    panOffset -= MurkaPoint(c.mouseScroll.x, c.mouseScroll.y) * osScrollwheelMultiplier;
                     limitPan();
                 }
             } else { // this was a trackpad swipe gesture, we should def pan then

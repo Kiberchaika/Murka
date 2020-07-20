@@ -176,8 +176,9 @@ public:
         ((MurkaViewHandler<View>*)widget)->widgetObject->draw(widget->dataToControl, widget->parametersInternal, widget->widgetObjectInternal, currentContext, widget->resultsInternal);
         
         // restarting layout generator
-    ((MurkaViewHandler<View>*)widget)->widgetObject->layoutGenerator.restart(((MurkaViewHandler<View>*)widget)->widgetObject->shape, getUIScale());
-        ((MurkaViewHandler<View>*)widget)->widgetObject->animationRestart();;
+    ((MurkaViewHandler<View>*)widget)->widgetObject->linearLayout.restart(((MurkaViewHandler<View>*)widget)->widgetObject->shape, getUIScale());
+        ((MurkaViewHandler<View>*)widget)->widgetObject->animationRestart();
+        ((MurkaViewHandler<View>*)widget)->widgetObject->mosaicLayout.restart();
         
         currentContext.transformTheRenderBackFromThisContextShape();
 
@@ -284,23 +285,23 @@ public:
     }
     
     void setCurrentLayoutStructure(std::initializer_list<MurkaLinearLayoutGenerator::ShapePartDescriptor> list) {
-       ((View*)currentContext.murkaView)->layoutGenerator.setLayoutStructure(list);
+       ((View*)currentContext.murkaView)->linearLayout.setLayoutStructure(list);
     }
     
     float getLayoutLineHeight() {
-        return ((View*)currentContext.murkaView)->layoutGenerator.getLayoutLineHeight();
+        return ((View*)currentContext.murkaView)->linearLayout.getLayoutLineHeight();
     }
     
     void setLayoutLinearOffset(float offset) {
-        ((View*)currentContext.murkaView)->layoutGenerator.setLinearOffset(offset);
+        ((View*)currentContext.murkaView)->linearLayout.setLinearOffset(offset);
     }
     
     void setLayoutLineHeight(float height) {
-        ((View*)currentContext.murkaView)->layoutGenerator.setLayoutLineHeight(height * getUIScale());
+        ((View*)currentContext.murkaView)->linearLayout.setLayoutLineHeight(height * getUIScale());
     }
     
     void addLayoutSpacing(float spacing) {
-        ((View*)currentContext.murkaView)->layoutGenerator.addSpacing(spacing);
+        ((View*)currentContext.murkaView)->linearLayout.addSpacing(spacing);
     }
 
     ////////

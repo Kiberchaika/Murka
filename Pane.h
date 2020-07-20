@@ -82,10 +82,18 @@ public:
             }
 
             if (*paneSplitValue < params->minValue) {
-                *paneSplitValue = 0;
+                if (params->collapseable) {
+                    *paneSplitValue = 0;
+                } else {
+                    *paneSplitValue = params->minValue;
+                }
             }
             if (*paneSplitValue > params->maxValue) {
-                *paneSplitValue = 1.0;
+                if (params->collapseable) {
+                    *paneSplitValue = 1.0;
+                } else {
+                    *paneSplitValue = params->maxValue;
+                }
             }
         }
     };
