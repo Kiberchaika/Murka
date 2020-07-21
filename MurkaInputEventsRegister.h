@@ -47,27 +47,27 @@ class MurkaInputEventsRegister {
     MurkaPoint mousePositionWhenMouseLeftPressed = {0, 0};
 public:
     
-#ifdef MURKA_OF
-
-    void setupEvents() {
-        ofRegisterKeyEvents(this);
-        ofRegisterMouseEvents(this);
-        ofRegisterTouchEvents(this);
-        
-#ifdef TARGET_OSX
-        ofAddListener(ofxMacTrackpad::pinch, this, &MurkaInputEventsRegister::didPinch);
-        ofAddListener(ofxMacTrackpad::swipe, this, &MurkaInputEventsRegister::didSwipe);
-        ofAddListener(ofxMacTrackpad::multitouch, this, &MurkaInputEventsRegister::didMultitouch);
-
-        ofxMacTrackpad::startListening();
-        
-        ofSetBackgroundAuto(true);
-
-#endif
-
-    }
-    
     MurkaEventState eventState;
+    
+    void setupEvents() {
+    #ifdef MURKA_OF
+            ofRegisterKeyEvents(this);
+            ofRegisterMouseEvents(this);
+            ofRegisterTouchEvents(this);
+            
+        #ifdef TARGET_OSX
+                ofAddListener(ofxMacTrackpad::pinch, this, &MurkaInputEventsRegister::didPinch);
+                ofAddListener(ofxMacTrackpad::swipe, this, &MurkaInputEventsRegister::didSwipe);
+                ofAddListener(ofxMacTrackpad::multitouch, this, &MurkaInputEventsRegister::didMultitouch);
+
+                ofxMacTrackpad::startListening();
+                
+                ofSetBackgroundAuto(true);
+
+        #endif // TARGET_OSX - trackpad
+        
+    #endif // MURKA_OF
+    }
     
     void clearEvents() {
         // mouse persistence
@@ -82,9 +82,22 @@ public:
         eventState.mouseDown[1] = mouseDown[1];
         eventState.mouseDown[2] = mouseDown[2];
     }
-    
 
-    // Keyboard events
+    // custom event registration
+    
+    void keyPressed(int key) {
+        eventState.keyPresses.push_back(key);
+    }
+    
+    void keyReleased(int key) {
+    }
+    
+    // oF event registration
+    
+#ifdef MURKA_OF
+
+
+    // oF Keyboard events
     
     void keyPressed(ofKeyEventArgs & args) {
         eventState.keyPresses.push_back(args.key);
@@ -93,7 +106,7 @@ public:
     void keyReleased(ofKeyEventArgs & args) {
     }
     
-    // Trackpad events
+    // oF Trackpad events
     
 #ifdef TARGET_OSX
 	void didPinch(ofxMacTrackpad::PinchArg &arg) {
@@ -109,7 +122,7 @@ public:
     }
 #endif
 
-    // Mouse events
+    // oF Mouse events
     
     void mouseDragged(ofMouseEventArgs & args) {
         eventState.mouseDragged[args.button] = true;
@@ -169,7 +182,6 @@ public:
     }
     
     void mouseEntered(ofMouseEventArgs & args) {
-#ifdef MURKA_OF
 
                 
 #ifdef TARGET_OSX
@@ -177,12 +189,11 @@ public:
 #endif
         
         
-#endif
     }
     
     void mouseExited(ofMouseEventArgs & args) {}
     
-    // Touch events
+    // oF Touch events
     
     void touchDown(ofTouchEventArgs & args) {}
     
@@ -194,7 +205,7 @@ public:
     
     void touchDoubleTap(ofTouchEventArgs & args) {}
     
-#endif 
+#endif // MURKA_OF
 
 };
 

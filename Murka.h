@@ -63,7 +63,7 @@
 
 namespace murka {
 
-class Murka : public MurkaViewInterface<Murka>, MurkaInputEventsRegister, public MurkaAssets, public MurkaOverlayHolder {
+class Murka : public MurkaViewInterface<Murka>, public MurkaInputEventsRegister, public MurkaAssets, public MurkaOverlayHolder {
 public:
 	Murka() {
         setupEvents();
@@ -222,8 +222,8 @@ public:
             popContext();
         };
         
-        currentContext.getParentContextInternal = [&]()->MurkaContext {
-            return getParentContext();
+        currentContext.getParentContextShapeInternal = [&]()->MurkaShape {
+            return getParentContext().currentViewShape;
         };
         
         currentContext.iterateHoverIndex = [&]()->int {
