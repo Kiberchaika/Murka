@@ -102,6 +102,12 @@ struct MurkaPoint {
         y = 0;
     }
     
+    template<typename A, typename B>
+    MurkaPoint(A x_, B y_) {
+        x = x_;
+        y = y_;
+    }
+    
     float length() const  {
         return sqrt(pow(x, 2) + pow(y, 2));
     }

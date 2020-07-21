@@ -92,6 +92,59 @@ public:
     void keyReleased(int key) {
     }
     
+    void mouseDragged(int mouseX, int mouseY, int mouseButtonIndex) {
+            eventState.mouseDragged[mouseButtonIndex] = true;
+            eventState.mouseDelta = {eventState.mousePosition.x - mouseX,
+                                     eventState.mousePosition.y - mouseY};
+            eventState.mousePosition = {mouseX, mouseY};
+            
+            // Pressed > Released delta support
+            
+            if (mouseButtonIndex == 0) {
+                eventState.mouseDeltaSinceMouseLeftPressed = eventState.mousePosition -  mousePositionWhenMouseLeftPressed;
+            }
+    }
+        
+        void mouseMoved(int mouseX, int mouseY, int mouseButtonIndex) {
+            eventState.mouseDelta = {eventState.mousePosition.x - mouseX,
+                eventState.mousePosition.y - mouseY};
+            eventState.mousePosition = {mouseX, mouseY};
+        }
+        
+        void mousePressed(int mouseX, int mouseY, int mouseButtonIndex) {
+            eventState.mousePosition = {mouseX, mouseY};
+            eventState.mouseDown[mouseButtonIndex] = true;
+            eventState.mouseDownPressed[mouseButtonIndex] = true;
+            
+            // Pressed > Released delta support
+            
+            if (mouseButtonIndex == 0) {
+                mousePositionWhenMouseLeftPressed = eventState.mousePosition;
+            }
+            
+            // Doubleclick support
+    /*
+    #ifdef MURKA_OF
+            if ((ofGetElapsedTimef() - lastLeftMousebuttonClicktime) < 0.2) {
+                eventState.doubleClick = true;
+            } else eventState.doubleClick = false;
+            lastLeftMousebuttonClicktime = ofGetElapsedTimef();
+    #endif
+     */
+        }
+        
+        void mouseReleased(int mouseX, int mouseY, int mouseButtonIndex) {
+            eventState.mousePosition = {mouseX, mouseY};
+            eventState.mouseReleased[mouseButtonIndex] = true;
+            eventState.mouseDown[mouseButtonIndex] = false;
+
+            // Pressed > Released delta support
+            
+            if (mouseButtonIndex == 0) {
+                eventState.mouseDeltaSinceMouseLeftPressed = eventState.mousePosition -  mousePositionWhenMouseLeftPressed;
+            }
+        }
+    
     // oF event registration
     
 #ifdef MURKA_OF
