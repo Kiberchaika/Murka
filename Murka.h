@@ -1,6 +1,5 @@
 #pragma once
 
-#define MURKA_OF
 
 // Murka is a mixed mode data driven user interface library.
 

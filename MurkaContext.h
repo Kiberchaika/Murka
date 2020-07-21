@@ -7,7 +7,6 @@
 #include "MurkaTypes.h"
 #include "MurkaAssets.h"
 #include "MurkaOverlayHolder.h"
-#include "Murka.h"
 
 // Here's the global typedefs for cross-render functionality
 

@@ -1,5 +1,5 @@
 #pragma once
-#include <functional>
+
 #include "MurkaTypes.h"
 #include "MurkaContext.h"
 #include "MurkaViewHandler.h"

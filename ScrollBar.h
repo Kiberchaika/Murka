@@ -4,7 +4,6 @@
 #include "MurkaContext.h"
 #include "MurkaView.h"
 #include "MurkaInputEventsRegister.h"
-#include "MurkaAssets.h"
 #include "MurkaLinearLayoutGenerator.h"
 #include "MurkaSurface.h"
 
