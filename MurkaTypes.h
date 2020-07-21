@@ -196,6 +196,14 @@ struct MurkaShape {
         size.y = height;
     }
     
+    template<typename A, typename B, typename C, typename D>
+    MurkaShape(A x, B y, C width, D height) {
+        position.x = x;
+        position.y = y;
+        size.x = width;
+        size.y = height;
+    }
+    
     MurkaShape operator * (float b) {
         return {position.x * b, position.y * b, size.x * b, size.y * b};
     }
