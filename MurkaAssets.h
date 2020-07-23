@@ -20,14 +20,15 @@ public:
     
     void setupFonts(std::string paragraphFontFilename, float paragraphSize,
                     std::string headerFontFilename, float headerSize,
-                    std::string monoFontFilename, float monofontSize) {
+                    std::string monoFontFilename, float monofontSize,
+                    bool isAbsolutePath = false) {
 #ifdef MURKA_OF
         paragraphFont = new FontObject();
         headerFont = new FontObject();
         monoFont = new FontObject();
-        paragraphFont->load(paragraphFontFilename, paragraphSize);
-        headerFont->load(headerFontFilename, headerSize);
-        monoFont->load(monoFontFilename, monofontSize);
+        paragraphFont->load(paragraphFontFilename, paragraphSize, isAbsolutePath);
+        headerFont->load(headerFontFilename, headerSize, isAbsolutePath);
+        monoFont->load(monoFontFilename, monofontSize, isAbsolutePath);
 #endif
     }
     
