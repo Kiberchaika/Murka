@@ -121,11 +121,11 @@ public:
         }
 #ifdef MURKA_OF
         
-        ofPushView();
-        ofViewport(viewport.position.x, viewport.position.y, viewport.size.x, viewport.size.y);
-        ofSetupScreen();
-        ofPushMatrix();
-        ofTranslate(offset.x, offset.y); // this is needed to crop the
+		renderer->pushStyle();
+		renderer->viewport(viewport.position.x, viewport.position.y, viewport.size.x, viewport.size.y);
+		renderer->setupScreen();
+		renderer->pushMatrix();
+		renderer->translate(offset.x, offset.y, 0); // this is needed to crop the
         // views that are only partly visible
 #endif
         
@@ -135,8 +135,8 @@ public:
     void transformTheRenderBackFromThisContextShape() const {
 #ifdef MURKA_OF
         
-        ofPopMatrix();
-        ofPopView();
+		renderer->popMatrix();
+		renderer->popView();
 #endif
     }
     
@@ -145,9 +145,9 @@ public:
     void startViewport() const {
         transformTheRenderBackFromThisContextShape();
 
-        ofPushView();
+        renderer->pushView();
         auto vport = ofGetCurrentViewport();
-        ofViewport(ofRectangle(currentViewShape.position.x,
+        renderer->viewport(MurkaShape(currentViewShape.position.x,
                                currentViewShape.position.y,
                                currentViewShape.size.x,
                                currentViewShape.size.y));
@@ -156,7 +156,7 @@ public:
     }
     
     void endViewport() const {
-        ofPopView();
+        renderer->popView();
 
         transformTheRenderIntoThisContextShape();
     }

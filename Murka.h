@@ -207,8 +207,8 @@ public:
 #ifdef MURKA_OF
         currentContext.currentViewShape = MurkaShape{0,
                                                   0,
-                                                  float(ofGetWidth()),
-                                                  float(ofGetHeight())};
+                                                  float(getWindowWidth()),
+                                                  float(getWindowHeight())};
 //        currentContext.currentViewShape = currentContext.rootViewShape;
 #endif
         currentContext.pushContextInternal = [&](MurkaViewHandlerInternal* mvhi) {

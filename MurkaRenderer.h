@@ -7,15 +7,19 @@
 #include "ofMain.h"
 
 class MurkaRenderer: public MurkaRendererBase {
-
+	ofAppBaseWindow* ofWindow;
     ofBaseGLRenderer* ofRenderer;
     
 public:
-    void setRenderer(ofBaseGLRenderer* renderer) {
-        ofRenderer = renderer;
-    }
+	void setWindow(ofAppBaseWindow* window) {
+		ofWindow = window;
+	}
 
-    // Object drawing
+	void setRenderer(ofBaseGLRenderer* renderer) {
+		ofRenderer = renderer;
+	}
+
+	// Object drawing
     virtual void draw(const MurImage & image, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) const override {
         ofRenderer->draw(image.internal, x, y, z, w, h, sx, sy, sw, sh);
     }
@@ -46,13 +50,29 @@ public:
 	}
 
 	// transformations
-    virtual void pushView() override{
-        ofRenderer->pushView();
-    }
-    
-    virtual void popView() override{
-        ofRenderer->popView();
-    }
+	virtual void pushView() override {
+		ofRenderer->pushView();
+	}
+
+	virtual void popView() override {
+		ofRenderer->popView();
+	}
+
+	virtual void pushMatrix() override {
+		ofRenderer->pushMatrix();
+	}
+
+	virtual void popMatrix() override {
+		ofRenderer->popMatrix();
+	}
+
+	virtual void translate(float x, float y, float z)  override {
+		ofRenderer->translate(x, y, z);
+	}
+
+	virtual void scale(float x, float y, float z) override {
+		ofRenderer->scale(x, y, z);
+	}
 
     // setup matrices and viewport (upto you to push and pop view before and after)
     virtual void viewport(MurkaShape viewport) override{
@@ -62,6 +82,10 @@ public:
     virtual void viewport(float x = 0, float y = 0, float width = -1, float height = -1, bool vflip=true) override{
         ofRenderer->viewport(x, y, width, height, vflip);
     }
+
+	virtual void setupScreen() override {
+		ofRenderer->setupScreen();
+	}
 
     // rendering setup
     virtual void setLineWidth(float lineWidth) override{
@@ -148,6 +172,14 @@ public:
 
 	virtual void drawVbo(MurVbo vbo, int drawMode, int first, int total) {
 		ofRenderer->draw(vbo.internal, drawMode, first, total);
+	}
+
+	virtual int getWindowWidth() {
+		return ofWindow->getWidth();
+	}
+
+	virtual int getWindowHeight() {
+		return ofWindow->getHeight();
 	}
 
 };

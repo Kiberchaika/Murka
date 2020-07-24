@@ -35,9 +35,16 @@ public:
     virtual void pushView() = 0;
     virtual void popView() = 0;
 
+	virtual void pushMatrix() = 0;
+	virtual void popMatrix() = 0;
+
+	virtual void translate(float x, float y, float z) = 0;
+	virtual void scale(float x, float y, float z) = 0;
+
     // setup matrices and viewport (upto you to push and pop view before and after)
     virtual void viewport(MurkaShape viewport) = 0;
     virtual void viewport(float x = 0, float y = 0, float width = -1, float height = -1, bool vflip=true) = 0;
+	virtual void setupScreen() = 0;
 
     // rendering setup
     virtual void setLineWidth(float lineWidth) = 0;
@@ -65,4 +72,8 @@ public:
 	virtual void drawCircle(float x, float y, float radius) = 0;
 	virtual void drawLine(float x1, float y1, float x2, float y2) = 0;
 	virtual void drawVbo(MurVbo vbo, int drawMode, int first, int total) = 0;
+
+	virtual int getWindowWidth() = 0;
+	virtual int getWindowHeight() = 0;
+
 };
