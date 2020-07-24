@@ -132,6 +132,11 @@ public:
 	virtual void drawRectangle(float x, float y, float w, float h) override {
 		ofRenderer->drawRectangle(x, y, 0.0f, w, h);
 	}
+    
+    virtual void drawRectangle(MurkaShape s) override {
+        ofRenderer->drawRectangle(s.position.x, s.position.y, 0., s.size.x, s.size.y);
+    }
+    
 
 	virtual void drawCircle(float x, float y, float radius) override {
 		ofRenderer->drawCircle(x, y, 0.0f, radius);

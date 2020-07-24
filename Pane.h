@@ -36,7 +36,7 @@ public:
             paneControlShape = MurkaShape(context.getSize().x *
                                                      float(*paneSplitValue) - params->paneControlWidth / 2, 0,
                                                      params->paneControlWidth, context.getSize().y);
-            params->drawPaneControl(paneControlShape,
+            params->drawPaneControl(context, paneControlShape,
                                     paneControlShape.inside(context.mousePosition, 5), draggingNow);
         }
         
@@ -57,7 +57,7 @@ public:
                                                      float(*paneSplitValue) - params->paneControlWidth / 2,
                                           context.getSize().x,
                                                      params->paneControlWidth);
-            params->drawPaneControl(paneControlShape,
+            params->drawPaneControl(context, paneControlShape,
                                     paneControlShape.inside(context.mousePosition, 5), draggingNow);
 
 
@@ -108,13 +108,15 @@ public:
                       // 1 = horizontal
                       // 2 = vertical
         
-        std::function<void(MurkaShape, bool, bool)> drawPaneControl =
-            [](MurkaShape shape, bool hover, bool draggingNow) {
-                ofSetColor(80 + (hover || draggingNow) * 40 + draggingNow * 80);
-                ofDrawRectangle(shape);
+        std::function<void(MurkaContext &, MurkaShape, bool, bool)> drawPaneControl =
+            [](MurkaContext & c, MurkaShape shape, bool hover, bool draggingNow) {
                 
-                ofSetColor(75 + hover * 100);
-                ofDrawCircle(shape.x() + shape.width() / 2, shape.y() + shape.height() / 2, 4);
+                c.renderer->setColor(80 + (hover || draggingNow) * 40 + draggingNow * 80);
+                
+                c.renderer->drawRectangle(shape);
+                
+                c.renderer->setColor(75 + hover * 100);
+                c.renderer->drawCircle(shape.x() + shape.width() / 2, shape.y() + shape.height() / 2, 4);
             };
     
         Parameters() {};

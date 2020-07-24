@@ -5,8 +5,8 @@
 #include "MurkaInputEventsRegister.h"
 #include "MurkaViewHandler.h"
 #include "MurkaTypes.h"
-#include "MurkaAssets.h"
 #include "MurkaOverlayHolder.h"
+#include "MurkaRenderer.h"
 
 // Here's the global typedefs for cross-render functionality
 
@@ -67,7 +67,7 @@ public:
     }
     
     MurkaOverlayHolder* overlayHolder;
-    MurkaAssets* renderer;
+    MurkaRenderer* renderer;
     
     MurkaShape getParentContextShape() const {
         return getParentContextShapeInternal();
