@@ -14,7 +14,7 @@ public:
     void setRenderer(ofBaseGLRenderer* renderer) {
         ofRenderer = renderer;
     }
-    
+
     // Object drawing
     virtual void draw(const MurImage & image, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) const override {
         ofRenderer->draw(image.internal, x, y, z, w, h, sx, sy, sw, sh);

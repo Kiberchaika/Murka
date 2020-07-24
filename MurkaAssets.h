@@ -1,15 +1,14 @@
 #pragma once
 
 #include "MurkaTypes.h"
-#include "MurkaRenderer.h"
+
+class MurkaRendererBase;
 
 namespace murka {
     
 // Global defines
 
 #define DEFAULT_LINE_HEIGHT 20
-
-
 
 class MurkaAssets {
 public:
@@ -23,7 +22,7 @@ public:
                     std::string headerFontFilename, float headerSize,
                     std::string monoFontFilename, float monofontSize,
                     bool isAbsolutePath = false,
-					void* renderer = nullptr) {
+					MurkaRendererBase* renderer = nullptr) {
 #ifdef MURKA_OF
         paragraphFont = new FontObject();
         headerFont = new FontObject();

@@ -6,9 +6,20 @@
 #include "MurkaTypes.h"
 #include "MurkaAssets.h"
 
-class MurkaRendererBase {
+class MurkaRendererBase : public murka::MurkaAssets {
 public:
     
+	void setupFonts(std::string paragraphFontFilename, float paragraphSize,
+		std::string headerFontFilename, float headerSize,
+		std::string monoFontFilename, float monofontSize,
+		bool isAbsolutePath = false) {
+		MurkaAssets::setupFonts(paragraphFontFilename, paragraphSize,
+			headerFontFilename, headerSize,
+			monoFontFilename, monofontSize,
+			isAbsolutePath,
+			this);
+	}
+
     // Object drawing
     virtual void draw(const MurImage & image, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) const = 0;
     virtual void draw(const MurTexture & texture, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) const = 0;

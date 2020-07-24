@@ -62,7 +62,7 @@
 
 namespace murka {
 
-class Murka : public MurkaViewInterface<Murka>, public MurkaInputEventsRegister, public MurkaRenderer, public MurkaAssets, public MurkaOverlayHolder {
+class Murka : public MurkaViewInterface<Murka>, public MurkaInputEventsRegister, public MurkaRenderer, public MurkaOverlayHolder {
 public:
 	Murka() {
         setupEvents();
