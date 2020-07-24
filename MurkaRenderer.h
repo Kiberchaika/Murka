@@ -75,13 +75,18 @@ public:
 	}
 
     // setup matrices and viewport (upto you to push and pop view before and after)
-    virtual void viewport(MurkaShape viewport) override{
+    virtual void viewport(MurkaShape viewport) override {
         ofRenderer->viewport(viewport);
     }
     
-    virtual void viewport(float x = 0, float y = 0, float width = -1, float height = -1, bool vflip=true) override{
+    virtual void viewport(float x = 0, float y = 0, float width = -1, float height = -1, bool vflip=true) override {
         ofRenderer->viewport(x, y, width, height, vflip);
     }
+
+	virtual MurkaShape getCurrentViewport() override {
+		ofRectangle rect = ofRenderer->getCurrentViewport();
+		return MurkaShape(rect.x, rect.y, rect.width, rect.height);
+	}
 
 	virtual void setupScreen() override {
 		ofRenderer->setupScreen();
