@@ -31,7 +31,7 @@ public:
                                             scrollbarHeight};
                MurkaShape scrollbarShape = {0, 0, context.getSize().x, context.getSize().y};
                 
-               params->drawScrollBar(scrollbarShape, handleShape, handleShape.inside(context.mousePosition), false);
+               params->drawScrollBar(context, scrollbarShape, handleShape, handleShape.inside(context.mousePosition), false);
                 
                 if (draggingNow) {
                     params->surfaceToControl->panOffset.y -= (lastFrameMousePosition.y - context.mousePosition.y) * (context.getSize().y / scrollbarHeight);
@@ -61,15 +61,15 @@ public:
     struct Parameters {
         MurkaSurface* surfaceToControl;
         
-        std::function<void(MurkaShape scrollbarShape, MurkaShape handleShape, bool hover, bool draggingNow)> drawScrollBar = [](MurkaShape scrollbarShape, MurkaShape handleShape, bool hover, bool draggingNow) {
-                            ofSetColor(80 + hover * 40 + draggingNow * 80);
-                            ofDrawRectangle(handleShape);
+        std::function<void(MurkaContext & c, MurkaShape scrollbarShape, MurkaShape handleShape, bool hover, bool draggingNow)> drawScrollBar = [](MurkaContext & c, MurkaShape scrollbarShape, MurkaShape handleShape, bool hover, bool draggingNow) {
+                            c.renderer->setColor(80 + hover * 40 + draggingNow * 80);
+                            c.renderer->drawRectangle(handleShape);
                         };
         int kind = 0; // 0 = vertical
                       // 1 = horizontal
 
         Parameters() {}
-        Parameters(MurkaSurface* _surfaceToControl, std::function<void(MurkaShape, MurkaShape, bool, bool)> _drawScrollBar, int _kind = 0) {
+        Parameters(MurkaSurface* _surfaceToControl, std::function<void(MurkaContext&, MurkaShape, MurkaShape, bool, bool)> _drawScrollBar, int _kind = 0) {
             surfaceToControl = _surfaceToControl;
             drawScrollBar = _drawScrollBar;
             kind = _kind;
