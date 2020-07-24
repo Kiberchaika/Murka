@@ -46,4 +46,8 @@ public:
     virtual void clear() = 0;
     virtual void clear(float r, float g, float b, float a=0) = 0;
     virtual void clear(float brightness, float a=0) = 0;
+
+	virtual void drawRectangle(float x, float y, float w, float h) = 0;
+	virtual void drawCircle(float x, float y, float radius) = 0;
+	virtual void drawLine(float x1, float y1, float x2, float y2) = 0;
 };
