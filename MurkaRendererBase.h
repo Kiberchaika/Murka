@@ -44,6 +44,7 @@ public:
     // setup matrices and viewport (upto you to push and pop view before and after)
     virtual void viewport(MurkaShape viewport) = 0;
     virtual void viewport(float x = 0, float y = 0, float width = -1, float height = -1, bool vflip=true) = 0;
+	virtual MurkaShape getCurrentViewport() = 0;
 	virtual void setupScreen() = 0;
 
     // rendering setup

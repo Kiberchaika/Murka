@@ -121,7 +121,7 @@ public:
         }
 #ifdef MURKA_OF
         
-		renderer->pushStyle();
+		renderer->pushView();
 		renderer->viewport(viewport.position.x, viewport.position.y, viewport.size.x, viewport.size.y);
 		renderer->setupScreen();
 		renderer->pushMatrix();
@@ -146,13 +146,14 @@ public:
         transformTheRenderBackFromThisContextShape();
 
         renderer->pushView();
-        auto vport = ofGetCurrentViewport();
+        auto vport = renderer->getCurrentViewport(); 
         renderer->viewport(MurkaShape(currentViewShape.position.x,
                                currentViewShape.position.y,
                                currentViewShape.size.x,
                                currentViewShape.size.y));
-        ofScale(vport.getWidth() / currentViewShape.size.x,
-                vport.getHeight() / currentViewShape.size.y);
+		renderer->scale(vport.size.x / currentViewShape.size.x,
+			vport.size.y / currentViewShape.size.y, 
+			1);
     }
     
     void endViewport() const {

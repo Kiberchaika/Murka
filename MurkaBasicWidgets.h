@@ -25,8 +25,8 @@ public:
         auto font = context.getHeaderFont();
         
 #ifdef MURKA_OF
-        ofColor fgColor = params->customColor ? params->color * 255 : context.getWidgetForegroundColor() * 255;
-        ofSetColor(fgColor);
+		MurkaColor fgColor = params->customColor ? params->color * 255 : context.getWidgetForegroundColor() * 255;
+        context.renderer->setColor(fgColor);
         if (params->alignment == TEXT_LEFT) {
             font->drawString(params->label, 5, 5 + font->getLineHeight());
         }
@@ -93,16 +93,16 @@ public:
         }
         
 #ifdef MURKA_OF
-        ofColor bgColor = params->backgroundColor;
-        ofFill();
+		MurkaColor bgColor = params->backgroundColor;
+        context.renderer->enableFill();
         if (bgColor.a != 0.0) {
-            ofSetColor(bgColor);
+            context.renderer->setColor(bgColor);
             if (params->alignment == TEXT_LEFT) {
                 ofDrawRectangle(0, 0, font->getStringBoundingBox(params->label, 0, 0).width + 10, context.getSize().y);
             }
         }
-        ofColor fgColor = params->customColor ? params->color : context.getWidgetForegroundColor();
-        ofSetColor(fgColor);
+		MurkaColor fgColor = params->customColor ? params->color : context.getWidgetForegroundColor();
+        context.renderer->setColor(fgColor);
         if (params->alignment == TEXT_LEFT) {
             font->drawString(params->label, 5, font->getLineHeight());
         }
@@ -116,11 +116,11 @@ public:
         }
         
         // Testing vertical centering
-//            ofSetColor(255);
+//            context.renderer->setColor(255);
 //            ofDrawLine(0, 0, context.getSize().x, 0);
-//            ofSetColor(255, 0, 0);
+//            context.renderer->setColor(255, 0, 0);
 //            ofDrawLine(0, context.getSize().y / 2, context.getSize().x, context.getSize().y / 2);
-//            ofSetColor(255);
+//            context.renderer->setColor(255);
 //            ofDrawLine(0, context.getSize().y, context.getSize().x, context.getSize().y);
 #endif
     };
@@ -131,7 +131,7 @@ public:
         TextAlignment alignment = TEXT_LEFT;
         
         MurkaColor color = {0.98, 0.98, 0.98};
-        MurkaColor backgroundColor = {0., 0., 0., 0.};
+		MurkaColor backgroundColor = {0., 0., 0., 0.};
         
         FontObject* font;
         
@@ -224,16 +224,16 @@ public:
         bool* booleanToControl = ((bool*)dataToControl);
 
 #ifdef MURKA_OF
-        ofColor fgColor = context.getWidgetForegroundColor() * 255;
+		MurkaColor fgColor = context.getWidgetForegroundColor() * 255;
 
         float pushed = 0.2 - (context.getRunningTime() - lastTimeClicked);
         if (pushed < 0) pushed = 0;
         pushed /= 0.2;
 
-        ofPushStyle();
-        ofSetColor((inside ? fgColor : fgColor / 2) * (1.0 + 0.2 * pushed));
+        context.renderer->pushStyle();
+        context.renderer->setColor((inside ? fgColor : fgColor / 2) * (1.0 + 0.2 * pushed));
 
-        ofNoFill();
+        context.renderer->disableFill();
         ofDrawRectangle(5, 5, 20, 20);
         if (*booleanToControl) {
             float symbolOffset = 4;
@@ -241,7 +241,7 @@ public:
             ofDrawLine(25 - symbolOffset, 5 + symbolOffset, 5 + symbolOffset, 25 - symbolOffset);
         }
         
-        ofFill();
+        context.renderer->enableFill();
         
         auto font = context.getParagraphFont();
         font->drawString(params->label, 30, 22);
@@ -250,7 +250,7 @@ public:
             *booleanToControl = !*booleanToControl;
             lastTimeClicked = context.getRunningTime();
         }
-        ofPopStyle();
+        context.renderer->popStyle();
 #endif
     };
     
@@ -294,17 +294,17 @@ public:
 
 #ifdef MURKA_OF
         
-        ofPushStyle();
-        ofFill();
-        ofSetColor(params->r, params->g, params->b, params->a);
+        context.renderer->pushStyle();
+        context.renderer->enableFill();
+        context.renderer->setColor(params->r, params->g, params->b, params->a);
         ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
         if (params->drawBorder) {
-            ofSetColor(30);
-            ofNoFill();
+            context.renderer->setColor(30);
+            context.renderer->disableFill();
             ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
         }
         
-        ofSetColor(255);
+        context.renderer->setColor(255);
         auto font = context.getMonospaceFont();
         font->drawString(params->label, 0, font->getLineHeight());
         
@@ -315,7 +315,7 @@ public:
             ofDrawLine(context.currentViewShape.size.x - 5, context.currentViewShape.size.y - 5,
                        context.currentViewShape.size.x - 5, context.currentViewShape.size.y - 15);
         }
-        ofPopStyle();
+        context.renderer->popStyle();
 
 #endif // MURKA_OF
         
@@ -404,17 +404,17 @@ public:
              if (pushed < 0) pushed = 0;
              pushed /= 0.2;
          
-             ofPushStyle();
-             ofFill();
+             context.renderer->pushStyle();
+             context.renderer->enableFill();
              if (inside) {
-                 ofSetColor(ofColor(parameters->r, parameters->g, parameters->b) * (1.0 + 0.2 * pushed));
-             } else ofSetColor(75 * (1.0 + 0.2 * pushed));
+                 context.renderer->setColor(MurkaColor(parameters->r, parameters->g, parameters->b) * (1.0 + 0.2 * pushed));
+             } else context.renderer->setColor(75 * (1.0 + 0.2 * pushed));
              ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
-             ofSetColor(30);
-             ofNoFill();
+             context.renderer->setColor(30);
+             context.renderer->disableFill();
              ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
         
-             ofSetColor(255);
+             context.renderer->setColor(255);
         
              float offset = font->stringWidth(parameters->label) / 2;
         
@@ -422,7 +422,7 @@ public:
 
 //                 float offset = parameters->label.length() * 4;
 //                 ofDrawBitmapString(parameters->label, context.getSize().x / 2 - offset, context.getSize().y / 2 + 5);
-             ofPopStyle();
+             context.renderer->popStyle();
 
              auto label = ((Parameters*)parametersObject)->label;
         
@@ -510,11 +510,11 @@ public:
         
 #ifdef MURKA_OF
         
-        ofPushStyle();
-        ofFill();
-        ofSetColor(15);
+        context.renderer->pushStyle();
+        context.renderer->enableFill();
+        context.renderer->setColor(15);
         ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
-        ofSetColor(parameters->r + (inside ? 20 : 0),
+        context.renderer->setColor(parameters->r + (inside ? 20 : 0),
                    parameters->g + (inside ? 20 : 0),
                    parameters->b + (inside ? 20 : 0), 200);
         float currentValue = *((float*)dataToControl);
@@ -525,14 +525,14 @@ public:
             currentValue = parameters->minValue;
         }
         ofDrawRectangle(0, 0, context.getSize().x * ((currentValue - parameters->minValue) / (parameters->maxValue - parameters->minValue)), context.getSize().y);
-        ofSetColor(80);
-        ofNoFill();
+        context.renderer->setColor(80);
+		context.renderer->disableFill();
         if (inside) {
             ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
         }
         
-        ofColor fgColor = context.getWidgetForegroundColor() * 255;
-        ofSetColor(inside ? fgColor : fgColor / 2);
+        MurkaColor fgColor = context.getWidgetForegroundColor() * 255;
+        context.renderer->setColor(inside ? fgColor : fgColor / 2);
         auto label = ((Parameters*)parametersObject)->label;
         auto resultString = label + ": " + ofToString(*((float*)dataToControl));
         
@@ -540,7 +540,7 @@ public:
         float offset = font->stringWidth(resultString) / 2;
         
         font->drawString(resultString, context.getSize().x / 2 - offset, context.getSize().y / 2  + font->getLineHeight() / 4);
-        ofPopStyle();
+        context.renderer->popStyle();
 
         
 #endif // MURKA_OF
