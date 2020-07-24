@@ -21,24 +21,24 @@ struct MurkaColor {
     MurkaColor(float R, float G, float B) {r = R; g = G; b = B; }
     MurkaColor(float R, float G, float B, float A) {r = R; g = G; b = B; a = A;}
 
-    MurkaColor operator *(int multiplier) {
+    MurkaColor operator *(int multiplier) const {
         return MurkaColor(r * float(multiplier), g * float(multiplier), b * float(multiplier), a * float(multiplier));
     }
 
-    MurkaColor operator *(float multiplier) {
+    MurkaColor operator *(float multiplier) const  {
         return MurkaColor(r * multiplier, g * multiplier, b * multiplier, a * multiplier);
     }
     
-    MurkaColor operator *(double multiplier) {
+    MurkaColor operator *(double multiplier) const  {
         return MurkaColor(r * multiplier, g * multiplier, b * multiplier, a * multiplier);
     }
     
-    MurkaColor operator +(MurkaColor rightColor) {
+    MurkaColor operator +(MurkaColor rightColor) const  {
         return MurkaColor(r + rightColor.r, g + rightColor.g, b + rightColor.b, a + rightColor.a);
     }
 
 #ifdef MURKA_OF
-    operator ofColor() { return ofColor(r, g, b, a); }
+    operator ofColor() const { return ofColor(r * 255.0, g * 255.0, b * 255.0, a * 255.0); }
 #endif
 };
 

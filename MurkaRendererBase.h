@@ -11,12 +11,12 @@ public:
     
     // Object drawing
     virtual void draw(const MurImage & image, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) const = 0;
-    virtual void draw(const MurTexture & image, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) const = 0;
+    virtual void draw(const MurTexture & texture, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) const = 0;
     virtual void draw(const MurVbo & vbo, GLuint drawMode, int first, int total) const = 0;
     
     // Textures binding
-    virtual void bind(const ofTexture & texture, int location) = 0;
-    virtual void unbind(const ofTexture & texture, int location) = 0;
+    virtual void bind(const MurTexture & texture, int location) = 0;
+    virtual void unbind(const MurTexture & texture, int location) = 0;
     
     // transformations
     virtual void pushView() = 0;
@@ -41,7 +41,7 @@ public:
     virtual void setColor(int r, int g, int b, int a) = 0; // 0-255
     virtual void setColor(const MurkaColor & color) = 0;
     virtual void setColor(const MurkaColor & color, int _a) = 0;
-    virtual void setColor(int gray) = 0; // new set a color as grayscale with one argument
+    virtual void setColor(float gray) = 0; // new set a color as grayscale with one argument
 
     virtual void clear() = 0;
     virtual void clear(float r, float g, float b, float a=0) = 0;
