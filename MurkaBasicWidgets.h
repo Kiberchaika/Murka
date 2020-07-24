@@ -93,7 +93,7 @@ public:
         }
         
 #ifdef MURKA_OF
-        ofColor bgColor = params->backgroundColor * 255;
+        ofColor bgColor = params->backgroundColor;
         ofFill();
         if (bgColor.a != 0.0) {
             ofSetColor(bgColor);
@@ -101,7 +101,7 @@ public:
                 ofDrawRectangle(0, 0, font->getStringBoundingBox(params->label, 0, 0).width + 10, context.getSize().y);
             }
         }
-        ofColor fgColor = params->customColor ? params->color * 255 : context.getWidgetForegroundColor() * 255;
+        ofColor fgColor = params->customColor ? params->color : context.getWidgetForegroundColor();
         ofSetColor(fgColor);
         if (params->alignment == TEXT_LEFT) {
             font->drawString(params->label, 5, font->getLineHeight());
