@@ -207,7 +207,7 @@ public:
         }
     }
     
-#define ATTEMPTS_AT_EACH_STAGE 3
+#define ATTEMPTS_AT_EACH_STAGE 5
     
     vector<MurkaShape> compactnessShapes;
     

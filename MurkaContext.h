@@ -28,27 +28,27 @@ public:
     // Assets access functions
     
     MurkaColor getWidgetForegroundColor() const {
-        return ((MurkaAssets*)assetsObject)->widgetFgColor;
+        return ((MurkaAssets*)renderer)->widgetFgColor;
     }
 
     MurkaColor getWidgetBackgroundColor() const {
-        return ((MurkaAssets*)assetsObject)->widgetBgColor;
+        return ((MurkaAssets*)renderer)->widgetBgColor;
     }
     
     FontObject* getHeaderFont() const {
-        return ((MurkaAssets*)assetsObject)->headerFont;
+        return ((MurkaAssets*)renderer)->headerFont;
     }
 
     FontObject* getParagraphFont() const {
-        return ((MurkaAssets*)assetsObject)->paragraphFont;
+        return ((MurkaAssets*)renderer)->paragraphFont;
     }
 
     FontObject* getMonospaceFont() const {
-        return ((MurkaAssets*)assetsObject)->monoFont;
+        return ((MurkaAssets*)renderer)->monoFont;
     }
     
     FontObject* getFont(std::string fontId) const {
-        return ((MurkaAssets*)assetsObject)->fontMap[fontId];
+        return ((MurkaAssets*)renderer)->fontMap[fontId];
     }
 
     //
@@ -67,7 +67,7 @@ public:
     }
     
     MurkaOverlayHolder* overlayHolder;
-    MurkaAssets* assetsObject;
+    MurkaAssets* renderer;
     
     MurkaShape getParentContextShape() const {
         return getParentContextShapeInternal();

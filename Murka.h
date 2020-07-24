@@ -11,7 +11,7 @@
 #include "MurkaInputEventsRegister.h"
 #include "MurkaAssets.h"
 #include "MurkaLinearLayoutGenerator.h"
-
+#include "MurkaRenderer.h"
 
 /*
  
@@ -62,7 +62,7 @@
 
 namespace murka {
 
-class Murka : public MurkaViewInterface<Murka>, public MurkaInputEventsRegister, public MurkaAssets, public MurkaOverlayHolder {
+class Murka : public MurkaViewInterface<Murka>, public MurkaInputEventsRegister, public MurkaRenderer, public MurkaOverlayHolder {
 public:
 	Murka() {
         setupEvents();
@@ -202,7 +202,7 @@ public:
         
 		currentContext = MurkaContext();
         *((MurkaEventState*)&currentContext) = eventState;
-        currentContext.assetsObject = this;
+        currentContext.renderer = this;
         currentContext.murkaView = this;
         currentContext.overlayHolder = this;
         
