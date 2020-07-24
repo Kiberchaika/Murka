@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MurkaTypes.h"
+#include "MurkaRenderer.h"
 
 namespace murka {
     
@@ -21,14 +22,15 @@ public:
     void setupFonts(std::string paragraphFontFilename, float paragraphSize,
                     std::string headerFontFilename, float headerSize,
                     std::string monoFontFilename, float monofontSize,
-                    bool isAbsolutePath = false) {
+                    bool isAbsolutePath = false,
+					void* renderer = nullptr) {
 #ifdef MURKA_OF
         paragraphFont = new FontObject();
         headerFont = new FontObject();
         monoFont = new FontObject();
-        paragraphFont->load(paragraphFontFilename, paragraphSize, isAbsolutePath);
-        headerFont->load(headerFontFilename, headerSize, isAbsolutePath);
-        monoFont->load(monoFontFilename, monofontSize, isAbsolutePath);
+        paragraphFont->load(paragraphFontFilename, paragraphSize, isAbsolutePath, renderer);
+        headerFont->load(headerFontFilename, headerSize, isAbsolutePath, renderer);
+        monoFont->load(monoFontFilename, monofontSize, isAbsolutePath, renderer);
 #endif
     }
     

@@ -6,7 +6,7 @@
 #include "MurkaTypes.h"
 #include "MurkaAssets.h"
 
-class MurkaRendererBase: public murka::MurkaAssets {
+class MurkaRendererBase {
 public:
     
     // Object drawing
@@ -15,9 +15,11 @@ public:
     virtual void draw(const MurVbo & vbo, GLuint drawMode, int first, int total) const = 0;
     
     // Textures binding
-    virtual void bind(const MurTexture & texture, int location) = 0;
-    virtual void unbind(const MurTexture & texture, int location) = 0;
-    
+	virtual void bind(const MurImage & img, int location = 0) = 0;
+	virtual void unbind(const MurImage & img, int location = 0) = 0;
+	virtual void bind(const MurTexture & texture, int location = 0) = 0;
+	virtual void unbind(const MurTexture & texture, int location = 0) = 0;
+
     // transformations
     virtual void pushView() = 0;
     virtual void popView() = 0;
@@ -50,4 +52,5 @@ public:
 	virtual void drawRectangle(float x, float y, float w, float h) = 0;
 	virtual void drawCircle(float x, float y, float radius) = 0;
 	virtual void drawLine(float x1, float y1, float x2, float y2) = 0;
+	virtual void drawVbo(MurVbo vbo, int drawMode, int first, int total) = 0;
 };

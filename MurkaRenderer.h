@@ -2,11 +2,6 @@
 
 #include "MurkaRendererBase.h"
 
-#include "MurkaTypes.h"
-#include "MurVbo.h"
-#include "MurTexture.h"
-#include "MurImage.h"
-
 #ifdef MURKA_OF // oF version of render
 
 #include "ofMain.h"
@@ -34,15 +29,23 @@ public:
     }
     
     // Textures binding
-    virtual void bind(const MurTexture & texture, int location) override {
-        ofRenderer->bind(texture.internal, location);
-    }
-    
-    virtual void unbind(const MurTexture & texture, int location) override{
-        ofRenderer->unbind(texture.internal, location);
-    }
-    
-    // transformations
+	virtual void bind(const MurImage & img, int location = 0) override {
+		ofRenderer->bind(img.internal.getTexture(), location);
+	}
+
+	virtual void unbind(const MurImage & img, int location = 0) override {
+		ofRenderer->unbind(img.internal.getTexture(), location);
+	}
+
+	virtual void bind(const MurTexture & texture, int location = 0) override {
+		ofRenderer->bind(texture.internal, location);
+	}
+
+	virtual void unbind(const MurTexture & texture, int location = 0) override {
+		ofRenderer->unbind(texture.internal, location);
+	}
+
+	// transformations
     virtual void pushView() override{
         ofRenderer->pushView();
     }
@@ -137,6 +140,11 @@ public:
 	virtual void drawLine(float x1, float y1, float x2, float y2) override {
 		ofRenderer->drawLine(x1, y1, 0.0f, x2, y2, 0.0f);
 	}
+
+	virtual void drawVbo(MurVbo vbo, int drawMode, int first, int total) {
+		ofRenderer->draw(vbo.internal, drawMode, first, total);
+	}
+
 };
 
 #else // "Default" render version

@@ -62,13 +62,11 @@
 
 namespace murka {
 
-class Murka : public MurkaViewInterface<Murka>, public MurkaInputEventsRegister, public MurkaRenderer, public MurkaOverlayHolder {
+class Murka : public MurkaViewInterface<Murka>, public MurkaInputEventsRegister, public MurkaRenderer, public MurkaAssets, public MurkaOverlayHolder {
 public:
 	Murka() {
         setupEvents();
 	}
-
-
 
 	MurkaContext currentContext;
     std::vector<MurkaContext> contextStack;
