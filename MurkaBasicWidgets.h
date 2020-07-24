@@ -24,7 +24,6 @@ public:
         // widget that is drawn on screen.
         auto font = context.getHeaderFont();
         
-#ifdef MURKA_OF
 		MurkaColor fgColor = params->customColor ? params->color * 255 : context.getWidgetForegroundColor() * 255;
         context.renderer->setColor(fgColor);
         if (params->alignment == TEXT_LEFT) {
@@ -38,7 +37,6 @@ public:
             float textX = (shape.size.x - 10) - font->getStringBoundingBox(params->label, 0, 0).getWidth();
             font->drawString(params->label, textX, 5 + font->getLineHeight());
         }
-#endif
     };
     
     // Here go parameters and any parameter convenience constructors. You need to define something called Parameters, even if it's NULL.
@@ -92,13 +90,12 @@ public:
             font = params->font;
         }
         
-#ifdef MURKA_OF
 		MurkaColor bgColor = params->backgroundColor;
         context.renderer->enableFill();
         if (bgColor.a != 0.0) {
             context.renderer->setColor(bgColor);
             if (params->alignment == TEXT_LEFT) {
-                ofDrawRectangle(0, 0, font->getStringBoundingBox(params->label, 0, 0).width + 10, context.getSize().y);
+                context.renderer->drawRectangle(0, 0, font->getStringBoundingBox(params->label, 0, 0).width + 10, context.getSize().y);
             }
         }
 		MurkaColor fgColor = params->customColor ? params->color : context.getWidgetForegroundColor();
@@ -122,7 +119,6 @@ public:
 //            ofDrawLine(0, context.getSize().y / 2, context.getSize().x, context.getSize().y / 2);
 //            context.renderer->setColor(255);
 //            ofDrawLine(0, context.getSize().y, context.getSize().x, context.getSize().y);
-#endif
     };
     
     // Here go parameters and any parameter convenience constructors. You need to define something called Parameters, even if it's NULL.
@@ -223,7 +219,6 @@ public:
         
         bool* booleanToControl = ((bool*)dataToControl);
 
-#ifdef MURKA_OF
 		MurkaColor fgColor = context.getWidgetForegroundColor() * 255;
 
         float pushed = 0.2 - (context.getRunningTime() - lastTimeClicked);
@@ -234,11 +229,11 @@ public:
         context.renderer->setColor((inside ? fgColor : fgColor / 2) * (1.0 + 0.2 * pushed));
 
         context.renderer->disableFill();
-        ofDrawRectangle(5, 5, 20, 20);
+        context.renderer->drawRectangle(5, 5, 20, 20);
         if (*booleanToControl) {
             float symbolOffset = 4;
-            ofDrawLine(5 + symbolOffset, 5 + symbolOffset, 25 - symbolOffset, 25 - symbolOffset);
-            ofDrawLine(25 - symbolOffset, 5 + symbolOffset, 5 + symbolOffset, 25 - symbolOffset);
+            context.renderer->drawLine(5 + symbolOffset, 5 + symbolOffset, 25 - symbolOffset, 25 - symbolOffset);
+            context.renderer->drawLine(25 - symbolOffset, 5 + symbolOffset, 5 + symbolOffset, 25 - symbolOffset);
         }
         
         context.renderer->enableFill();
@@ -251,7 +246,6 @@ public:
             lastTimeClicked = context.getRunningTime();
         }
         context.renderer->popStyle();
-#endif
     };
     
     // Here go parameters and any parameter convenience constructors. You need to define something called Parameters, even if it's NULL.
@@ -292,16 +286,14 @@ public:
             } else gonnaResize = true;
         }
 
-#ifdef MURKA_OF
-        
         context.renderer->pushStyle();
         context.renderer->enableFill();
         context.renderer->setColor(params->r, params->g, params->b, params->a);
-        ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
+        context.renderer->drawRectangle(0, 0, context.getSize().x, context.getSize().y);
         if (params->drawBorder) {
             context.renderer->setColor(30);
             context.renderer->disableFill();
-            ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
+            context.renderer->drawRectangle(0, 0, context.getSize().x, context.getSize().y);
         }
         
         context.renderer->setColor(255);
@@ -310,15 +302,13 @@ public:
         
         // Drawing symbols to show that we're going to resize this widget
         if ((gonnaResize) && (inside)) {
-            ofDrawLine(context.currentViewShape.size.x - 5, context.currentViewShape.size.y - 5,
+            context.renderer->drawLine(context.currentViewShape.size.x - 5, context.currentViewShape.size.y - 5,
                        context.currentViewShape.size.x - 15, context.currentViewShape.size.y - 5);
-            ofDrawLine(context.currentViewShape.size.x - 5, context.currentViewShape.size.y - 5,
+            context.renderer->drawLine(context.currentViewShape.size.x - 5, context.currentViewShape.size.y - 5,
                        context.currentViewShape.size.x - 5, context.currentViewShape.size.y - 15);
         }
         context.renderer->popStyle();
 
-#endif // MURKA_OF
-        
         // Moving & resizing logic
         
         if (params->moveable)

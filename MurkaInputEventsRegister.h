@@ -105,13 +105,13 @@ public:
             }
     }
         
-        void mouseMoved(int mouseX, int mouseY, int mouseButtonIndex) {
+    void mouseMoved(int mouseX, int mouseY, int mouseButtonIndex) {
             eventState.mouseDelta = {eventState.mousePosition.x - mouseX,
                 eventState.mousePosition.y - mouseY};
             eventState.mousePosition = {mouseX, mouseY};
-        }
+    }
         
-        void mousePressed(int mouseX, int mouseY, int mouseButtonIndex) {
+    void mousePressed(int mouseX, int mouseY, int mouseButtonIndex) {
             eventState.mousePosition = {mouseX, mouseY};
             eventState.mouseDown[mouseButtonIndex] = true;
             eventState.mouseDownPressed[mouseButtonIndex] = true;
@@ -133,7 +133,7 @@ public:
      */
         }
         
-        void mouseReleased(int mouseX, int mouseY, int mouseButtonIndex) {
+    void mouseReleased(int mouseX, int mouseY, int mouseButtonIndex) {
             eventState.mousePosition = {mouseX, mouseY};
             eventState.mouseReleased[mouseButtonIndex] = true;
             eventState.mouseDown[mouseButtonIndex] = false;
@@ -143,7 +143,7 @@ public:
             if (mouseButtonIndex == 0) {
                 eventState.mouseDeltaSinceMouseLeftPressed = eventState.mousePosition -  mousePositionWhenMouseLeftPressed;
             }
-        }
+    }
     
     // oF event registration
     
