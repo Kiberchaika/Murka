@@ -85,14 +85,14 @@ public:
 
     // custom event registration
     
-    void keyPressed(int key) {
+    void registerKeyPressed(int key) {
         eventState.keyPresses.push_back(key);
     }
     
-    void keyReleased(int key) {
+    void registerKeyReleased(int key) {
     }
     
-    void mouseDragged(int mouseX, int mouseY, int mouseButtonIndex) {
+    void registerMouseDragged(int mouseX, int mouseY, int mouseButtonIndex) {
             eventState.mouseDragged[mouseButtonIndex] = true;
             eventState.mouseDelta = {eventState.mousePosition.x - mouseX,
                                      eventState.mousePosition.y - mouseY};
@@ -105,13 +105,13 @@ public:
             }
     }
         
-    void mouseMoved(int mouseX, int mouseY, int mouseButtonIndex) {
+    void registerMouseMoved(int mouseX, int mouseY, int mouseButtonIndex) {
             eventState.mouseDelta = {eventState.mousePosition.x - mouseX,
                 eventState.mousePosition.y - mouseY};
             eventState.mousePosition = {mouseX, mouseY};
     }
         
-    void mousePressed(int mouseX, int mouseY, int mouseButtonIndex) {
+    void registerMousePressed(int mouseX, int mouseY, int mouseButtonIndex) {
             eventState.mousePosition = {mouseX, mouseY};
             eventState.mouseDown[mouseButtonIndex] = true;
             eventState.mouseDownPressed[mouseButtonIndex] = true;
@@ -133,7 +133,7 @@ public:
      */
         }
         
-    void mouseReleased(int mouseX, int mouseY, int mouseButtonIndex) {
+    void registerMouseReleased(int mouseX, int mouseY, int mouseButtonIndex) {
             eventState.mousePosition = {mouseX, mouseY};
             eventState.mouseReleased[mouseButtonIndex] = true;
             eventState.mouseDown[mouseButtonIndex] = false;
