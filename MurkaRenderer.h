@@ -125,6 +125,18 @@ public:
     virtual void clear(float brightness, float a=0) override{
         ofRenderer->clear(brightness, a);
     };
+
+	virtual void drawRectangle(float x, float y, float w, float h) override {
+		ofRenderer->drawRectangle(x, y, 0.0f, w, h);
+	}
+
+	virtual void drawCircle(float x, float y, float radius) override {
+		ofRenderer->drawCircle(x, y, 0.0f, radius);
+	}
+
+	virtual void drawLine(float x1, float y1, float x2, float y2) override {
+		ofRenderer->drawLine(x1, y1, 0.0f, x2, y2, 0.0f);
+	}
 };
 
 #else // "Default" render version
