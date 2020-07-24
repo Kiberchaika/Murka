@@ -29,11 +29,24 @@ struct MurkaColor {
         return MurkaColor(r * multiplier, g * multiplier, b * multiplier, a * multiplier);
     }
     
-    MurkaColor operator *(double multiplier) const  {
-        return MurkaColor(r * multiplier, g * multiplier, b * multiplier, a * multiplier);
-    }
-    
-    MurkaColor operator +(MurkaColor rightColor) const  {
+	MurkaColor operator *(double multiplier) const {
+		return MurkaColor(r * multiplier, g * multiplier, b * multiplier, a * multiplier);
+	}
+
+	MurkaColor operator /(int devider) const {
+		return MurkaColor(r / float(devider), g / float(devider), b / float(devider), a / float(devider));
+	}
+
+	MurkaColor operator /(float devider) const {
+		return MurkaColor(r / devider, g / devider, b / devider, a / devider);
+	}
+
+	MurkaColor operator /(double devider) const {
+		return MurkaColor(r / devider, g / devider, b / devider, a / devider);
+	}
+
+
+	MurkaColor operator +(MurkaColor rightColor) const  {
         return MurkaColor(r + rightColor.r, g + rightColor.g, b + rightColor.b, a + rightColor.a);
     }
 

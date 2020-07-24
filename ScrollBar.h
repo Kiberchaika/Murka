@@ -62,7 +62,7 @@ public:
         MurkaSurface* surfaceToControl;
         
         std::function<void(MurkaShape scrollbarShape, MurkaShape handleShape, bool hover, bool draggingNow)> drawScrollBar = [](MurkaShape scrollbarShape, MurkaShape handleShape, bool hover, bool draggingNow) {
-                            ofSetColor(80 + hover * 40 + draggingNow * 80);
+							ofSetColor(80 + hover * 40 + draggingNow * 80);
                             ofDrawRectangle(handleShape);
                         };
         int kind = 0; // 0 = vertical
