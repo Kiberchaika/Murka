@@ -374,44 +374,37 @@ public:
                 for (auto key: context.keyPresses) {
 //                        ofLog() << key;
                     
-                    if (key == 13) { // enter
+                    if (key == OF_KEY_RETURN) { // enter
                         enterPressed = true;
                     }
-                    
-                    
-                    if ((key >= 32) && (key <= 255)) { // symbol keys
-                        
-                        ofLog() << "pressed symbol key " << key;
-                        if (isSelectingTextNow()) {
-                            ofLog() << "   .. and selecting text now ..";
-                            displayString.replace(selectionSymbolsRange.first, selectionSymbolsRange.second - selectionSymbolsRange.first, "");
-                            cursorPosition = selectionSymbolsRange.first;
-                        }
-                        
-                        
-                        displayString.insert(displayString.begin() + cursorPosition, char(key));
-                        
-                        cursorPosition += 1;
-                        
-                        updateTextSelectionFirst(cursorPosition);
-                        updateTextSelectionSecond(cursorPosition);
-                    }
-                    
-                    if (key == 8) { // backspace
-                        if (isSelectingTextNow()) { // if we select now, backspace just deletes
-                            displayString.replace(selectionSymbolsRange.first, selectionSymbolsRange.second - selectionSymbolsRange.first, "");
-                            cursorPosition = selectionSymbolsRange.first;
-                            updateTextSelectionFirst(cursorPosition);
-                            updateTextSelectionSecond(cursorPosition);
-                        } else {
-                            if (cursorPosition > 0) {
-                                displayString.erase(cursorPosition - 1, 1);
-                                cursorPosition -= 1;
-                            }
-                        }
-                    }
-                    
-                    if (key == OF_KEY_LEFT) { // left
+                    else if (key == OF_KEY_BACKSPACE) { // backspace
+						if (isSelectingTextNow()) { // if we select now, backspace just deletes
+							displayString.replace(selectionSymbolsRange.first, selectionSymbolsRange.second - selectionSymbolsRange.first, "");
+							cursorPosition = selectionSymbolsRange.first;
+							updateTextSelectionFirst(cursorPosition);
+							updateTextSelectionSecond(cursorPosition);
+						}
+						else {
+							if (cursorPosition > 0) {
+								displayString.erase(cursorPosition - 1, 1);
+								cursorPosition -= 1;
+							}
+						}
+					}
+					else if (key == OF_KEY_DEL) { 
+						if (isSelectingTextNow()) { // if we select now, backspace just deletes
+							displayString.replace(selectionSymbolsRange.first, selectionSymbolsRange.second - selectionSymbolsRange.first, "");
+							cursorPosition = selectionSymbolsRange.first;
+							updateTextSelectionFirst(cursorPosition);
+							updateTextSelectionSecond(cursorPosition);
+						}
+						else {
+							if (cursorPosition < displayString.size()) {
+								displayString.erase(cursorPosition, 1);
+							}
+						}
+					}
+					else if (key == OF_KEY_LEFT) { // left
                         if (cursorPosition > 0) {
                             if (isSelectingTextNow()) {
                                 if (cursorPosition != selectionSymbolsRange.first) {
@@ -434,7 +427,7 @@ public:
                         }
                         
                     }
-                    if (key == OF_KEY_RIGHT) { // right
+                    else if (key == OF_KEY_RIGHT) { // right
                         if (cursorPosition < displayString.size()) {
                             if (isSelectingTextNow()) {
                                 if (cursorPosition != selectionSymbolsRange.second) {
@@ -458,6 +451,22 @@ public:
                         }
                         
                     }
+					else if (key >= 32 && key <= 255) { // symbol keys
+
+						ofLog() << "pressed symbol key " << key;
+						if (isSelectingTextNow()) {
+							ofLog() << "   .. and selecting text now ..";
+							displayString.replace(selectionSymbolsRange.first, selectionSymbolsRange.second - selectionSymbolsRange.first, "");
+							cursorPosition = selectionSymbolsRange.first;
+						}
+
+						displayString.insert(displayString.begin() + cursorPosition, char(key));
+
+						cursorPosition += 1;
+
+						updateTextSelectionFirst(cursorPosition);
+						updateTextSelectionSecond(cursorPosition);
+					}
                 }
             }
         }
