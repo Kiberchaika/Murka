@@ -62,7 +62,7 @@ public:
     virtual void setColor(int r, int g, int b, int a) = 0; // 0-255
     virtual void setColor(const MurkaColor & color) = 0;
     virtual void setColor(const MurkaColor & color, int _a) = 0;
-    virtual void setColor(float gray) = 0; // new set a color as grayscale with one argument
+    virtual void setColor(int gray) = 0; // 0-255
 
     virtual void clear() = 0;
     virtual void clear(float r, float g, float b, float a=0) = 0;
