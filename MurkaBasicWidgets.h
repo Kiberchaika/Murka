@@ -24,7 +24,7 @@ public:
         // widget that is drawn on screen.
         auto font = context.getHeaderFont();
         
-		MurkaColor fgColor = params->customColor ? params->color * 255 : context.getWidgetForegroundColor() * 255;
+		MurkaColor fgColor = params->customColor ? params->color : context.getWidgetForegroundColor();
         context.renderer->setColor(fgColor);
         if (params->alignment == TEXT_LEFT) {
             font->drawString(params->label, 5, 5 + font->getLineHeight());
@@ -219,7 +219,7 @@ public:
         
         bool* booleanToControl = ((bool*)dataToControl);
 
-		MurkaColor fgColor = context.getWidgetForegroundColor() * 255;
+		MurkaColor fgColor = context.getWidgetForegroundColor();
 
         float pushed = 0.2 - (context.getRunningTime() - lastTimeClicked);
         if (pushed < 0) pushed = 0;
@@ -399,10 +399,10 @@ public:
              if (inside) {
                  context.renderer->setColor(MurkaColor(parameters->r, parameters->g, parameters->b) * (1.0 + 0.2 * pushed));
              } else context.renderer->setColor(75 * (1.0 + 0.2 * pushed));
-             ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
+             context.renderer->drawRectangle(0, 0, context.getSize().x, context.getSize().y);
              context.renderer->setColor(30);
              context.renderer->disableFill();
-             ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
+             context.renderer->drawRectangle(0, 0, context.getSize().x, context.getSize().y);
         
              context.renderer->setColor(255);
         
@@ -503,7 +503,7 @@ public:
         context.renderer->pushStyle();
         context.renderer->enableFill();
         context.renderer->setColor(15);
-        ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
+        context.renderer->drawRectangle(0, 0, context.getSize().x, context.getSize().y);
         context.renderer->setColor(parameters->r + (inside ? 20 : 0),
                    parameters->g + (inside ? 20 : 0),
                    parameters->b + (inside ? 20 : 0), 200);
@@ -514,14 +514,14 @@ public:
         if (currentValue < parameters->minValue) {
             currentValue = parameters->minValue;
         }
-        ofDrawRectangle(0, 0, context.getSize().x * ((currentValue - parameters->minValue) / (parameters->maxValue - parameters->minValue)), context.getSize().y);
+        context.renderer->drawRectangle(0, 0, context.getSize().x * ((currentValue - parameters->minValue) / (parameters->maxValue - parameters->minValue)), context.getSize().y);
         context.renderer->setColor(80);
 		context.renderer->disableFill();
         if (inside) {
-            ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
+            context.renderer->drawRectangle(0, 0, context.getSize().x, context.getSize().y);
         }
         
-        MurkaColor fgColor = context.getWidgetForegroundColor() * 255;
+        MurkaColor fgColor = context.getWidgetForegroundColor();
         context.renderer->setColor(inside ? fgColor : fgColor / 2);
         auto label = ((Parameters*)parametersObject)->label;
         auto resultString = label + ": " + ofToString(*((float*)dataToControl));

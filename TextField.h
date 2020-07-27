@@ -137,20 +137,18 @@ public:
 
 #ifdef MURKA_OF
         MurkaColor c = context.getWidgetForegroundColor();
-        ofColor bgColor = params->widgetBgColor * 255;
-        ofColor fgColor = params->widgetFgColor * 255;
         
         if (params->drawBounds) {
-            ofPushStyle();
-            ofFill();
-            ofSetColor(bgColor);
-            ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
+            context.renderer->pushStyle();
+            context.renderer->enableFill();
+            context.renderer->setColor(params->widgetBgColor);
+            context.renderer->drawRectangle(0, 0, context.getSize().x, context.getSize().y);
             
-            ofNoFill();
-            ofSetColor(inside ? fgColor : fgColor / 2);
-            if (activated) ofSetColor(fgColor * 1.2);
-            ofDrawRectangle(1, 1, context.getSize().x-2, context.getSize().y-2);
-            ofPopStyle();
+            context.renderer->disableFill();
+            context.renderer->setColor(inside ? params->widgetFgColor : params->widgetFgColor / 2);
+            if (activated) context.renderer->setColor(params->widgetFgColor * 1.2);
+            context.renderer->drawRectangle(1, 1, context.getSize().x-2, context.getSize().y-2);
+            context.renderer->popStyle();
         }
         
         if (isSelectingTextNow()) {
@@ -158,23 +156,22 @@ public:
             auto selectionShape = returnSelectionVisualShape();
             MurkaColor selectionColor = (context.getWidgetForegroundColor() * 0.5 +
                                          context.getWidgetBackgroundColor() * 0.5) * 255;
-            ofColor selectionOfColor = (ofColor)selectionColor;
-            ofSetColor(selectionOfColor, 200);
-            ofDrawRectangle(10 - cameraPanInsideWidget + selectionShape.x(), 4, selectionShape.width(), context.getSize().y - 8);
+            context.renderer->setColor(selectionColor, 200);
+            context.renderer->drawRectangle(10 - cameraPanInsideWidget + selectionShape.x(), 4, selectionShape.width(), context.getSize().y - 8);
         }
 
         
         recalcGlyphLengths(displayString, &context);
         
         float glyphXCoordinate = 10;
-        ofSetColor(fgColor);
+        context.renderer->setColor(params->widgetFgColor);
         font->drawString(displayString, 10 - cameraPanInsideWidget, context.getSize().y / 2  + font->getLineHeight() / 4);
         
         if (displayString.size() == 0) {
             // drawing hint
             MurkaColor hintColor = context.getWidgetForegroundColor() * 0.5 +
                                    context.getWidgetBackgroundColor() * 0.5;
-            ofSetColor(hintColor * 255);
+            context.renderer->setColor(hintColor * 255);
             font->drawString(params->hint, 10, context.getSize().y / 2  + font->getLineHeight() / 4);
         }
         
@@ -190,8 +187,8 @@ public:
             bool insideGlyph = glyphShape.inside(context.mousePosition);
             
             /*
-            ofSetColor(insideGlyph ? fgColor / 2 : fgColor / 4, 100);
-            ofDrawRectangle(glyphXCoordinate - cameraPanInsideWidget, 0, currentGlyphLengths[i], 30);
+            context.renderer->setColor(insideGlyph ? fgColor / 2 : fgColor / 4, 100);
+            context.renderer->drawRectangle(glyphXCoordinate - cameraPanInsideWidget, 0, currentGlyphLengths[i], 30);
              */
             
             MurkaShape currentSymbolShape = {glyphXCoordinate, 0, currentGlyphLengths[i], context.getSize().y};
@@ -261,9 +258,9 @@ public:
         // drawing cursor
         if (activated && !isSelectingTextNow()) {
             float timeMod = context.getRunningTime() / 1.0 - int(context.getRunningTime() / 1.0);
-            ofSetColor(200);
+            context.renderer->setColor(200);
             if (timeMod > 0.5)
-                ofDrawLine(cursorPositionInPixels - cameraPanInsideWidget, 3,
+                context.renderer->drawLine(cursorPositionInPixels - cameraPanInsideWidget, 3,
                            cursorPositionInPixels - cameraPanInsideWidget, 30);
         }
         
