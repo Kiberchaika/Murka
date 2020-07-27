@@ -52,7 +52,7 @@ class TextField : public MurkaViewInterface<TextField> {
         }
     };
     
-    KeyStroke copyText, cutText, pasteText, goLeft, goRight, selectAll;
+    KeyStroke copyText, cutText, pasteText, goLeft, goRight, shiftLeft, shiftRight, selectAll;
     
 public:
     TextField() {
@@ -71,9 +71,11 @@ public:
         copyText = KeyStroke({ OF_KEY_CONTROL, 'c' });
         cutText = KeyStroke({ OF_KEY_CONTROL, 'x' });
         pasteText = KeyStroke({ OF_KEY_CONTROL, 'v' });
-        goLeft = KeyStroke({ OF_KEY_CONTROL, OF_KEY_LEFT });
-        goRight = KeyStroke({ OF_KEY_CONTROL, OF_KEY_RIGHT });
-        selectAll = KeyStroke({ OF_KEY_CONTROL, 'a' });
+		goLeft = KeyStroke({ OF_KEY_CONTROL, OF_KEY_LEFT });
+		goRight = KeyStroke({ OF_KEY_CONTROL, OF_KEY_RIGHT });
+		shiftLeft = KeyStroke({ OF_KEY_SHIFT, OF_KEY_LEFT });
+		shiftRight = KeyStroke({ OF_KEY_SHIFT, OF_KEY_RIGHT });
+		selectAll = KeyStroke({ OF_KEY_CONTROL, 'a' });
 #endif
         }
 
@@ -247,7 +249,6 @@ public:
             // Moving the internal window so the cursor is always visible
             if (cursorPositionInPixels < cameraPanInsideWidget) {
                 cameraPanInsideWidget = cursorPositionInPixels - 5;
-                
             }
             
             if (cursorPositionInPixels > (context.getSize().x + cameraPanInsideWidget)) {
@@ -323,7 +324,7 @@ public:
                 
                 cursorPosition = 0;
                 
-                if (!ofGetKeyPressed(OF_KEY_SHIFT)) {
+                if (!shiftLeft.isPressed()) {
                     updateTextSelectionFirst(cursorPosition);
                     updateTextSelectionSecond(cursorPosition);
                 } else { // shift pressed, so we enlarge the selected text shape
@@ -346,7 +347,7 @@ public:
 
                 cursorPosition = displayString.size();
 
-                if (!ofGetKeyPressed(OF_KEY_SHIFT)) {
+                if (!shiftRight.isPressed()) {
                     updateTextSelectionFirst(cursorPosition);
                     updateTextSelectionSecond(cursorPosition);
                 } else {
@@ -416,7 +417,7 @@ public:
                                 cursorPosition --;
                             }
                             
-                            if (!ofGetKeyPressed(OF_KEY_SHIFT)) {
+                            if (!shiftLeft.isPressed()) {
                                 // pressing left collapses the text selection if shift isn't pressed
                                 updateTextSelectionFirst(cursorPosition);
                                 updateTextSelectionSecond(cursorPosition);
@@ -440,7 +441,7 @@ public:
                             }
 
                             
-                            if (!ofGetKeyPressed(OF_KEY_SHIFT)) {
+                            if (!shiftRight.isPressed()) {
                                 // pressing left collapses the text selection if shift isn't pressed
                                 updateTextSelectionFirst(cursorPosition);
                                 updateTextSelectionSecond(cursorPosition);
