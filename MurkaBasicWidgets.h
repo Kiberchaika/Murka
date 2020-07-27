@@ -504,6 +504,7 @@ public:
         context.renderer->enableFill();
         context.renderer->setColor(15);
         context.renderer->drawRectangle(0, 0, context.getSize().x, context.getSize().y);
+        
         context.renderer->setColor(parameters->r + (inside ? 20 : 0),
                    parameters->g + (inside ? 20 : 0),
                    parameters->b + (inside ? 20 : 0), 200);

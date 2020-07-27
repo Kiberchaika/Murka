@@ -143,7 +143,7 @@ public:
     };
     
     virtual void setColor(float gray) override{
-        ofRenderer->setColor(gray * 255);
+        ofRenderer->setColor(gray);
     }; // new set a color as grayscale with one argument
 
     virtual void clear() override{
