@@ -54,6 +54,8 @@ public:
     virtual void setLineSmoothing(bool smooth) = 0;
     virtual void enableAntiAliasing() = 0;
     virtual void disableAntiAliasing() = 0;
+    virtual void enableAlphaBlending() = 0;
+    virtual void disableAlphaBlending() = 0;
     virtual void pushStyle() = 0;
     virtual void popStyle() = 0;
     

@@ -117,6 +117,14 @@ public:
         ofRenderer->disableAntiAliasing();
     };
     
+    virtual void enableAlphaBlending() override{
+        ofRenderer->setBlendMode(OF_BLENDMODE_ALPHA);
+    };
+    
+    virtual void disableAlphaBlending() override{
+        ofRenderer->setBlendMode(OF_BLENDMODE_DISABLED);
+    };
+    
     virtual void pushStyle() override{
         ofRenderer->pushStyle();
     };
