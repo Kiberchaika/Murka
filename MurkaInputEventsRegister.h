@@ -50,7 +50,7 @@ public:
     MurkaEventState eventState;
     
     void setupEvents() {
-    #ifdef MURKA_OF
+    #if defined(MURKA_OF) && !defined(MURKA_OFFSCREEN)
             ofRegisterKeyEvents(this);
             ofRegisterMouseEvents(this);
             ofRegisterTouchEvents(this);
