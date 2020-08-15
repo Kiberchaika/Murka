@@ -74,7 +74,7 @@ public:
 	virtual void drawRectangle(float x, float y, float w, float h) = 0;
 	virtual void drawCircle(float x, float y, float radius) = 0;
 	virtual void drawLine(float x1, float y1, float x2, float y2) = 0;
-	virtual void drawVbo(MurVbo vbo, int drawMode, int first, int total) = 0;
+    virtual void drawVbo(const MurVbo & vbo, GLuint drawMode, int first, int total) const = 0;
 
 	virtual int getWindowWidth() = 0;
 	virtual int getWindowHeight() = 0;

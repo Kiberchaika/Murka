@@ -182,16 +182,16 @@ public:
 	virtual void drawLine(float x1, float y1, float x2, float y2) override {
 		ofRenderer->drawLine(x1, y1, 0.0f, x2, y2, 0.0f);
 	}
-
-	virtual void drawVbo(MurVbo vbo, int drawMode, int first, int total) {
-		ofRenderer->draw(vbo.internal, drawMode, first, total);
-	}
-
-	virtual int getWindowWidth() {
+    
+    virtual void drawVbo(const MurVbo & vbo, GLuint drawMode, int first, int total) const override{
+        draw(vbo, drawMode, first, total);
+    }
+    
+	virtual int getWindowWidth() override {
 		return ofWindow->getWidth();
 	}
 
-	virtual int getWindowHeight() {
+	virtual int getWindowHeight() override {
 		return ofWindow->getHeight();
 	}
 
