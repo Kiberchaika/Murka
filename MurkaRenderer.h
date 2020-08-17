@@ -93,6 +93,10 @@ public:
 	}
 
     // rendering setup
+    virtual void setCircleResolution(int resolution) override{
+        ofRenderer->setCircleResolution(resolution);
+    }
+    
     virtual void setLineWidth(float lineWidth) override{
         ofRenderer->setLineWidth(lineWidth);
     };

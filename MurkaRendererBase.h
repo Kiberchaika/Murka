@@ -48,6 +48,7 @@ public:
 	virtual void setupScreen() = 0;
 
     // rendering setup
+    virtual void setCircleResolution(int resolution) = 0;
     virtual void setLineWidth(float lineWidth) = 0;
     virtual void enableFill() = 0;
     virtual void disableFill() = 0;
