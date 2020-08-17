@@ -69,6 +69,10 @@ public:
 	virtual void translate(float x, float y, float z)  override {
 		ofRenderer->translate(x, y, z);
 	}
+    
+    virtual void rotateZRad(float radians) override {
+        ofRenderer->rotateZRad(radians);
+    }
 
 	virtual void scale(float x, float y, float z) override {
 		ofRenderer->scale(x, y, z);
