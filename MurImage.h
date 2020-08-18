@@ -16,7 +16,7 @@ public:
 	}
 
 	bool load(const std::filesystem::path& fileName, const ofImageLoadSettings &settings = ofImageLoadSettings()) {
-		internal.load(fileName, settings);
+		return internal.load(fileName, settings);
 	}
 
 	void setColor(int x, int y, const MurkaColor color) {
