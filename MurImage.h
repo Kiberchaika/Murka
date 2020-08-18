@@ -35,6 +35,10 @@ public:
 		internal.update();
 	}
 
+	void clear() {
+		internal.clear();
+	}
+
 };
 
 #else // Default version
