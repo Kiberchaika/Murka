@@ -15,6 +15,10 @@ public:
 		internal.allocate(w, h, OF_IMAGE_COLOR_ALPHA);
 	}
 
+	bool load(const std::filesystem::path& fileName, const ofImageLoadSettings &settings = ofImageLoadSettings()) {
+		internal.load(fileName, settings);
+	}
+
 	void setColor(int x, int y, const MurkaColor color) {
 		internal.setColor(x, y, color);
 	}

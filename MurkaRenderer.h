@@ -20,11 +20,15 @@ public:
 	}
 
 	// Object drawing
-    virtual void draw(const MurImage & image, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) const override {
-        ofRenderer->draw(image.internal, x, y, z, w, h, sx, sy, sw, sh);
-    }
-    
-    virtual void draw(const MurTexture & texture, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) const override {
+	virtual void draw(const MurImage & image, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) const override {
+		ofRenderer->draw(image.internal, x, y, z, w, h, sx, sy, sw, sh);
+	}
+
+	virtual void draw(const MurImage & image, float x, float y) const override {
+		ofRenderer->draw(image.internal, x, y, 0, image.internal.getWidth(), image.internal.getHeight(), 0, 0, image.internal.getWidth(), image.internal.getHeight());
+	}
+
+	virtual void draw(const MurTexture & texture, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) const override {
         ofRenderer->draw(texture.internal, x, y, z, w, h, sx, sy, sw, sh);
     }
     

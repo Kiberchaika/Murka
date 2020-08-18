@@ -22,6 +22,8 @@ public:
 
     // Object drawing
     virtual void draw(const MurImage & image, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) const = 0;
+	virtual void draw(const MurImage & image, float x, float y) const = 0;
+
     virtual void draw(const MurTexture & texture, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) const = 0;
     virtual void draw(const MurVbo & vbo, GLuint drawMode, int first, int total) const = 0;
     
