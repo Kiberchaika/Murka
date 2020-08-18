@@ -17,6 +17,12 @@
 namespace murka {
 
 class MurkaContext: public MurkaEventState {
+    /*
+private:
+    MurkaContext(const MurkaContext&) {}
+    MurkaContext& operator=(const MurkaContext&){}
+     */
+    
 public:
     
     MurkaContext() {
