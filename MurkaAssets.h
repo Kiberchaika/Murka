@@ -12,36 +12,41 @@ namespace murka {
 
 class MurkaAssets {
 public:
-    FontObject* paragraphFont = NULL;
-    FontObject* headerFont = NULL;
-    FontObject* monoFont = NULL;
     
-    std::map<std::string, FontObject*> fontMap;
-    
-    void setupFonts(std::string paragraphFontFilename, float paragraphSize,
-                    std::string headerFontFilename, float headerSize,
-                    std::string monoFontFilename, float monofontSize,
-                    bool isAbsolutePath = false,
-					MurkaRendererBase* renderer = nullptr) {
-#ifdef MURKA_OF
-        paragraphFont = new FontObject();
-        headerFont = new FontObject();
-        monoFont = new FontObject();
-        paragraphFont->load(paragraphFontFilename, paragraphSize, isAbsolutePath, renderer);
-        headerFont->load(headerFontFilename, headerSize, isAbsolutePath, renderer);
-        monoFont->load(monoFontFilename, monofontSize, isAbsolutePath, renderer);
-#endif
+    std::string resourcesPath;
+
+    void setResourcesPath(std::string path) {
+        resourcesPath = path;
     }
     
-    void addFont(std::string fontId, std::string fontName, float fontSize) {
-#ifdef MURKA_OF
-        fontMap[fontId] = new FontObject();
-        fontMap[fontId]->load(fontName, fontSize);
-#endif
+    std::string getResourcesPath() {
+        return resourcesPath;
     }
     
-    MurkaColor widgetBgColor = {0.1, 0.1, 0.1};
-    MurkaColor widgetFgColor = {0.98, 0.98, 0.98};
+    typedef tuple<string /* fontName */, int /* fontSize */> FontInfo;
+    
+    std::map<FontInfo, FontObject*> fonts;
+    std::map<FontInfo, FontObject*>::iterator currentFont;
+
+    
+    FontObject* getCurrentFont() {
+        return currentFont->second;
+    }
+    
+    void setFont(std::string name, int size) {
+        FontInfo fontId = {name, size};
+        auto font = fonts.find(fontId);
+        if (font != fonts.end()) {
+            currentFont = font;
+        } else {
+            auto font = new FontObject();
+            font->load(resourcesPath +
+                       (resourcesPath[resourcesPath.length() - 1] == '/' ? "" : "/") + name, size);
+            fonts[fontId] = font;
+            currentFont = fonts.find(fontId);
+        }
+    }
+
     
     float getFontLineHeight(FontObject* font) {
         if (font == NULL) {

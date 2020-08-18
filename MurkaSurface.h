@@ -263,7 +263,7 @@ public:
             
             
             ofSetColor(0, 200, 60, 155);
-            auto font = latestContextDebug.getMonospaceFont();
+            auto font = latestContextDebug.getCurrentFont();
             font->drawString("scale: " + ofToString(scale), 50, 50);
             font->drawString("panOffset: " + ofToString(panOffset.x) + " : " + ofToString(panOffset.y), 0, 90);
 

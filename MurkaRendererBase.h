@@ -9,17 +9,6 @@
 class MurkaRendererBase : public murka::MurkaAssets {
 public:
     
-	void setupFonts(std::string paragraphFontFilename, float paragraphSize,
-		std::string headerFontFilename, float headerSize,
-		std::string monoFontFilename, float monofontSize,
-		bool isAbsolutePath = false) {
-		MurkaAssets::setupFonts(paragraphFontFilename, paragraphSize,
-			headerFontFilename, headerSize,
-			monoFontFilename, monofontSize,
-			isAbsolutePath,
-			this);
-	}
-
     // Object drawing
     virtual void draw(const MurImage & image, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) const = 0;
 	virtual void draw(const MurImage & image, float x, float y, float z, float w, float h) const = 0;
@@ -64,7 +53,8 @@ public:
     virtual void pushStyle() = 0;
     virtual void popStyle() = 0;
     
-    // color options
+    // color operations
+    virtual MurkaColor getColor() = 0;
     virtual void setColor(int r, int g, int b) = 0; // 0-255
     virtual void setColor(int r, int g, int b, int a) = 0; // 0-255
     virtual void setColor(const MurkaColor & color) = 0;

@@ -19,7 +19,7 @@ public:
         
         context.startViewport();
         
-        auto font = context.getMonospaceFont();
+        auto font = context.getCurrentFont();
         float monospaceSymbolWidth = float(font->stringWidth("x"));
         int highlightedNumber = (context.mousePosition.x - float(10)) / monospaceSymbolWidth;
 
@@ -37,9 +37,9 @@ public:
         if (highlightedNumber >= numberString.size()) highlightedNumber = numberString.size() - 1;
         
 
-        MurkaColor c = context.getWidgetForegroundColor();
-        ofColor bgColor = context.getWidgetBackgroundColor() * 255;
-        ofColor fgColor = context.getWidgetForegroundColor() * 255;
+        MurkaColor c = context.renderer->getColor();
+        ofColor bgColor = context.renderer->getColor();
+        ofColor fgColor = context.renderer->getColor();
         
         ofPushStyle();
         ofFill();

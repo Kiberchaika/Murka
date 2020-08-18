@@ -104,7 +104,7 @@ public:
             updateInternalRepresenation(dataToControl, params->precision, params->clampNumber, params->minNumber, params->maxNumber);
         }
 
-        params->useCustomFont ? font = params->customFont : font = context.getParagraphFont();
+        params->useCustomFont ? font = params->customFont : font = context.getCurrentFont();
         
         bool doubleClick = false;
         
@@ -138,7 +138,7 @@ public:
         }
 
 #ifdef MURKA_OF
-        MurkaColor c = context.getWidgetForegroundColor();
+        MurkaColor c = context.renderer->getColor();
         
         if (params->drawBounds) {
             context.renderer->pushStyle();
@@ -156,8 +156,8 @@ public:
         if (isSelectingTextNow()) {
 
             auto selectionShape = returnSelectionVisualShape();
-            MurkaColor selectionColor = (context.getWidgetForegroundColor() * 0.5 +
-                                         context.getWidgetBackgroundColor() * 0.5) * 255;
+            MurkaColor selectionColor = (context.renderer->getColor() * 0.5 +
+                                         context.renderer->getColor() * 0.5) * 255;
             context.renderer->setColor(selectionColor, 200);
             context.renderer->drawRectangle(10 - cameraPanInsideWidget + selectionShape.x(), 4, selectionShape.width(), context.getSize().y - 8);
         }
@@ -171,8 +171,8 @@ public:
         
         if (displayString.size() == 0) {
             // drawing hint
-            MurkaColor hintColor = context.getWidgetForegroundColor() * 0.5 +
-                                   context.getWidgetBackgroundColor() * 0.5;
+            MurkaColor hintColor = context.renderer->getColor() * 0.5 +
+                                   context.renderer->getColor() * 0.5;
             context.renderer->setColor(hintColor * 255);
             font->drawString(params->hint, 10, context.getSize().y / 2  + font->getLineHeight() / 4);
         }

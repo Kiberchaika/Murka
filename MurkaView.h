@@ -89,7 +89,7 @@ public:
     }
 
 
-    bool areInteractiveChildrenHovered(MurkaContext c) {
+    bool areInteractiveChildrenHovered(MurkaContext & c) {
         if (!c.isHovered()) {
             return false;
         }

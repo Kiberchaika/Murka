@@ -33,28 +33,8 @@ public:
     
     // Assets access functions
     
-    MurkaColor getWidgetForegroundColor() const {
-        return ((MurkaAssets*)renderer)->widgetFgColor;
-    }
-
-    MurkaColor getWidgetBackgroundColor() const {
-        return ((MurkaAssets*)renderer)->widgetBgColor;
-    }
-    
-    FontObject* getHeaderFont() const {
-        return ((MurkaAssets*)renderer)->headerFont;
-    }
-
-    FontObject* getParagraphFont() const {
-        return ((MurkaAssets*)renderer)->paragraphFont;
-    }
-
-    FontObject* getMonospaceFont() const {
-        return ((MurkaAssets*)renderer)->monoFont;
-    }
-    
-    FontObject* getFont(std::string fontId) const {
-        return ((MurkaAssets*)renderer)->fontMap[fontId];
+    FontObject* getCurrentFont() const {
+        return ((MurkaAssets*)renderer)->getCurrentFont();
     }
 
     //

@@ -22,9 +22,9 @@ public:
         // Your drawing and interaction code goes here.
         // Don't forget that all of this executes at each frame for each
         // widget that is drawn on screen.
-        auto font = context.getHeaderFont();
+        auto font = context.getCurrentFont();
         
-		MurkaColor fgColor = params->customColor ? params->color : context.getWidgetForegroundColor();
+        MurkaColor fgColor = params->customColor ? params->color : context.renderer->getColor();
         context.renderer->setColor(fgColor);
         if (params->alignment == TEXT_LEFT) {
             font->drawString(params->label, 5, 5 + font->getLineHeight());
@@ -85,7 +85,7 @@ public:
         
         bool inside = context.isHovered() * !areChildrenHovered(context);
         
-        auto font = context.getParagraphFont();
+        auto font = context.getCurrentFont();
         if (params->customFont) {
             font = params->font;
         }
@@ -98,7 +98,7 @@ public:
                 context.renderer->drawRectangle(0, 0, font->getStringBoundingBox(params->label, 0, 0).width + 10, context.getSize().y);
             }
         }
-		MurkaColor fgColor = params->customColor ? params->color : context.getWidgetForegroundColor();
+		MurkaColor fgColor = params->customColor ? params->color : context.renderer->getColor();
         context.renderer->setColor(fgColor);
         if (params->alignment == TEXT_LEFT) {
             font->drawString(params->label, 5, font->getLineHeight());
@@ -219,7 +219,7 @@ public:
         
         bool* booleanToControl = ((bool*)dataToControl);
 
-		MurkaColor fgColor = context.getWidgetForegroundColor();
+        MurkaColor fgColor = context.renderer->getColor();
 
         float pushed = 0.2 - (context.getRunningTime() - lastTimeClicked);
         if (pushed < 0) pushed = 0;
@@ -238,7 +238,7 @@ public:
         
         context.renderer->enableFill();
         
-        auto font = context.getParagraphFont();
+        auto font = context.getCurrentFont();
         font->drawString(params->label, 30, 22);
         
         if (inside && context.mouseDownPressed[0]) {
@@ -265,7 +265,7 @@ public:
 //    void loadInternalData(std::vector<MurkaVar>) override {}
     
     
-    // Everything else in the class is for handling the internal state. It persist.
+    // Everything else in the class is for handling the internal state. It persistы.
     double lastTimeClicked = 0;
 };
 
@@ -297,7 +297,7 @@ public:
         }
         
         context.renderer->setColor(255);
-        auto font = context.getMonospaceFont();
+        auto font = context.getCurrentFont();
         font->drawString(params->label, 0, font->getLineHeight());
         
         // Drawing symbols to show that we're going to resize this widget
@@ -386,7 +386,7 @@ public:
             lastTimeClicked = context.getRunningTime();
          } else castedResults = false;
         
-         auto font = context.getMonospaceFont();
+         auto font = context.getCurrentFont();
         
          #ifdef MURKA_OF
         
@@ -496,7 +496,7 @@ public:
             *((float*)dataToControl) = newValue;
         }
         
-        auto font = context.getMonospaceFont();
+        auto font = context.getCurrentFont();
         
 #ifdef MURKA_OF
         
@@ -522,7 +522,7 @@ public:
             context.renderer->drawRectangle(0, 0, context.getSize().x, context.getSize().y);
         }
         
-        MurkaColor fgColor = context.getWidgetForegroundColor();
+        MurkaColor fgColor = context.renderer->getColor();
         context.renderer->setColor(inside ? fgColor : fgColor / 2);
         auto label = ((Parameters*)parametersObject)->label;
         auto resultString = label + ": " + ofToString(*((float*)dataToControl));

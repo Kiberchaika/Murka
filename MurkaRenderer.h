@@ -149,7 +149,15 @@ public:
         ofRenderer->popStyle();
     };
     
-    // color options
+    // color operations
+    virtual MurkaColor getColor() override {
+        auto color = ofRenderer->getStyle().color;
+        return {float(color.r / 255.),
+                float(color.g / 255.),
+                float(color.b / 255.),
+                float(color.a / 255.)};
+    }
+    
     virtual void setColor(int r, int g, int b) override{
         ofRenderer->setColor(r, g, b);
     }; // 0-255
