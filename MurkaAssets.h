@@ -32,7 +32,12 @@ public:
     FontObject* getCurrentFont() {
         return currentFont->second;
     }
-    
+
+	void clearFontsCache() {
+		fonts.clear();
+		currentFont = fonts.begin();
+	}
+
     void setFont(std::string name, int size, MurkaRendererBase* renderer) {
         FontInfo fontId = {name, size};
         auto font = fonts.find(fontId);
