@@ -18,6 +18,14 @@ public:
 	void setRenderer(ofBaseGLRenderer* renderer) {
 		ofRenderer = renderer;
 	}
+    
+    // This font loading function needs to be here because
+    // downcasting from Renderer to MurkaAssets doesn't work for some reason.
+    // TODO: figure a better way to make setFont() accessible like this.
+    
+    void setFont(std::string name, int size) {
+        murka::MurkaAssets::setFont(name, size, this);
+    }
 
 	// Object drawing
 	virtual void draw(const MurImage & image, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) const override {
