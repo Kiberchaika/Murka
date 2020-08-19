@@ -33,7 +33,7 @@ public:
         return currentFont->second;
     }
     
-    void setFont(std::string name, int size) {
+    void setFont(std::string name, int size, MurkaRendererBase* renderer) {
         FontInfo fontId = {name, size};
         auto font = fonts.find(fontId);
         if (font != fonts.end()) {
@@ -41,7 +41,7 @@ public:
         } else {
             auto font = new FontObject();
             font->load(resourcesPath +
-                       (resourcesPath[resourcesPath.length() - 1] == '/' ? "" : "/") + name, size);
+                       (resourcesPath[resourcesPath.length() - 1] == '/' ? "" : "/") + name, size, true, renderer);
             fonts[fontId] = font;
             currentFont = fonts.find(fontId);
         }
