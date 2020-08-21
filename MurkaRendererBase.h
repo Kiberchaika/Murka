@@ -60,6 +60,7 @@ public:
     virtual void setColor(const MurkaColor & color) = 0;
     virtual void setColor(const MurkaColor & color, int _a) = 0;
     virtual void setColor(int gray) = 0; // 0-255
+    virtual void setColor(int gray, int _a) = 0; // 0-255
 
     virtual void clear() = 0;
     virtual void clear(float r, float g, float b, float a=0) = 0;

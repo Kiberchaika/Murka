@@ -185,6 +185,11 @@ public:
     virtual void setColor(int gray) override{
         ofRenderer->setColor(gray);
     }; // 0 - 255
+    
+    virtual void setColor(int gray, int _a) override {
+        ofRenderer->setColor(gray, _a);
+    }; // 0-255
+
 
     virtual void clear() override{
         ofRenderer->clear();
