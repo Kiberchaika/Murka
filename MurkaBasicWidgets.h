@@ -498,8 +498,10 @@ public:
         
         auto font = context.getCurrentFont();
         
-#ifdef MURKA_OF
+
         
+		MurkaColor fgColor = context.renderer->getColor();
+
         context.renderer->pushStyle();
         context.renderer->enableFill();
         context.renderer->setColor(15);
@@ -522,7 +524,7 @@ public:
             context.renderer->drawRectangle(0, 0, context.getSize().x, context.getSize().y);
         }
         
-        MurkaColor fgColor = context.renderer->getColor();
+
         context.renderer->setColor(inside ? fgColor : fgColor / 2);
         auto label = ((Parameters*)parametersObject)->label;
         auto resultString = label + ": " + ofToString(*((float*)dataToControl));
@@ -534,7 +536,7 @@ public:
         context.renderer->popStyle();
 
         
-#endif // MURKA_OF
+
         
     };
     
