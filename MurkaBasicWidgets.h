@@ -213,9 +213,11 @@ public:
     MURKA_VIEW_DRAW_FUNCTION  {
         
         auto params = (Parameters*)parametersObject;
-        Checkbox* thisWidget = (Checkbox*)thisWidgetObject;
-        
-        bool inside = context.isHovered() * !areChildrenHovered(context);
+		auto &castedResults = *(castResults(resultObject));
+	
+		Checkbox* thisWidget = (Checkbox*)thisWidgetObject;
+		
+		bool inside = context.isHovered() * !areChildrenHovered(context);
         
         bool* booleanToControl = ((bool*)dataToControl);
 
@@ -244,7 +246,10 @@ public:
         if (inside && context.mouseDownPressed[0]) {
             *booleanToControl = !*booleanToControl;
             lastTimeClicked = context.getRunningTime();
-        }
+			castedResults = booleanToControl;
+		}
+		else castedResults = false;
+
         context.renderer->popStyle();
     };
     
@@ -255,10 +260,20 @@ public:
         Parameters() {}
         Parameters(std::string Label) { label = Label; } // a convenience initializer
     };
-    
-    // The results type, you also need to define it even if it's nothing.
-    typedef bool Results;
-    
+
+	// The results type, you also need to define it even if it's nothing.
+	typedef bool Results;
+
+	Results* castResults(void* results) {
+		auto resultsPointer = (Results*)results;
+		return resultsPointer;
+	}
+
+	Parameters& castParameters() {
+		return  *((Parameters*)parametersInternal);
+	}
+
+   
     // The two functions needed for optional UI state saving. It's up to you
     // to use those.
 //    std::vector<MurkaVar> saveInternalData(int indexX, int indexY) override { }
@@ -268,6 +283,76 @@ public:
     // Everything else in the class is for handling the internal state. It persistы.
     double lastTimeClicked = 0;
 };
+
+
+class Radiobutton : public MurkaViewInterface<Radiobutton> {
+public:
+	MURKA_VIEW_DRAW_FUNCTION{
+
+		auto params = (Parameters*)parametersObject;
+		Radiobutton* thisWidget = (Radiobutton*)thisWidgetObject;
+
+		bool inside = context.isHovered() * !areChildrenHovered(context);
+
+		int* intToControl = ((int*)dataToControl);
+
+		MurkaColor fgColor = context.renderer->getColor();
+
+		float pushed = 0.2 - (context.getRunningTime() - lastTimeClicked);
+		if (pushed < 0) pushed = 0;
+		pushed /= 0.2;
+
+		for (int i = 0; i < params->labels.size(); i++) {
+			context.renderer->pushMatrix();
+			context.renderer->pushStyle();
+			context.renderer->translate(0, 25 * i, 0);
+			MurkaShape rowShape = { 0, 25 * i, context.getSize().x, 25 };
+			bool rowHover = rowShape.inside(context.mousePosition);
+
+			context.renderer->setColor((rowHover * inside ? fgColor : fgColor / 2) * (1.0 + 0.2 * pushed));
+
+			context.renderer->disableFill();
+			context.renderer->drawCircle(5 + 20 / 2, 5 + 20 / 2, 10);
+			if (*intToControl == i) {
+				context.renderer->enableFill();
+				context.renderer->drawCircle(5 + 20 / 2, 5 + 20 / 2, 6);
+			}
+			context.renderer->enableFill();
+
+			auto font = context.getCurrentFont();
+			font->drawString(params->labels[i], 30, 22);
+
+			if (rowHover * inside && context.mouseDownPressed[0]) {
+				*intToControl = i;
+				lastTimeClicked = context.getRunningTime();
+			}
+
+			context.renderer->popStyle();
+			context.renderer->popMatrix();
+		}
+	};
+
+	// Here go parameters and any parameter convenience constructors. You need to define something called Parameters, even if it's NULL.
+	struct Parameters {
+		std::vector<std::string> labels;
+
+		Parameters() {}
+		Parameters(std::vector<std::string> Labels) { labels = Labels; } // a convenience initializer
+	};
+
+	// The results type, you also need to define it even if it's nothing.
+	typedef bool Results;
+
+	// The two functions needed for optional UI state saving. It's up to you
+	// to use those.
+//    std::vector<MurkaVar> saveInternalData(int indexX, int indexY) override { }
+//    void loadInternalData(std::vector<MurkaVar>) override {}
+
+
+	// Everything else in the class is for handling the internal state. It persistы.
+	double lastTimeClicked = 0;
+};
+
 
 class BlankPanel : public MurkaViewInterface<BlankPanel> {
 public:
