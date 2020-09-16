@@ -221,7 +221,10 @@ public:
         
         bool* booleanToControl = ((bool*)dataToControl);
 
-        MurkaColor fgColor = context.renderer->getColor();
+		Results* results = (Results*)resultObject;
+		*results = false;
+
+		MurkaColor fgColor = context.renderer->getColor();
 
         float pushed = 0.2 - (context.getRunningTime() - lastTimeClicked);
         if (pushed < 0) pushed = 0;
@@ -247,6 +250,7 @@ public:
             *booleanToControl = !*booleanToControl;
             lastTimeClicked = context.getRunningTime();
 			castedResults = booleanToControl;
+			*results = true;
 		}
 		else castedResults = false;
 
@@ -292,6 +296,9 @@ public:
 		auto params = (Parameters*)parametersObject;
 		Radiobutton* thisWidget = (Radiobutton*)thisWidgetObject;
 
+		Results* results = (Results*)resultObject;
+		*results = false;
+
 		bool inside = context.isHovered() * !areChildrenHovered(context);
 
 		int* intToControl = ((int*)dataToControl);
@@ -324,6 +331,7 @@ public:
 
 			if (rowHover * inside && context.mouseDownPressed[0]) {
 				*intToControl = i;
+				*results = true;
 				lastTimeClicked = context.getRunningTime();
 			}
 
