@@ -81,6 +81,8 @@ public:
         eventState.mouseDown[0] = mouseDown[0];
         eventState.mouseDown[1] = mouseDown[1];
         eventState.mouseDown[2] = mouseDown[2];
+
+		eventState.mouseDelta = { 0, 0 };
     }
 
     // custom event registration
@@ -94,7 +96,7 @@ public:
     
     void registerMouseDragged(int mouseX, int mouseY, int mouseButtonIndex) {
             eventState.mouseDragged[mouseButtonIndex] = true;
-            eventState.mouseDelta = {eventState.mousePosition.x - mouseX,
+            eventState.mouseDelta += {eventState.mousePosition.x - mouseX,
                                      eventState.mousePosition.y - mouseY};
             eventState.mousePosition = {mouseX, mouseY};
             
@@ -106,7 +108,7 @@ public:
     }
         
     void registerMouseMoved(int mouseX, int mouseY, int mouseButtonIndex) {
-            eventState.mouseDelta = {eventState.mousePosition.x - mouseX,
+            eventState.mouseDelta += {eventState.mousePosition.x - mouseX,
                 eventState.mousePosition.y - mouseY};
             eventState.mousePosition = {mouseX, mouseY};
     }
