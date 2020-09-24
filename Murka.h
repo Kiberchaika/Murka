@@ -68,6 +68,11 @@ public:
         setupEvents();
 	}
 
+	void setScreenScale(float newScreenScale) override {
+		MurkaRenderer::setScreenScale(newScreenScale);
+		//MurkaInputEventsRegister::setInputEventsScale(newScreenScale);
+	}
+
 	MurkaContext currentContext;
     std::vector<MurkaContext> contextStack;
     
@@ -83,9 +88,8 @@ public:
         
         ((View*)currentContext.murkaView)->latestContext = currentContext;
         
-        MurkaPoint containerPosition = ((View*)viewSource->widgetObjectInternal)->shape.position;
-        MurkaEventState derivedEventState = currentContext.transformedWith({-containerPosition.x,
-            -containerPosition.y}, 1.0);
+        MurkaPoint containerPosition = ((View*)viewSource->widgetObjectInternal)->shape.position ;
+        MurkaEventState derivedEventState = currentContext.transformedWith({-containerPosition.x, -containerPosition.y }, 1.0);
 
         contextStack.push_back(currentContext); // this makes it a parent
         
@@ -94,7 +98,6 @@ public:
         currentContext.currentViewShape.size = ((View*)viewSource->widgetObjectInternal)->shape.size;
         currentContext.murkaView = ((View*)viewSource->widgetObjectInternal);
         currentContext.overlayHolder = this;
-        currentContext.setUIScale(getUIScale());
         
         ((View*)viewSource->widgetObjectInternal)->latestContext = currentContext;
         
@@ -144,6 +147,8 @@ public:
         
         restartContext();
         
+		currentContext.mousePosition /= getScreenScale();
+
         hoverIndex = 0;
         
         for (auto& i : children) {
@@ -163,7 +168,8 @@ public:
         overlays.clear();
         
         maxHoverIndex = hoverIndex;
-    }
+
+	}
 
 	// A recursive OOP draw cycle that starts with this widget
 	void drawCycleRecursive(MurkaViewHandlerInternal* widget) {
@@ -173,7 +179,7 @@ public:
         ((MurkaViewHandler<View>*)widget)->widgetObject->draw(widget->dataToControl, widget->parametersInternal, widget->widgetObjectInternal, currentContext, widget->resultsInternal);
         
         // restarting layout generator
-    ((MurkaViewHandler<View>*)widget)->widgetObject->linearLayout.restart(((MurkaViewHandler<View>*)widget)->widgetObject->shape, getUIScale());
+    ((MurkaViewHandler<View>*)widget)->widgetObject->linearLayout.restart(((MurkaViewHandler<View>*)widget)->widgetObject->shape);
         ((MurkaViewHandler<View>*)widget)->widgetObject->animationRestart();
         ((MurkaViewHandler<View>*)widget)->widgetObject->mosaicLayout.restart();
         
@@ -245,8 +251,6 @@ public:
             return allowedToUseKeyboard((View*)asker);
         };
         
-        currentContext.setUIScale(getUIScale());
-
         latestContext = currentContext;
 
         clearEvents();
@@ -294,7 +298,7 @@ public:
     }
     
     void setLayoutLineHeight(float height) {
-        ((View*)currentContext.murkaView)->linearLayout.setLayoutLineHeight(height * getUIScale());
+        ((View*)currentContext.murkaView)->linearLayout.setLayoutLineHeight(height);
     }
     
     void addLayoutSpacing(float spacing) {
@@ -335,7 +339,7 @@ public:
         
         newHandler->widgetObject->dataTypeName = typeid(data).name();
 
-        shapeInParentContainer = shapeInParentContainer * getUIScale();
+        shapeInParentContainer = shapeInParentContainer;
         
         newHandler->widgetObject->shape = shapeInParentContainer;
         
@@ -384,14 +388,6 @@ public:
     
     ///////////////////
     
-    void setUIScale(float newScale) {
-        uiScale = newScale;
-    }
-    
-    float getUIScale() {
-        return uiScale;
-    }
-    
 	View* getRootView() {
 		return (View*)this;
 	}
@@ -408,7 +404,6 @@ public:
     typedef bool Results;
 
 private:
-    float uiScale = 1;
     
     int hoverIndex = 0;
     int maxHoverIndex = 0;

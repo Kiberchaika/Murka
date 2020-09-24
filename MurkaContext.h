@@ -49,7 +49,7 @@ public:
     }
     
     bool isHovered() const {
-        return currentViewShape.transformedInside(mousePosition); // using absolute coordinates to calc that
+        return currentViewShape.transformedInside(mousePosition /* / renderer->getScreenScale() */); // using absolute coordinates to calc that
     }
     
     MurkaOverlayHolder* overlayHolder;
@@ -184,21 +184,11 @@ public:
 
     double getRunningTime() const {return runningTime;}
     
-    void setUIScale(float scale) {
-        uiScale = scale;
-    }
-    
-    float getUIScale() {
-        return uiScale;
-    }
-    
 private:
     int imCounter = 0; // the counter that we use to distinguish new widgets from the ones we
     // want to reuse in IM mode.
 
     double runningTime;
-
-    float uiScale;
 };
 
 }

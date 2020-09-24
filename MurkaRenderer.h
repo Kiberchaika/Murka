@@ -24,27 +24,27 @@ public:
     // TODO: figure a better way to make setFont() accessible like this.
     
     void setFont(std::string name, int size) {
-        murka::MurkaAssets::setFont(name, size, this);
+        murka::MurkaAssets::setFont(name, size * getScreenScale(), this);
     }
 
 	// Object drawing
-	virtual void draw(const MurImage & image, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) const override {
-		ofRenderer->draw(image.internal, x, y, z, w, h, sx, sy, sw, sh);
+	virtual void draw(const MurImage & image, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) override {
+		ofRenderer->draw(image.internal, x * getScreenScale(), y * getScreenScale(), z * getScreenScale(), w * getScreenScale(), h * getScreenScale(), sx * getScreenScale(), sy * getScreenScale(), sw * getScreenScale(), sh * getScreenScale());
 	}
 
-	virtual void draw(const MurImage & image, float x, float y, float z, float w, float h) const override {
-		ofRenderer->draw(image.internal, x, y, z, w, h, 0, 0, image.internal.getWidth(), image.internal.getHeight());
+	virtual void draw(const MurImage & image, float x, float y, float z, float w, float h) override {
+		ofRenderer->draw(image.internal, x * getScreenScale(), y * getScreenScale(), z * getScreenScale(), w * getScreenScale(), h * getScreenScale(), 0, 0, image.internal.getWidth() * getScreenScale(), image.internal.getHeight() * getScreenScale());
 	}
 
-	virtual void draw(const MurImage & image, float x, float y) const override {
-		ofRenderer->draw(image.internal, x, y, 0, image.internal.getWidth(), image.internal.getHeight(), 0, 0, image.internal.getWidth(), image.internal.getHeight());
+	virtual void draw(const MurImage & image, float x, float y) override {
+		ofRenderer->draw(image.internal, x * getScreenScale(), y * getScreenScale(), 0, image.internal.getWidth() * getScreenScale(), image.internal.getHeight() * getScreenScale(), 0, 0, image.internal.getWidth() * getScreenScale(), image.internal.getHeight() * getScreenScale());
 	}
 
-	virtual void draw(const MurTexture & texture, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) const override {
-        ofRenderer->draw(texture.internal, x, y, z, w, h, sx, sy, sw, sh);
+	virtual void draw(const MurTexture & texture, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) override {
+        ofRenderer->draw(texture.internal, x * getScreenScale(), y * getScreenScale(), z * getScreenScale(), w * getScreenScale(), h * getScreenScale(), sx * getScreenScale(), sy * getScreenScale(), sw * getScreenScale(), sh * getScreenScale());
     }
     
-    virtual void draw(const MurVbo & vbo, GLuint drawMode, int first, int total) const override{
+    virtual void draw(const MurVbo & vbo, GLuint drawMode, int first, int total) override{
         ofRenderer->draw(vbo.internal, drawMode, first, total);
     }
     
@@ -91,21 +91,21 @@ public:
     }
 
 	virtual void scale(float x, float y, float z) override {
-		ofRenderer->scale(x, y, z);
+		ofRenderer->scale(x * getScreenScale(), y * getScreenScale(), z * getScreenScale());
 	}
 
     // setup matrices and viewport (upto you to push and pop view before and after)
     virtual void viewport(MurkaShape viewport) override {
-        ofRenderer->viewport(viewport);
+        ofRenderer->viewport(viewport * getScreenScale());
     }
     
     virtual void viewport(float x = 0, float y = 0, float width = -1, float height = -1, bool vflip=true) override {
-        ofRenderer->viewport(x, y, width, height, vflip);
+        ofRenderer->viewport(x * getScreenScale(), y * getScreenScale(), width * getScreenScale(), height * getScreenScale(), vflip);
     }
 
 	virtual MurkaShape getCurrentViewport() override {
 		ofRectangle rect = ofRenderer->getCurrentViewport();
-		return MurkaShape(rect.x, rect.y, rect.width, rect.height);
+		return MurkaShape(rect.x, rect.y, rect.width, rect.height) / getScreenScale();
 	}
 
 	virtual void setupScreen() override {
@@ -204,23 +204,23 @@ public:
     };
 
 	virtual void drawRectangle(float x, float y, float w, float h) override {
-		ofRenderer->drawRectangle(x, y, 0.0f, w, h);
+		ofRenderer->drawRectangle(x * getScreenScale(), y * getScreenScale(), 0.0f, w * getScreenScale(), h * getScreenScale());
 	}
     
     virtual void drawRectangle(MurkaShape s) override {
-        ofRenderer->drawRectangle(s.position.x, s.position.y, 0., s.size.x, s.size.y);
+        ofRenderer->drawRectangle(s.position.x * getScreenScale(), s.position.y * getScreenScale(), 0., s.size.x * getScreenScale(), s.size.y * getScreenScale());
     }
     
 
 	virtual void drawCircle(float x, float y, float radius) override {
-		ofRenderer->drawCircle(x, y, 0.0f, radius);
+		ofRenderer->drawCircle(x * getScreenScale(), y * getScreenScale(), 0.0f, radius * getScreenScale());
 	}
 
 	virtual void drawLine(float x1, float y1, float x2, float y2) override {
-		ofRenderer->drawLine(x1, y1, 0.0f, x2, y2, 0.0f);
+		ofRenderer->drawLine(x1 * getScreenScale(), y1 * getScreenScale(), 0.0f, x2 * getScreenScale(), y2 * getScreenScale(), 0.0f);
 	}
     
-    virtual void drawVbo(const MurVbo & vbo, GLuint drawMode, int first, int total) const override{
+    virtual void drawVbo(const MurVbo & vbo, GLuint drawMode, int first, int total) override{
         draw(vbo, drawMode, first, total);
     }
     

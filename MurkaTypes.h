@@ -68,6 +68,16 @@ struct MurkaPoint {
         return *this;
     }
 
+	MurkaPoint operator /= (float arg) {
+		this->operator=({ x / arg, y / arg });
+		return *this;
+	}
+
+	MurkaPoint operator *= (float arg) {
+		this->operator=({ x * arg, y * arg });
+		return *this;
+	}
+
     MurkaPoint operator + (const MurkaPoint p2) const {
         return {x + p2.x, y + p2.y};
     }
@@ -80,11 +90,11 @@ struct MurkaPoint {
         return {x - p2.x, y - p2.y};
     }
 
-    MurkaPoint operator * (float multiplier) {
+    MurkaPoint operator * (float multiplier) const {
         return {x * multiplier, y * multiplier};
     }
     
-    MurkaPoint operator / (float divider) {
+    MurkaPoint operator / (float divider) const {
         return {x / divider, y / divider};
     }
     
