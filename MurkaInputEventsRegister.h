@@ -46,7 +46,7 @@ struct MurkaEventState {
 class MurkaInputEventsRegister {
 
 	float inputEventsScale = 1.0;
-    double lastLeftMousebuttonClicktime = -10000;
+	double lastLeftMousebuttonClicktime = -10000;
     MurkaPoint mousePositionWhenMouseLeftPressed = {0, 0};
 
 protected:
@@ -105,14 +105,11 @@ public:
     }
     
     void registerMouseDragged(int mouseX, int mouseY, int mouseButtonIndex) {
-			mouseX *= inputEventsScale;
-			mouseY *= inputEventsScale;
-
 			eventState.mouseDragged[mouseButtonIndex] = true;
-            eventState.mouseDelta += {eventState.mousePosition.x - mouseX,
-                                     eventState.mousePosition.y - mouseY};
-            eventState.mousePosition = {mouseX, mouseY};
-            
+			MurkaPoint p = { eventState.mousePosition.x - mouseX, eventState.mousePosition.y - mouseY };
+			eventState.mouseDelta += p / inputEventsScale;
+			eventState.mousePosition = {mouseX, mouseY};
+             
             // Pressed > Released delta support
             
             if (mouseButtonIndex == 0) {
@@ -121,18 +118,13 @@ public:
     }
         
     void registerMouseMoved(int mouseX, int mouseY, int mouseButtonIndex) {
-			mouseX *= inputEventsScale;
-			mouseY *= inputEventsScale;
+			MurkaPoint p = { eventState.mousePosition.x - mouseX, eventState.mousePosition.y - mouseY };
+			eventState.mouseDelta += p / inputEventsScale;
 
-			eventState.mouseDelta += {eventState.mousePosition.x - mouseX,
-                eventState.mousePosition.y - mouseY};
-            eventState.mousePosition = {mouseX, mouseY};
+			eventState.mousePosition = {mouseX, mouseY};
     }
         
     void registerMousePressed(int mouseX, int mouseY, int mouseButtonIndex) {
-			mouseX *= inputEventsScale;
-			mouseY *= inputEventsScale;
-
 			eventState.mousePosition = {mouseX, mouseY};
             eventState.mouseDown[mouseButtonIndex] = true;
             eventState.mouseDownPressed[mouseButtonIndex] = true;
@@ -155,9 +147,6 @@ public:
         }
         
     void registerMouseReleased(int mouseX, int mouseY, int mouseButtonIndex) {
-			mouseX *= inputEventsScale;
-			mouseY *= inputEventsScale;
-
 			eventState.mousePosition = {mouseX, mouseY};
             eventState.mouseReleased[mouseButtonIndex] = true;
             eventState.mouseDown[mouseButtonIndex] = false;
@@ -203,9 +192,9 @@ public:
     
     void mouseDragged(ofMouseEventArgs& args) {
         eventState.mouseDragged[args.button] = true;
-        eventState.mouseDelta = {eventState.mousePosition.x - args.x * inputEventsScale,
-                                 eventState.mousePosition.y - args.y * inputEventsScale };
-        eventState.mousePosition = {args.x * inputEventsScale, args.y * inputEventsScale };
+		MurkaPoint p = { eventState.mousePosition.x - args.x, eventState.mousePosition.y - args.y };
+		eventState.mouseDelta += p / inputEventsScale;
+		eventState.mousePosition = {args.x, args.y };
         
         // Pressed > Released delta support
         
@@ -215,13 +204,13 @@ public:
     }
     
     void mouseMoved(ofMouseEventArgs & args) {
-        eventState.mouseDelta = {eventState.mousePosition.x - args.x * inputEventsScale,
-            eventState.mousePosition.y - args.y * inputEventsScale };
-        eventState.mousePosition = {args.x * inputEventsScale, args.y * inputEventsScale };
+        MurkaPoint p = {eventState.mousePosition.x - args.x, eventState.mousePosition.y - args.y };
+		eventState.mouseDelta += p / inputEventsScale;
+		eventState.mousePosition = {args.x, args.y };
     }
     
     void mousePressed(ofMouseEventArgs & args) {
-        eventState.mousePosition = {args.x * inputEventsScale, args.y * inputEventsScale };
+        eventState.mousePosition = {args.x, args.y };
         eventState.mouseDown[args.button] = true;
         eventState.mouseDownPressed[args.button] = true;
         
@@ -243,7 +232,7 @@ public:
     }
     
     void mouseReleased(ofMouseEventArgs & args) {
-        eventState.mousePosition = {args.x * inputEventsScale, args.y * inputEventsScale };
+        eventState.mousePosition = {args.x, args.y };
         eventState.mouseReleased[args.button] = true;
         eventState.mouseDown[args.button] = false;
 

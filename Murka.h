@@ -70,7 +70,7 @@ public:
 
 	void setScreenScale(float newScreenScale) override {
 		MurkaRenderer::setScreenScale(newScreenScale);
-		//MurkaInputEventsRegister::setInputEventsScale(newScreenScale);
+		MurkaInputEventsRegister::setInputEventsScale(newScreenScale);
 	}
 
 	MurkaContext currentContext;

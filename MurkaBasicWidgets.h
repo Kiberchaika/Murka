@@ -27,15 +27,15 @@ public:
         MurkaColor fgColor = params->customColor ? params->color : context.renderer->getColor();
         context.renderer->setColor(fgColor);
         if (params->alignment == TEXT_LEFT) {
-            font->drawString(params->label, 5, 5 + font->getLineHeight());
+            font->drawString(params->label, 5, 5);
         }
         if (params->alignment == TEXT_CENTER) {
             float textX = 5 + (shape.size.x - 10) / 2 - font->getStringBoundingBox(params->label, 0, 0).getWidth() / 2;
-            font->drawString(params->label, textX, 5 + font->getLineHeight());
+            font->drawString(params->label, textX, 5);
         }
         if (params->alignment == TEXT_RIGHT) {
             float textX = (shape.size.x - 10) - font->getStringBoundingBox(params->label, 0, 0).getWidth();
-            font->drawString(params->label, textX, 5 + font->getLineHeight());
+            font->drawString(params->label, textX, 5);
         }
     };
     
@@ -101,24 +101,24 @@ public:
 		MurkaColor fgColor = params->customColor ? params->color : context.renderer->getColor();
         context.renderer->setColor(fgColor);
         if (params->alignment == TEXT_LEFT) {
-            font->drawString(params->label, 5, font->getLineHeight());
+            font->drawString(params->label, 5, 0);
         }
         if (params->alignment == TEXT_CENTER) {
-            float textX = 5 + (shape.size.x - 10) / 2 - font->getStringBoundingBox(params->label, 0, 0).getWidth() / 2;
-            font->drawString(params->label, textX, font->getLineHeight());
+            float textX = 5 + (shape.size.x - 10) / 2 - font->getStringBoundingBox(params->label, 0, 0).getWidth()  / 2;
+            font->drawString(params->label, textX, 0);
         }
         if (params->alignment == TEXT_RIGHT) {
             float textX = (shape.size.x - 10) - font->getStringBoundingBox(params->label, 0, 0).getWidth();
-            font->drawString(params->label, textX, font->getLineHeight());
+            font->drawString(params->label, textX, 0);
         }
         
         // Testing vertical centering
-//            context.renderer->setColor(255);
-//            ofDrawLine(0, 0, context.getSize().x, 0);
-//            context.renderer->setColor(255, 0, 0);
-//            ofDrawLine(0, context.getSize().y / 2, context.getSize().x, context.getSize().y / 2);
-//            context.renderer->setColor(255);
-//            ofDrawLine(0, context.getSize().y, context.getSize().x, context.getSize().y);
+            //context.renderer->setColor(255);
+            //ofDrawLine(0, 0, context.getSize().x, 0);
+            //context.renderer->setColor(255, 0, 0);
+            //ofDrawLine(0, context.getSize().y / 2, context.getSize().x, context.getSize().y / 2);
+            //context.renderer->setColor(255);
+            //ofDrawLine(0, context.getSize().y, context.getSize().x, context.getSize().y);
     };
     
     // Here go parameters and any parameter convenience constructors. You need to define something called Parameters, even if it's NULL.
@@ -244,7 +244,7 @@ public:
         context.renderer->enableFill();
         
         auto font = context.getCurrentFont();
-        font->drawString(params->label, 30, 22);
+        font->drawString(params->label, 30, 0);
         
         if (inside && context.mouseDownPressed[0]) {
             *booleanToControl = !*booleanToControl;
@@ -391,7 +391,7 @@ public:
         
         context.renderer->setColor(255);
         auto font = context.getCurrentFont();
-        font->drawString(params->label, 0, font->getLineHeight());
+        font->drawString(params->label, 0, 0);
         
         // Drawing symbols to show that we're going to resize this widget
         if ((gonnaResize) && (inside)) {
@@ -499,9 +499,9 @@ public:
         
              context.renderer->setColor(255);
         
-             float offset = font->stringWidth(parameters->label) / 2;
+             float offset = (font->stringWidth(parameters->label) / 2);
         
-             font->drawString(parameters->label, context.getSize().x / 2 - offset, context.getSize().y / 2 + font->getLineHeight() / 4);
+			 font->drawString(parameters->label, context.getSize().x / 2 - offset, context.getSize().y / 2 - font->getLineHeight() / 2);
 
 //                 float offset = parameters->label.length() * 4;
 //                 ofDrawBitmapString(parameters->label, context.getSize().x / 2 - offset, context.getSize().y / 2 + 5);
@@ -625,7 +625,7 @@ public:
         
         float offset = font->stringWidth(resultString) / 2;
         
-        font->drawString(resultString, context.getSize().x / 2 - offset, context.getSize().y / 2  + font->getLineHeight() / 4);
+        font->drawString(resultString, context.getSize().x / 2 - offset, context.getSize().y / 2 - font->getLineHeight()/2);
         context.renderer->popStyle();
 
         

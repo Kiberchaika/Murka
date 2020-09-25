@@ -167,14 +167,14 @@ public:
         
         float glyphXCoordinate = 10;
         context.renderer->setColor(params->widgetFgColor);
-        font->drawString(displayString, 10 - cameraPanInsideWidget, context.getSize().y / 2  + font->getLineHeight() / 4);
+        font->drawString(displayString, 10 - cameraPanInsideWidget, context.getSize().y / 2 - font->getLineHeight() / 2);
         
         if (displayString.size() == 0) {
             // drawing hint
             MurkaColor hintColor = context.renderer->getColor() * 0.5 +
                                    context.renderer->getColor() * 0.5;
             context.renderer->setColor(hintColor * 255);
-            font->drawString(params->hint, 10, context.getSize().y / 2  + font->getLineHeight() / 4);
+            font->drawString(params->hint, 10, context.getSize().y / 2 - font->getLineHeight() / 2);
         }
         
         textHeight = context.getSize().y; // this is cache for text selection rect retrieavl
