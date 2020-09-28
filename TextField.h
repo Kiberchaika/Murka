@@ -189,9 +189,11 @@ public:
             bool insideGlyph = glyphShape.inside(context.mousePosition);
             
             /*
-            context.renderer->setColor(insideGlyph ? fgColor / 2 : fgColor / 4, 100);
-            context.renderer->drawRectangle(glyphXCoordinate - cameraPanInsideWidget, 0, currentGlyphLengths[i], 30);
-             */
+			context.renderer->disableFill();
+			context.renderer->setColor(insideGlyph ? params->widgetFgColor / 2 : params->widgetFgColor / 4, 100);
+			context.renderer->drawRectangle(glyphXCoordinate - cameraPanInsideWidget, 0, currentGlyphLengths[i], 30);
+			context.renderer->enableFill();
+			*/
             
             MurkaShape currentSymbolShape = {glyphXCoordinate, 0, currentGlyphLengths[i], context.getSize().y};
             
