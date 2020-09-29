@@ -27,13 +27,17 @@ public:
         murka::MurkaAssets::setFont(name, size * getScreenScale(), this);
     }
 
+	void drawString(const string & s, float x, float y) {
+		murka::MurkaAssets::getCurrentFont()->drawString(s, x, y);
+	}
+
 	// Object drawing
 	virtual void draw(const MurImage & image, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) override {
 		ofRenderer->draw(image.internal, x * getScreenScale(), y * getScreenScale(), z * getScreenScale(), w * getScreenScale(), h * getScreenScale(), sx * getScreenScale(), sy * getScreenScale(), sw * getScreenScale(), sh * getScreenScale());
 	}
 
 	virtual void draw(const MurImage & image, float x, float y, float z, float w, float h) override {
-		ofRenderer->draw(image.internal, x * getScreenScale(), y * getScreenScale(), z * getScreenScale(), w * getScreenScale(), h * getScreenScale(), 0, 0, image.internal.getWidth() * getScreenScale(), image.internal.getHeight() * getScreenScale());
+		ofRenderer->draw(image.internal, x * getScreenScale(), y * getScreenScale(), z * getScreenScale(), w * getScreenScale(), h * getScreenScale(), 0, 0, image.internal.getWidth(), image.internal.getHeight());
 	}
 
 	virtual void draw(const MurImage & image, float x, float y) override {
@@ -83,7 +87,7 @@ public:
 	}
 
 	virtual void translate(float x, float y, float z)  override {
-		ofRenderer->translate(x, y, z);
+		ofRenderer->translate(x * getScreenScale(), y * getScreenScale(), z * getScreenScale());
 	}
     
     virtual void rotateZRad(float radians) override {
@@ -225,11 +229,11 @@ public:
     }
     
 	virtual int getWindowWidth() override {
-		return ofWindow->getWidth();
+		return ofWindow->getWidth() / getScreenScale();
 	}
 
 	virtual int getWindowHeight() override {
-		return ofWindow->getHeight();
+		return ofWindow->getHeight() / getScreenScale();
 	}
 
 };

@@ -39,6 +39,13 @@ public:
 		internal.clear();
 	}
 
+	float getWidth() {
+		return internal.getWidth();
+	}
+
+	float getHeight() {
+		return internal.getHeight();
+	}
 };
 
 #else // Default version
