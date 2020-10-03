@@ -308,12 +308,14 @@ public:
 		float pushed = 0.2 - (context.getRunningTime() - lastTimeClicked);
 		if (pushed < 0) pushed = 0;
 		pushed /= 0.2;
+            
+        int lineHeight = 25;
 
 		for (int i = 0; i < params->labels.size(); i++) {
 			context.renderer->pushMatrix();
 			context.renderer->pushStyle();
-			context.renderer->translate(0, 25 * i, 0);
-			MurkaShape rowShape = { 0, 25 * i, context.getSize().x, 25 };
+			context.renderer->translate(0, lineHeight * i, 0);
+			MurkaShape rowShape = { 0, lineHeight * i, context.getSize().x, lineHeight };
 			bool rowHover = rowShape.inside(context.mousePosition);
 
 			context.renderer->setColor((rowHover * inside ? fgColor : fgColor / 2) * (1.0 + 0.2 * pushed));
@@ -327,7 +329,7 @@ public:
 			context.renderer->enableFill();
 
 			auto font = context.getCurrentFont();
-			font->drawString(params->labels[i], 30, 22);
+			font->drawString(params->labels[i], 30, 10);
 
 			if (rowHover * inside && context.mouseDownPressed[0]) {
 				*intToControl = i;
