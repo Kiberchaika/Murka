@@ -257,6 +257,7 @@ public:
         context.renderer->popStyle();
     };
     
+    
     // Here go parameters and any parameter convenience constructors. You need to define something called Parameters, even if it's NULL.
     struct Parameters {
         std::string label;
@@ -264,6 +265,34 @@ public:
         Parameters() {}
         Parameters(std::string Label) { label = Label; } // a convenience initializer
     };
+     /*
+    
+    int* dataToControl = NULL;
+    Checkbox& controlData(int* data) {
+        dataToControl = data;
+        return *this;
+    }
+
+    std::function<void()> onChange = [](){};
+    Checkbox& withOnChange(std::function<void()> callback) {
+        onChange = callback;
+        return *this;
+    }
+
+    
+    MURKA_PARAMETER_SETTER(int*, dataToControl, controlData);
+    MURKA_PARAMETER_SETTER(std::function<void()>, onChange, withOnChange);
+*/
+    
+    /*
+    class ParameterSetter {
+        Checkbox* widget;
+        Parameters(std::string Label) {
+            widget->label = Label;
+        } // a convenience initializer
+    };
+    ParameterSetter p;
+     */
 
 	// The results type, you also need to define it even if it's nothing.
 	typedef bool Results;
