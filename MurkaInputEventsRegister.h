@@ -151,14 +151,14 @@ public:
             }
             
             // Doubleclick support
-    /*
+    
     #ifdef MURKA_OF
             if ((ofGetElapsedTimef() - lastLeftMousebuttonClicktime) < 0.2) {
                 eventState.doubleClick = true;
             } else eventState.doubleClick = false;
             lastLeftMousebuttonClicktime = ofGetElapsedTimef();
     #endif
-     */
+     
         }
         
     void registerMouseReleased(int mouseX, int mouseY, int mouseButtonIndex) {
