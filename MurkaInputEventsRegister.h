@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MurkaTypes.h"
+#include <algorithm>
 
 #ifdef MURKA_OF
 #include "ofMain.h"
@@ -29,7 +30,13 @@ struct MurkaEventState {
     MurkaPoint mouseDeltaSinceMouseLeftPressed = {0, 0};
     bool trackpadGesturePerformed = false;
     float pinchMagnification = 0;
-    std::vector<int> keyPresses;
+    
+    std::vector<int> keyPresses; // The keys that were just pressed
+    std::vector<int> keyHolds; // The keys that were presed in the past frames and not yet released
+
+    bool isKeyPressed(int key) {
+        return std::find(std::begin(keyHolds), std::end(keyHolds), key) != std::end(keyHolds);
+    }
     
     MurkaEventState transformedWith(MurkaPoint translatePosition, float scale) {
         MurkaEventState newState = *this;
@@ -86,6 +93,8 @@ public:
                              eventState.mouseDown[1],
                              eventState.mouseDown[2]};
         
+        std::vector<int> keyHolds = eventState.keyHolds;
+        
         eventState = MurkaEventState();
         eventState.mousePosition = mousePosition;
         eventState.mouseDown[0] = mouseDown[0];
@@ -93,15 +102,21 @@ public:
         eventState.mouseDown[2] = mouseDown[2];
 
 		eventState.mouseDelta = { 0, 0 };
+        
+        eventState.keyHolds = keyHolds;
     }
 
     // custom event registration
     
     void registerKeyPressed(int key) {
         eventState.keyPresses.push_back(key);
+        eventState.keyHolds.push_back(key);
     }
     
     void registerKeyReleased(int key) {
+        eventState.keyHolds.erase(std::remove(eventState.keyHolds.begin(),
+                                              eventState.keyHolds.end(), key),
+                                              eventState.keyHolds.end());
     }
     
     void registerMouseDragged(int mouseX, int mouseY, int mouseButtonIndex) {
@@ -136,14 +151,14 @@ public:
             }
             
             // Doubleclick support
-    /*
+    
     #ifdef MURKA_OF
             if ((ofGetElapsedTimef() - lastLeftMousebuttonClicktime) < 0.2) {
                 eventState.doubleClick = true;
             } else eventState.doubleClick = false;
             lastLeftMousebuttonClicktime = ofGetElapsedTimef();
     #endif
-     */
+     
         }
         
     void registerMouseReleased(int mouseX, int mouseY, int mouseButtonIndex) {
