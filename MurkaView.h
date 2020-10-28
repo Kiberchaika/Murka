@@ -338,6 +338,49 @@ T& drawWidget(MurkaContext &c, MurkaShape shape) {
     return *widgetObject;
 }
 
+// Immediate mode custom layout
+    
+template<typename T>
+T & drawWidgetNEWAPI(MurkaContext &c, typename T::Parameters parameters, MurkaShape shape) {
+
+    //        auto context = &(m.currentContext);
+    int counter = c.getImCounter();
+
+    
+    auto parentView = (View*)c.murkaView;
+    auto widgetHandler = T::getOrCreateImModeWidgetObject(counter, NULL, parentView, shape);
+    auto widgetObject = (View*)widgetHandler->widgetObjectInternal;
+    
+    
+    typename T::Results results = typename T::Results();
+    
+    c.pushContext(widgetHandler);
+    if (c.transformTheRenderIntoThisContextShape(c.overlayHolder->disableViewportCrop)) {
+        widgetObject->linearLayout.restart(((View*)widgetHandler->widgetObjectInternal)->shape);
+            widgetObject->draw(NULL, &parameters, widgetObject, c, &results);
+        widgetObject->animationRestart();
+        widgetObject->mosaicLayout.restart();
+        
+        /*
+        //DEBUG - drawing the children frame that we had at the last frame end
+        ofSetColor(255, 100, 0);
+            ofNoFill();
+
+        ofDrawRectangle(((View*)c.murkaView)->childrenBounds.position.x, ((View*)c.murkaView)->childrenBounds.position.y, ((View*)c.murkaView)->childrenBounds.size.x, ((View*)c.murkaView)->childrenBounds.size.y);
+            ofFill();
+        //////
+         */
+
+        
+        c.transformTheRenderBackFromThisContextShape();
+    }
+    c.popContext();
+        
+    widgetObject->resetChildrenBounds();
+        
+
+    return *((T*)widgetObject);
+}
 
 // Immediate mode custom layout
     

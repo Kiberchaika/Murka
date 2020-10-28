@@ -1,5 +1,8 @@
 #pragma once
 
+enum TextAlignment {TEXT_LEFT, TEXT_CENTER, TEXT_RIGHT};
+
+
 #ifdef MURKA_OF
 #include "ofMain.h"
 #endif
