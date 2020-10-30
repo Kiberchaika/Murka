@@ -7,6 +7,7 @@
 #include "MurkaTypes.h"
 #include "MurkaOverlayHolder.h"
 #include "MurkaRenderer.h"
+#include "MurkaAnimator.h"
 
 // Here's the global typedefs for cross-render functionality
 
@@ -177,7 +178,12 @@ public:
     std::function<int()> iterateHoverIndex = []()->int {return 0;};
     std::function<void(MurkaViewHandlerInternal*)> pushContextInternal = [](MurkaViewHandlerInternal* mvhi) {};
     std::function<void()> popContextInternal = []() {};
+
+    // This uses Animator class because you can't include View from here
+    std::function<void(MurkaAnimator*)> pushContextInternal_NEW = [](MurkaAnimator* v) {};
+    std::function<void()> popContextInternal_NEW = []() {};
     
+
     std::function<MurkaShape()> getParentContextShapeInternal = []()->MurkaShape {
         return MurkaShape();
     };

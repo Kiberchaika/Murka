@@ -99,9 +99,30 @@ public:
         currentContext.murkaView = ((View*)viewSource->widgetObjectInternal);
         currentContext.overlayHolder = this;
         
-        ((View*)viewSource->widgetObjectInternal)->latestContext = currentContext;
+        ((View*)viewSource->widgetObjectInternal)->latestContext = this->currentContext;
         
         latestChildContext = currentContext;
+    }
+    
+    void pushContext_NEW(View* viewSource) {
+        
+        ((View*)currentContext.murkaView)->latestContext = currentContext;
+        
+        MurkaPoint containerPosition = viewSource->shape.position ;
+        MurkaEventState derivedEventState = currentContext.transformedWith({-containerPosition.x, -containerPosition.y }, 1.0);
+
+        contextStack.push_back(currentContext); // this makes it a parent
+        
+        currentContext.MurkaEventState::operator=(derivedEventState);
+        currentContext.currentViewShape.position += containerPosition;
+        currentContext.currentViewShape.size = viewSource->shape.size;
+        currentContext.murkaView = viewSource;
+        currentContext.overlayHolder = this;
+        
+        viewSource->latestContext = currentContext;
+        
+        latestChildContext = currentContext;
+         
     }
     
     void popContext() {
@@ -220,7 +241,15 @@ public:
         currentContext.pushContextInternal = [&](MurkaViewHandlerInternal* mvhi) {
             pushContext(mvhi);
         };
-        
+
+        currentContext.pushContextInternal_NEW = [&](MurkaAnimator* v) {
+            pushContext_NEW((View*)v);
+        };
+
+        currentContext.popContextInternal_NEW = [&]() {
+            popContext();
+        };
+
         currentContext.popContextInternal = [&]() {
             popContext();
         };

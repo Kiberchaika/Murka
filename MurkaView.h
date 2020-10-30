@@ -19,6 +19,162 @@ typedef std::function<void (void* dataToControl,
 
 #define MURKA_VIEW_DRAW_FUNCTION void draw(void* dataToControl, void* parametersObject, void* thisWidgetObject, MurkaContext & context, void* resultObject)
 
+template<typename T>
+class View_NEW: public MurkaAnimator {
+public:
+    
+    // This variable is needed to support immediate mode widgets resizing themselves while also receiving sizes from outside.
+    MurkaShape latestShapeThatCameFromOutside;
+    
+    
+    virtual bool wantsClicks() { return true; } // override this if you want to signal to other widgets that you don't want clicks
+    
+public:
+    View_NEW() {
+        
+    }
+    
+    ~View_NEW() {
+        // TODO: delete children
+    }
+    
+    
+    // This children list contains all the children objects and their respective data
+    std::vector<MurkaViewHandlerInternal*> children;
+    
+    // This tuple is how Murka identifies the IM mode widget object.
+    // Int stands for object drawing index, void* is a pointer to data, string is typeid
+    typedef std::tuple<int, void*, std::string> imIdentifier;
+    typedef std::tuple<int, std::string> imIdentifier_NEW;
+    
+    std::map<imIdentifier_NEW, MurkaViewHandler<View_NEW>*> imChildren_NEW; // Immediate mode widget objects that were once drawn inside this widget. We hold their state here in the shape of their MurkaViews.
+
+    MurkaViewHandlerInternal* latestDrawnIMModeWidgetObjectHandler;
+
+    /*
+    void clearChildren() {
+        for (auto &i: children) {
+            ((View*)i->widgetObjectInternal)->clearChildren();
+            delete i;
+        }
+        children.clear();
+    }
+     */
+    
+    MurkaShape childrenBounds = {std::numeric_limits<float>::max(), std::numeric_limits<float>::max(),
+                                 0, 0};
+    
+    void resetChildrenBounds() {
+        childrenBounds = {std::numeric_limits<float>::max(), std::numeric_limits<float>::max(),
+            0, 0};
+    }
+    
+    int hoverIndexCache = 0;
+    
+    bool hasMouseFocus(MurkaContext & context) {
+        bool inside = context.isHovered() * !areInteractiveChildrenHovered(context);
+        
+        bool pass = false;
+        if (inside && wantsClicks()) {
+            auto itr = context.iterateHoverIndex();
+            if (hoverIndexCache != context.getMaxHoverIndex()) pass = false;
+                else pass = true;
+                
+            hoverIndexCache = itr;
+        }
+        
+        return pass;
+    }
+
+
+    bool areInteractiveChildrenHovered(MurkaContext & c) {
+        if (!c.isHovered()) {
+            return false;
+        }
+        
+        /*
+        for (auto i: children) {
+            auto shape = ((View*)i->widgetObjectInternal)->shape;
+            shape.position = ((View*)i->widgetObjectInternal)->shape.position;
+            
+            if ((shape.inside(c.mousePosition)) && (((View*)i->widgetObjectInternal)->wantsClicks())) {
+                return true;
+            }
+        }
+        */
+        
+        int index = 0;
+        typename std::map<imIdentifier, MurkaViewHandler<View_NEW>*>::iterator it;
+        for (it = imChildren_NEW.begin(); it != imChildren_NEW.end(); it++) {
+            auto shape = ((View_NEW*)it->second->widgetObjectInternal)->shape;
+            shape.position = ((View_NEW*)it->second->widgetObjectInternal)->shape.position;
+            
+            if ((shape.inside(c.mousePosition)) && (((View_NEW*)it->second->widgetObjectInternal)->wantsClicks())) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    bool areChildrenHovered(MurkaContext c) {
+        if (!c.isHovered()) {
+            return false;
+        }
+        
+        /*
+        for (auto i: children) {
+            auto shape = ((View_NEW*)i->widgetObjectInternal)->shape;
+            shape.position = ((View_NEW*)i->widgetObjectInternal)->shape.position;
+            
+            if (shape.inside(c.mousePosition)) {
+                return true;
+            }
+        }
+        */
+        
+        int index = 0;
+        typename std::map<imIdentifier, MurkaViewHandler<View_NEW>*>::iterator it;
+        for (it = imChildren_NEW.begin(); it != imChildren_NEW.end(); it++) {
+            auto shape = ((View_NEW*)it->second->widgetObjectInternal)->shape;
+            shape.position = ((View_NEW*)it->second->widgetObjectInternal)->shape.position;
+            
+            if (shape.inside(c.mousePosition)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    
+    void* returnNewResultsObject() {
+        return new bool(false);
+    }
+    
+    void* returnNewWidgetObject() {
+        return new View_NEW();
+    }
+    
+    virtual MURKA_VIEW_DRAW_FUNCTION {
+        ofLog() << "drawing an empty func...";
+    }
+    
+    struct Parameters {};
+    struct Results {};
+    
+    void* parametersInternal;
+    void* resultsInternal;
+    std::string dataTypeName = "";
+    
+    MurkaShape shape = {0, 0, 1, 2};
+    
+    MurkaLinearLayoutGenerator linearLayout;
+    MosaicLayout mosaicLayout;
+    
+    MurkaContext latestContext;
+};
+
 // // View heirarchy
 
 // View is non-template class that holds everything that any widget should subclass (wantsClicks) and hold.
@@ -50,8 +206,12 @@ public:
     // This tuple is how Murka identifies the IM mode widget object.
     // Int stands for object drawing index, void* is a pointer to data, string is typeid
     typedef std::tuple<int, void*, std::string> imIdentifier;
-    std::map<imIdentifier, MurkaViewHandler<View>*> imChildren; // Immediate mode widget objects that were once drawn inside this widget. We hold their state here in the shape of their MurkaViews.
+    typedef std::tuple<int, std::string> imIdentifier_NEW;
     
+    std::map<imIdentifier, MurkaViewHandler<View>*> imChildren; // Immediate mode widget objects that were once drawn inside this widget. We hold their state here in the shape of their MurkaViews.
+
+    std::map<imIdentifier_NEW, MurkaViewHandler<View>*> imChildren_NEW; // Immediate mode widget objects that were once drawn inside this widget. We hold their state here in the shape of their MurkaViews.
+
     MurkaViewHandlerInternal* latestDrawnIMModeWidgetObjectHandler;
 
     
@@ -287,6 +447,81 @@ public:
         }
     }
     
+        static View_NEW<T>* getOrCreateImModeWidgetObject_NEW(int index, View_NEW* parentWidget, MurkaShape shape) {
+            
+            auto idTuple = std::make_tuple(index, typeid(T).name());
+            if (parentWidget->imChildren_NEW.find(idTuple) != parentWidget->imChildren_NEW.end()) {
+                // the widget exists
+                
+    //            ofLog() << "returning the object";
+                
+                auto imChild = ((View_NEW<T>*)parentWidget->imChildren_NEW[idTuple]);
+                auto widget = imChild;
+                
+                if (widget->latestShapeThatCameFromOutside != shape) {
+                    // updating shape cause something else came from outside
+                    
+                    widget->latestShapeThatCameFromOutside = shape;
+                    widget->shape = shape;
+                }
+
+                // Updating children bounds
+                if (parentWidget->childrenBounds.position.x > widget->shape.position.x) {
+                    parentWidget->childrenBounds.position.x = widget->shape.position.x;
+    //                ofLog() << "updated cb x (2) to " << shape.position.x;
+                }
+                if (parentWidget->childrenBounds.position.y > widget->shape.position.y) {
+                    parentWidget->childrenBounds.position.y = widget->shape.position.y;
+    //                ofLog() << "updated cb y (2) to " << shape.position.y;
+                }
+                if ((parentWidget->childrenBounds.size.x + parentWidget->childrenBounds.position.x) < (widget->shape.position.x + widget->shape.size.x)) {
+                    parentWidget->childrenBounds.size.x = widget->shape.position.x + widget->shape.size.x - parentWidget->childrenBounds.position.x;
+    //                ofLog() << "updated cb sx (2) to " << parentWidget->childrenBounds.size.x;
+                }
+                
+                if ((parentWidget->childrenBounds.size.y + parentWidget->childrenBounds.position.y) < widget->shape.position.y + widget->shape.size.y) {
+                    parentWidget->childrenBounds.size.y = widget->shape.position.y + widget->shape.size.y - parentWidget->childrenBounds.position.y;
+                }
+
+                parentWidget->latestDrawnIMModeWidgetObjectHandler = (MurkaViewHandler<T>*)parentWidget->imChildren[idTuple];
+                return (MurkaViewHandler<T>*)parentWidget->imChildren[idTuple];
+            } else {
+                auto newWidget = new T();
+                auto resultsObject = newWidget->returnNewResultsObject();
+                newWidget->shape = shape;
+                newWidget->latestShapeThatCameFromOutside = shape;
+                
+                MurkaViewHandler<T>* newHandler = new MurkaViewHandler<T>();
+                newHandler->resultsInternal = resultsObject;
+                newHandler->dataToControl = data;
+                newHandler->widgetObjectInternal = newWidget;
+                
+                parentWidget->imChildren[idTuple] = (MurkaViewHandler<View> *)newHandler;
+
+                // Updating children bounds (this is needed for automatic scrolling and things like that -
+                // basically informing parent widget of how much space does its children occupy)
+                if (parentWidget->childrenBounds.position.x > shape.position.x) {
+                    parentWidget->childrenBounds.position.x = shape.position.x;
+    //                ofLog() << "updated cb x (1) to " << shape.position.x;
+                }
+                if (parentWidget->childrenBounds.position.y > shape.position.y) {
+                    parentWidget->childrenBounds.position.y = shape.position.y;
+    //                ofLog() << "updated cb y (1) to " << shape.position.y;
+                }
+                if ((parentWidget->childrenBounds.size.x + parentWidget->childrenBounds.position.x) < (shape.position.x + shape.size.x)) {
+                    parentWidget->childrenBounds.size.x = shape.position.x + shape.size.x - parentWidget->childrenBounds.position.x;
+    //                ofLog() << "updated cb sx (2) to " << parentWidget->childrenBounds.size.x;
+                }
+                
+                if ((parentWidget->childrenBounds.size.y + parentWidget->childrenBounds.position.y) < (shape.position.y + shape.size.y)) {
+                    parentWidget->childrenBounds.size.y = shape.position.y + shape.size.y - parentWidget->childrenBounds.position.y;
+                }
+                
+                parentWidget->latestDrawnIMModeWidgetObjectHandler = newHandler;
+                return newHandler;
+            }
+        }
+    
     static MurkaViewInterface<T>::Results imDrawST2(MurkaContext &c, void* dataToControl, MurkaViewInterface<T>::Parameters parameters, MurkaShape shape) {
     }
 
@@ -339,9 +574,9 @@ T& drawWidget(MurkaContext &c, MurkaShape shape) {
 }
 
 // Immediate mode custom layout
-    
+
 template<typename T>
-T & drawWidgetNEWAPI(MurkaContext &c, typename T::Parameters parameters, MurkaShape shape) {
+T & drawWidget_NEW(MurkaContext &c, MurkaShape shape) {
 
     //        auto context = &(m.currentContext);
     int counter = c.getImCounter();
@@ -357,7 +592,9 @@ T & drawWidgetNEWAPI(MurkaContext &c, typename T::Parameters parameters, MurkaSh
     c.pushContext(widgetHandler);
     if (c.transformTheRenderIntoThisContextShape(c.overlayHolder->disableViewportCrop)) {
         widgetObject->linearLayout.restart(((View*)widgetHandler->widgetObjectInternal)->shape);
-            widgetObject->draw(NULL, &parameters, widgetObject, c, &results);
+        
+//            widgetObject->draw(NULL, {&parameters}, widgetObject, c, &results);
+        
         widgetObject->animationRestart();
         widgetObject->mosaicLayout.restart();
         
