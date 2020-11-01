@@ -8,6 +8,7 @@
 #include "MurkaOverlayHolder.h"
 #include "MurkaRenderer.h"
 #include "MurkaAnimator.h"
+#include "ViewBase.h"
 
 // Here's the global typedefs for cross-render functionality
 
@@ -153,7 +154,9 @@ public:
     // All shapes are absolute
     MurkaShape* currentWidgetShapeSource; // this shape pointer points to a shape of the current
     // view that you could use inside the widget to use or reshape it if needed
-    void* murkaView; // the MurkaView that this context once represented
+    void* linkedView = NULL; // the MurkaView that this context once represented
+    
+    void* linkedView_NEW = NULL; // the MurkaView that this context once represented
 
     int getImCounter() {
         imCounter++;
@@ -168,6 +171,10 @@ public:
         pushContextInternal(viewSource);
     }
 
+    void pushContext_NEW(ViewBase_NEW* viewSource) {
+        pushContextInternal_NEW(viewSource);
+    }
+
     void popContext() {
         popContextInternal();
     }
@@ -180,8 +187,8 @@ public:
     std::function<void()> popContextInternal = []() {};
 
     // This uses Animator class because you can't include View from here
-    std::function<void(MurkaAnimator*)> pushContextInternal_NEW = [](MurkaAnimator* v) {};
-    std::function<void()> popContextInternal_NEW = []() {};
+    std::function<void(ViewBase_NEW*)> pushContextInternal_NEW = [](ViewBase_NEW* v) {};
+//    std::function<void()> popContextInternal_NEW = []() {};
     
 
     std::function<MurkaShape()> getParentContextShapeInternal = []()->MurkaShape {

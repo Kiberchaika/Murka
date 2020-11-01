@@ -7,6 +7,7 @@
 #include "MurkaLinearLayoutGenerator.h"
 #include "MurkaAnimator.h"
 #include "MosaicLayout.h"
+#include "ViewBase.h"
 
 namespace murka {
     
@@ -20,7 +21,7 @@ typedef std::function<void (void* dataToControl,
 #define MURKA_VIEW_DRAW_FUNCTION void draw(void* dataToControl, void* parametersObject, void* thisWidgetObject, MurkaContext & context, void* resultObject)
 
 template<typename T>
-class View_NEW: public MurkaAnimator {
+class View_NEW: public MurkaAnimator, public ViewBase_NEW {
 public:
     
     // This variable is needed to support immediate mode widgets resizing themselves while also receiving sizes from outside.
@@ -45,9 +46,7 @@ public:
     // This tuple is how Murka identifies the IM mode widget object.
     // Int stands for object drawing index, void* is a pointer to data, string is typeid
     typedef std::tuple<int, void*, std::string> imIdentifier;
-    typedef std::tuple<int, std::string> imIdentifier_NEW;
     
-    std::map<imIdentifier_NEW, MurkaViewHandler<View_NEW>*> imChildren_NEW; // Immediate mode widget objects that were once drawn inside this widget. We hold their state here in the shape of their MurkaViews.
 
     MurkaViewHandlerInternal* latestDrawnIMModeWidgetObjectHandler;
 
@@ -60,14 +59,6 @@ public:
         children.clear();
     }
      */
-    
-    MurkaShape childrenBounds = {std::numeric_limits<float>::max(), std::numeric_limits<float>::max(),
-                                 0, 0};
-    
-    void resetChildrenBounds() {
-        childrenBounds = {std::numeric_limits<float>::max(), std::numeric_limits<float>::max(),
-            0, 0};
-    }
     
     int hoverIndexCache = 0;
     
@@ -163,16 +154,12 @@ public:
     struct Parameters {};
     struct Results {};
     
-    void* parametersInternal;
-    void* resultsInternal;
     std::string dataTypeName = "";
-    
-    MurkaShape shape = {0, 0, 1, 2};
     
     MurkaLinearLayoutGenerator linearLayout;
     MosaicLayout mosaicLayout;
     
-    MurkaContext latestContext;
+//    MurkaContext latestContext;
 };
 
 // // View heirarchy
@@ -209,8 +196,6 @@ public:
     typedef std::tuple<int, std::string> imIdentifier_NEW;
     
     std::map<imIdentifier, MurkaViewHandler<View>*> imChildren; // Immediate mode widget objects that were once drawn inside this widget. We hold their state here in the shape of their MurkaViews.
-
-    std::map<imIdentifier_NEW, MurkaViewHandler<View>*> imChildren_NEW; // Immediate mode widget objects that were once drawn inside this widget. We hold their state here in the shape of their MurkaViews.
 
     MurkaViewHandlerInternal* latestDrawnIMModeWidgetObjectHandler;
 
@@ -447,7 +432,7 @@ public:
         }
     }
     
-        static View_NEW<T>* getOrCreateImModeWidgetObject_NEW(int index, View_NEW* parentWidget, MurkaShape shape) {
+        static View_NEW<T>* getOrCreateImModeWidgetObject_NEW(int index, ViewBase_NEW* parentWidget, MurkaShape shape) {
             
             auto idTuple = std::make_tuple(index, typeid(T).name());
             if (parentWidget->imChildren_NEW.find(idTuple) != parentWidget->imChildren_NEW.end()) {
@@ -483,20 +468,26 @@ public:
                     parentWidget->childrenBounds.size.y = widget->shape.position.y + widget->shape.size.y - parentWidget->childrenBounds.position.y;
                 }
 
-                parentWidget->latestDrawnIMModeWidgetObjectHandler = (MurkaViewHandler<T>*)parentWidget->imChildren[idTuple];
-                return (MurkaViewHandler<T>*)parentWidget->imChildren[idTuple];
+//                parentWidget->latestDrawnIMModeWidgetObjectHandler = (MurkaViewHandler<T>*)parentWidget->imChildren[idTuple];
+                return (View_NEW<T>*)parentWidget->imChildren_NEW[idTuple];
             } else {
+                // Creating new widget
+                
                 auto newWidget = new T();
                 auto resultsObject = newWidget->returnNewResultsObject();
                 newWidget->shape = shape;
                 newWidget->latestShapeThatCameFromOutside = shape;
                 
+                /*
                 MurkaViewHandler<T>* newHandler = new MurkaViewHandler<T>();
                 newHandler->resultsInternal = resultsObject;
                 newHandler->dataToControl = data;
                 newHandler->widgetObjectInternal = newWidget;
+                */
                 
-                parentWidget->imChildren[idTuple] = (MurkaViewHandler<View> *)newHandler;
+                auto newView = new View_NEW<T>();
+                
+                parentWidget->imChildren_NEW[idTuple] = (View_NEW<T>*)newView;
 
                 // Updating children bounds (this is needed for automatic scrolling and things like that -
                 // basically informing parent widget of how much space does its children occupy)
@@ -517,8 +508,8 @@ public:
                     parentWidget->childrenBounds.size.y = shape.position.y + shape.size.y - parentWidget->childrenBounds.position.y;
                 }
                 
-                parentWidget->latestDrawnIMModeWidgetObjectHandler = newHandler;
-                return newHandler;
+//                parentWidget->latestDrawnIMModeWidgetObjectHandler = newHandler;
+                return newView;
             }
         }
     
@@ -536,7 +527,7 @@ T& drawWidget(MurkaContext &c, MurkaShape shape) {
     int counter = c.getImCounter();
 
     
-    auto parentView = (View*)c.murkaView;
+    auto parentView = (View*)c.linkedView;
     auto widgetHandler = T::getOrCreateImModeWidgetObject(counter, NULL, parentView, shape);
     auto widgetObject = (View*)widgetHandler->widgetObjectInternal;
     
@@ -582,16 +573,16 @@ T & drawWidget_NEW(MurkaContext &c, MurkaShape shape) {
     int counter = c.getImCounter();
 
     
-    auto parentView = (View*)c.murkaView;
-    auto widgetHandler = T::getOrCreateImModeWidgetObject(counter, NULL, parentView, shape);
-    auto widgetObject = (View*)widgetHandler->widgetObjectInternal;
+    auto parentView = (ViewBase_NEW*)c.linkedView_NEW;
+    auto widgetObject = T::getOrCreateImModeWidgetObject_NEW(counter, parentView, shape);
+//    auto widgetObject = (View*)widgetHandler->widgetObjectInternal;
     
     
-    typename T::Results results = typename T::Results();
+//    typename T::Results results = typename T::Results();
     
-    c.pushContext(widgetHandler);
+    c.pushContext_NEW(widgetObject);
     if (c.transformTheRenderIntoThisContextShape(c.overlayHolder->disableViewportCrop)) {
-        widgetObject->linearLayout.restart(((View*)widgetHandler->widgetObjectInternal)->shape);
+        widgetObject->linearLayout.restart(widgetObject->shape);
         
 //            widgetObject->draw(NULL, {&parameters}, widgetObject, c, &results);
         
@@ -628,7 +619,7 @@ typename T::Results drawWidget(MurkaContext &c, typename T::Parameters parameter
     int counter = c.getImCounter();
 
     
-    auto parentView = (View*)c.murkaView;
+    auto parentView = (View*)c.linkedView;
     auto widgetHandler = T::getOrCreateImModeWidgetObject(counter, NULL, parentView, shape);
     auto widgetObject = (View*)widgetHandler->widgetObjectInternal;
     
@@ -668,8 +659,8 @@ typename T::Results drawWidget(MurkaContext &c, B* dataToControl, typename T::Pa
 
     int counter = c.getImCounter();
     
-    auto mView = (View*)c.murkaView;
-    auto widgetHandler = T::getOrCreateImModeWidgetObject(counter, NULL, (View*)c.murkaView, shape);
+    auto mView = (View*)c.linkedView;
+    auto widgetHandler = T::getOrCreateImModeWidgetObject(counter, NULL, (View*)c.linkedView, shape);
     auto widgetObject = (View*)widgetHandler->widgetObjectInternal;
     
     widgetObject->dataTypeName = typeid(dataToControl).name();
@@ -711,11 +702,11 @@ typename T::Results drawWidget(MurkaContext &c, B* dataToControl, typename T::Pa
     
     int counter = c.getImCounter();
     
-    auto parentMView = (View*)c.murkaView;
+    auto parentMView = (View*)c.linkedView;
     
     auto shapeOffering = parentMView->linearLayout.getNextShapeOffering();
     
-    auto widgetHandler = T::getOrCreateImModeWidgetObject(counter, NULL, (View*)c.murkaView, shapeOffering);
+    auto widgetHandler = T::getOrCreateImModeWidgetObject(counter, NULL, (View*)c.linkedView, shapeOffering);
     auto widgetObject = (View*)widgetHandler->widgetObjectInternal;
 
     widgetObject->dataTypeName = typeid(dataToControl).name();
@@ -744,11 +735,11 @@ typename T::Results drawWidget(MurkaContext &c, typename T::Parameters parameter
     
     int counter = c.getImCounter();
     
-    auto parentMView = (View*)c.murkaView;
+    auto parentMView = (View*)c.linkedView;
     
     auto shapeOffering = parentMView->linearLayout.getNextShapeOffering();
     
-    auto widgetHandler = T::getOrCreateImModeWidgetObject(counter, NULL, (View*)c.murkaView, shapeOffering);
+    auto widgetHandler = T::getOrCreateImModeWidgetObject(counter, NULL, (View*)c.linkedView, shapeOffering);
     auto widgetObject = (View*)widgetHandler->widgetObjectInternal;
     
     typename T::Results results;
@@ -776,7 +767,7 @@ template<typename T>
 T* getLatestDrawnWidget(MurkaContext &c) {
 //    auto widgetHandler = T::getOrCreateImModeWidgetObject(0, new View(), new View(), MurkaShape());
     
-    auto widgetHandler = T::getLatestDrawn((View*)c.murkaView);
+    auto widgetHandler = T::getLatestDrawn((View*)c.linkedView);
 //
     auto widgetObject = (T*)widgetHandler->widgetObjectInternal;
 //
