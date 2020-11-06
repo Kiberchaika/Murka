@@ -142,14 +142,22 @@ public:
             customColor = true;
         } // a convenience initializer
         
-        Parameters(std::string labelText, MurkaColor color_, MurkaColor backgroundColor_) {
-            label = labelText;
-            color = color_;
-            customColor = true;
-            backgroundColor = backgroundColor_;
-        } // a convenience initializer
-        
-        Parameters(std::string labelText, TextAlignment align) {
+		Parameters(std::string labelText, MurkaColor color_, MurkaColor backgroundColor_) {
+			label = labelText;
+			color = color_;
+			customColor = true;
+			backgroundColor = backgroundColor_;
+		} // a convenience initializer
+
+		Parameters(std::string labelText, MurkaColor color_, MurkaColor backgroundColor_, TextAlignment align) {
+			label = labelText;
+			color = color_;
+			customColor = true;
+			backgroundColor = backgroundColor_;
+			alignment = align;
+		} // a convenience initializer
+
+		Parameters(std::string labelText, TextAlignment align) {
             label = labelText;
             alignment = align;
         } // a convenience initializer

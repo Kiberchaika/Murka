@@ -223,11 +223,17 @@ public:
 	virtual void drawLine(float x1, float y1, float x2, float y2) override {
 		ofRenderer->drawLine(x1 * getScreenScale(), y1 * getScreenScale(), 0.0f, x2 * getScreenScale(), y2 * getScreenScale(), 0.0f);
 	}
-    
-    virtual void drawVbo(const MurVbo & vbo, GLuint drawMode, int first, int total) override{
+
+	virtual void drawVbo(const MurVbo & vbo, GLuint drawMode, int first, int total) override {
         draw(vbo, drawMode, first, total);
     }
-    
+
+	virtual void drawPath(const vector<MurkaPoint> & verts)  {
+		ofPolyline polyline;
+		polyline.addVertices(*(const vector<glm::vec3>*)&verts);
+		ofRenderer->draw(polyline);
+	}
+
 	virtual int getWindowWidth() override {
 		return ofWindow->getWidth() / getScreenScale();
 	}
