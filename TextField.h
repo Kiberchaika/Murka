@@ -167,7 +167,7 @@ public:
         
         float glyphXCoordinate = 10;
         context.renderer->setColor(params->widgetFgColor);
-        font->drawString(displayString, 10 - cameraPanInsideWidget, context.getSize().y / 2 - font->getLineHeight() / 2);
+        font->drawString(displayString, 10 - cameraPanInsideWidget, context.getSize().y / 2 - font->getLineHeight());
         
         if (displayString.size() == 0) {
             // drawing hint
