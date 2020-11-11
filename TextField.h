@@ -20,10 +20,10 @@ class TextField : public MurkaViewInterface<TextField> {
         
         KeyStroke() { }
         
-        bool isPressed() {
+        bool isPressed(MurkaEventState m) {
             if (fired) {
                 bool shouldResetFired = false;
-                for (auto &i: keys) { if (ofGetKeyPressed(i)) shouldResetFired = true; }
+                for (auto &i: keys) { if (m.isKeyPressed(i)) shouldResetFired = true; }
                 if (shouldResetFired) {
                     fired = false;
                 }
@@ -33,7 +33,7 @@ class TextField : public MurkaViewInterface<TextField> {
 #ifdef MURKA_OF
             
             bool result = true;
-            for (auto &i: keys) { if (!ofGetKeyPressed(i)) result = false; }
+            for (auto &i: keys) { if (!m.isKeyPressed(i)) result = false; }
             
             if ((ofGetElapsedTimef() - timeItFired) < 0.5) {
                 result = false; // too little time since it was last pressed
@@ -64,6 +64,8 @@ public:
         pasteText = KeyStroke({OF_KEY_COMMAND, 'v'});
         goLeft = KeyStroke({OF_KEY_COMMAND, OF_KEY_LEFT});
         goRight = KeyStroke({OF_KEY_COMMAND, OF_KEY_RIGHT});
+        shiftLeft = KeyStroke({ OF_KEY_SHIFT, OF_KEY_LEFT });
+        shiftRight = KeyStroke({ OF_KEY_SHIFT, OF_KEY_RIGHT });
         selectAll = KeyStroke({OF_KEY_COMMAND, 'a'});
 #endif
         
@@ -80,7 +82,7 @@ public:
         }
 
         //
-        
+    
     MURKA_VIEW_DRAW_FUNCTION  {
 
         auto params = (Parameters*)parametersObject;
@@ -156,8 +158,8 @@ public:
         if (isSelectingTextNow()) {
 
             auto selectionShape = returnSelectionVisualShape();
-            MurkaColor selectionColor = (context.renderer->getColor() * 0.5 +
-                                         context.renderer->getColor() * 0.5) * 255;
+            MurkaColor selectionColor = (context.renderer->getColor() * 0.7 +
+                                         context.renderer->getColor() * 0.7) * 255;
             context.renderer->setColor(selectionColor, 200);
             context.renderer->drawRectangle(10 - cameraPanInsideWidget + selectionShape.x(), 4, selectionShape.width(), context.getSize().y - 8);
         }
@@ -283,7 +285,7 @@ public:
 
             // Keystrokes support
             
-            if ((copyText.isPressed()) && (activated) && (isSelectingTextNow())) {
+            if ((copyText.isPressed(context)) && (activated) && (isSelectingTextNow())) {
                 ofLog() << "copytext!!";
                 
                 auto substr = displayString.substr(selectionSymbolsRange.first, selectionSymbolsRange.second - selectionSymbolsRange.first);
@@ -292,7 +294,7 @@ public:
 
                 copyText.fire();
             } else
-            if ((cutText.isPressed()) && (activated) && (isSelectingTextNow())) {
+            if ((cutText.isPressed(context)) && (activated) && (isSelectingTextNow())) {
                 ofLog() << "cutText!!";
                 
                 if (isSelectingTextNow()) { // if we select now, backspace just deletes
@@ -308,7 +310,7 @@ public:
                 
                 cutText.fire();
             } else
-            if ((pasteText.isPressed()) && (activated)) {
+            if ((pasteText.isPressed(context)) && (activated)) {
                 ofLog() << "pasteText!!";
                 
                 if (isSelectingTextNow()) { // if we select now, it also replaces the selected text
@@ -321,12 +323,12 @@ public:
                 
                 pasteText.fire();
             } else
-            if ((goLeft.isPressed()) && (activated)) {
+            if ((goLeft.isPressed(context)) && (activated)) {
                 ofLog() << "goLeft!!";
                 
                 cursorPosition = 0;
                 
-                if (!shiftLeft.isPressed()) {
+                if (!shiftLeft.isPressed(context)) {
                     updateTextSelectionFirst(cursorPosition);
                     updateTextSelectionSecond(cursorPosition);
                 } else { // shift pressed, so we enlarge the selected text shape
@@ -344,12 +346,12 @@ public:
 
                 goLeft.fire();
             } else
-            if ((goRight.isPressed()) && (activated)) {
+            if ((goRight.isPressed(context)) && (activated)) {
                 ofLog() << "goRight!!";
 
                 cursorPosition = displayString.size();
 
-                if (!shiftRight.isPressed()) {
+                if (!shiftRight.isPressed(context)) {
                     updateTextSelectionFirst(cursorPosition);
                     updateTextSelectionSecond(cursorPosition);
                 } else {
@@ -364,7 +366,7 @@ public:
                     
                 goRight.fire();
             } else
-            if ((selectAll.isPressed()) && (activated)) {
+            if ((selectAll.isPressed(context)) && (activated)) {
                 ofLog() << "selectAll!!";
                 
                 updateTextSelectionFirst(0);
@@ -419,7 +421,7 @@ public:
                                 cursorPosition --;
                             }
                             
-                            if (!shiftLeft.isPressed()) {
+                            if (!shiftLeft.isPressed(context)) {
                                 // pressing left collapses the text selection if shift isn't pressed
                                 updateTextSelectionFirst(cursorPosition);
                                 updateTextSelectionSecond(cursorPosition);
@@ -443,7 +445,7 @@ public:
                             }
 
                             
-                            if (!shiftRight.isPressed()) {
+                            if (!shiftRight.isPressed(context)) {
                                 // pressing left collapses the text selection if shift isn't pressed
                                 updateTextSelectionFirst(cursorPosition);
                                 updateTextSelectionSecond(cursorPosition);
@@ -454,7 +456,23 @@ public:
                         }
                         
                     }
-					else if (key >= 32 && key <= 255) { // symbol keys
+                    else if (key >= 45 && key <= 57) { // number keys, - and .
+                        
+                        ofLog() << "pressed numeric key " << key;
+                        if (isSelectingTextNow()) {
+                            ofLog() << "   .. and selecting text now ..";
+                            displayString.replace(selectionSymbolsRange.first, selectionSymbolsRange.second - selectionSymbolsRange.first, "");
+                            cursorPosition = selectionSymbolsRange.first;
+                        }
+
+                        displayString.insert(displayString.begin() + cursorPosition, char(key));
+
+                        cursorPosition += 1;
+
+                        updateTextSelectionFirst(cursorPosition);
+                        updateTextSelectionSecond(cursorPosition);
+                    }
+					else if (!params->numbersOnly && key >= 32 && key <= 255) { // symbol keys
 
 						ofLog() << "pressed symbol key " << key;
 						if (isSelectingTextNow()) {
@@ -603,6 +621,7 @@ public:
         MurkaColor widgetFgColor = {0.98, 0.98, 0.98};
         MurkaColor widgetBgColor = {0.1, 0.1, 0.1};
 
+        bool numbersOnly = false;
         
         Parameters() {
         }
