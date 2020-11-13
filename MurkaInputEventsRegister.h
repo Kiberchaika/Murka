@@ -2,6 +2,7 @@
 
 #include "MurkaTypes.h"
 #include <algorithm>
+#include <vector>
 
 #ifdef MURKA_OF
 #include "ofMain.h"

@@ -1,12 +1,12 @@
 #pragma once
 
 #include "MurkaTypes.h"
-#include "MurkaContext.h"
-#include "MurkaView.h"
 #include "MurkaInputEventsRegister.h"
 #include "MurkaLinearLayoutGenerator.h"
 
+#ifndef MURKA_MOSAIC_LAYOUT_DEF
 
+#define MURKA_MOSAIC_LAYOUT_DEF
 class MosaicLayout {
     ///
     
@@ -175,7 +175,7 @@ public:
         } else return 0;
     }
     
-    inline double overlapAreaOfOneToAll(MurkaShape shape, vector<MurkaShape>& others) {
+    inline double overlapAreaOfOneToAll(MurkaShape shape, std::vector<MurkaShape>& others) {
         double sumOverlapArea = 0;
         for (auto &j: others) {
             sumOverlapArea += overlapArea(shape, j);
@@ -321,3 +321,5 @@ public:
     
 
 };
+
+#endif

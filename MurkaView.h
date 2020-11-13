@@ -1,13 +1,11 @@
 #pragma once
 
+#include "ViewBase.h"
 #include "MurkaTypes.h"
 #include "MurkaContext.h"
 #include "MurkaViewHandler.h"
 #include "Murka.h"
-#include "MurkaLinearLayoutGenerator.h"
 #include "MurkaAnimator.h"
-#include "MosaicLayout.h"
-#include "ViewBase.h"
 
 namespace murka {
     
@@ -15,13 +13,13 @@ namespace murka {
 typedef std::function<void (void* dataToControl,
                             void* parametersObject,
                             void* thisWidgetObject,
-                            MurkaContext & context,
+                            MurkaContextBase & context,
                             void* resultObject)> viewDrawFunction;
 
 #define MURKA_VIEW_DRAW_FUNCTION void draw(void* dataToControl, void* parametersObject, void* thisWidgetObject, MurkaContext & context, void* resultObject)
 
 template<typename T>
-class View_NEW: public MurkaAnimator, public ViewBase_NEW {
+class View_NEW: public ViewBase_NEW {
 public:
     
     // This variable is needed to support immediate mode widgets resizing themselves while also receiving sizes from outside.
@@ -32,7 +30,6 @@ public:
     
 public:
     View_NEW() {
-        
     }
     
     ~View_NEW() {
@@ -108,7 +105,7 @@ public:
         return false;
     }
 
-    bool areChildrenHovered(MurkaContext c) {
+    bool areChildrenHovered(MurkaContextBase & c) {
         if (!c.isHovered()) {
             return false;
         }
@@ -125,10 +122,10 @@ public:
         */
         
         int index = 0;
-        typename std::map<imIdentifier, MurkaViewHandler<View_NEW>*>::iterator it;
-        for (it = imChildren_NEW.begin(); it != imChildren_NEW.end(); it++) {
-            auto shape = ((View_NEW*)it->second->widgetObjectInternal)->shape;
-            shape.position = ((View_NEW*)it->second->widgetObjectInternal)->shape.position;
+//        typename std::map<imIdentifier, MurkaViewHandler<View_NEW>*>::iterator it;
+        for (auto it = imChildren_NEW.begin(); it != imChildren_NEW.end(); it++) {
+            auto shape = ((View_NEW*)it->second)->shape;
+            shape.position = ((View_NEW*)it->second)->shape.position;
             
             if (shape.inside(c.mousePosition)) {
                 return true;
@@ -147,19 +144,115 @@ public:
         return new View_NEW();
     }
     
+    /*
     virtual MURKA_VIEW_DRAW_FUNCTION {
         ofLog() << "drawing an empty func...";
     }
+     */
+    
     
     struct Parameters {};
     struct Results {};
     
     std::string dataTypeName = "";
     
-    MurkaLinearLayoutGenerator linearLayout;
-    MosaicLayout mosaicLayout;
-    
 //    MurkaContext latestContext;
+    
+//    MURKA_VIEW_DRAW_FUNCTION_NEW override {
+//
+//    };
+//
+    
+    // Utility functions for those calling from outside
+    
+    static View_NEW<T>* getOrCreateImModeWidgetObject_NEW(int index, ViewBase_NEW* parentWidget, MurkaShape shape) {
+        
+        auto idTuple = std::make_tuple(index, typeid(T).name());
+        if (parentWidget->imChildren_NEW.find(idTuple) != parentWidget->imChildren_NEW.end()) {
+            // the widget exists
+            
+//            ofLog() << "returning the object";
+            
+            auto imChild = ((View_NEW<T>*)parentWidget->imChildren_NEW[idTuple]);
+            auto widget = imChild;
+            
+            if (widget->latestShapeThatCameFromOutside != shape) {
+                // updating shape cause something else came from outside
+                
+                widget->latestShapeThatCameFromOutside = shape;
+                widget->shape = shape;
+            }
+
+            // Updating children bounds
+            if (parentWidget->childrenBounds.position.x > widget->shape.position.x) {
+                parentWidget->childrenBounds.position.x = widget->shape.position.x;
+//                ofLog() << "updated cb x (2) to " << shape.position.x;
+            }
+            if (parentWidget->childrenBounds.position.y > widget->shape.position.y) {
+                parentWidget->childrenBounds.position.y = widget->shape.position.y;
+//                ofLog() << "updated cb y (2) to " << shape.position.y;
+            }
+            if ((parentWidget->childrenBounds.size.x + parentWidget->childrenBounds.position.x) < (widget->shape.position.x + widget->shape.size.x)) {
+                parentWidget->childrenBounds.size.x = widget->shape.position.x + widget->shape.size.x - parentWidget->childrenBounds.position.x;
+//                ofLog() << "updated cb sx (2) to " << parentWidget->childrenBounds.size.x;
+            }
+            
+            if ((parentWidget->childrenBounds.size.y + parentWidget->childrenBounds.position.y) < widget->shape.position.y + widget->shape.size.y) {
+                parentWidget->childrenBounds.size.y = widget->shape.position.y + widget->shape.size.y - parentWidget->childrenBounds.position.y;
+            }
+
+//                parentWidget->latestDrawnIMModeWidgetObjectHandler = (MurkaViewHandler<T>*)parentWidget->imChildren[idTuple];
+            return (View_NEW<T>*)parentWidget->imChildren_NEW[idTuple];
+        } else {
+            // Creating new widget
+            
+            auto newWidget = new T();
+//            auto resultsObject = newWidget->returnNewResultsObject();
+            newWidget->shape = shape;
+            newWidget->latestShapeThatCameFromOutside = shape;
+            
+            /*
+            MurkaViewHandler<T>* newHandler = new MurkaViewHandler<T>();
+            newHandler->resultsInternal = resultsObject;
+            newHandler->dataToControl = data;
+            newHandler->widgetObjectInternal = newWidget;
+            */
+            
+
+            
+            int z = parentWidget->imChildren_NEW.size();
+            
+            if (z == 0) {
+                // This doesn't work implicitly on Mac so we're remaking the map
+//                parentWidget->imChildren_NEW = std::map<imIdentifier_NEW, ViewBase_NEW*>();
+            }
+            
+            parentWidget->imChildren_NEW.insert(std::pair<imIdentifier_NEW, ViewBase_NEW*>(idTuple, new ViewBase_NEW()));
+//            parentWidget->imChildren_NEW[idTuple] = new ViewBase_NEW();
+
+            // Updating children bounds (this is needed for automatic scrolling and things like that -
+            // basically informing parent widget of how much space does its children occupy)
+            if (parentWidget->childrenBounds.position.x > shape.position.x) {
+                parentWidget->childrenBounds.position.x = shape.position.x;
+//                ofLog() << "updated cb x (1) to " << shape.position.x;
+            }
+            if (parentWidget->childrenBounds.position.y > shape.position.y) {
+                parentWidget->childrenBounds.position.y = shape.position.y;
+//                ofLog() << "updated cb y (1) to " << shape.position.y;
+            }
+            if ((parentWidget->childrenBounds.size.x + parentWidget->childrenBounds.position.x) < (shape.position.x + shape.size.x)) {
+                parentWidget->childrenBounds.size.x = shape.position.x + shape.size.x - parentWidget->childrenBounds.position.x;
+//                ofLog() << "updated cb sx (2) to " << parentWidget->childrenBounds.size.x;
+            }
+            
+            if ((parentWidget->childrenBounds.size.y + parentWidget->childrenBounds.position.y) < (shape.position.y + shape.size.y)) {
+                parentWidget->childrenBounds.size.y = shape.position.y + shape.size.y - parentWidget->childrenBounds.position.y;
+            }
+            
+//                parentWidget->latestDrawnIMModeWidgetObjectHandler = newHandler;
+            return newWidget;
+        }
+    }
 };
 
 // // View heirarchy
@@ -432,86 +525,7 @@ public:
         }
     }
     
-        static View_NEW<T>* getOrCreateImModeWidgetObject_NEW(int index, ViewBase_NEW* parentWidget, MurkaShape shape) {
-            
-            auto idTuple = std::make_tuple(index, typeid(T).name());
-            if (parentWidget->imChildren_NEW.find(idTuple) != parentWidget->imChildren_NEW.end()) {
-                // the widget exists
-                
-    //            ofLog() << "returning the object";
-                
-                auto imChild = ((View_NEW<T>*)parentWidget->imChildren_NEW[idTuple]);
-                auto widget = imChild;
-                
-                if (widget->latestShapeThatCameFromOutside != shape) {
-                    // updating shape cause something else came from outside
-                    
-                    widget->latestShapeThatCameFromOutside = shape;
-                    widget->shape = shape;
-                }
 
-                // Updating children bounds
-                if (parentWidget->childrenBounds.position.x > widget->shape.position.x) {
-                    parentWidget->childrenBounds.position.x = widget->shape.position.x;
-    //                ofLog() << "updated cb x (2) to " << shape.position.x;
-                }
-                if (parentWidget->childrenBounds.position.y > widget->shape.position.y) {
-                    parentWidget->childrenBounds.position.y = widget->shape.position.y;
-    //                ofLog() << "updated cb y (2) to " << shape.position.y;
-                }
-                if ((parentWidget->childrenBounds.size.x + parentWidget->childrenBounds.position.x) < (widget->shape.position.x + widget->shape.size.x)) {
-                    parentWidget->childrenBounds.size.x = widget->shape.position.x + widget->shape.size.x - parentWidget->childrenBounds.position.x;
-    //                ofLog() << "updated cb sx (2) to " << parentWidget->childrenBounds.size.x;
-                }
-                
-                if ((parentWidget->childrenBounds.size.y + parentWidget->childrenBounds.position.y) < widget->shape.position.y + widget->shape.size.y) {
-                    parentWidget->childrenBounds.size.y = widget->shape.position.y + widget->shape.size.y - parentWidget->childrenBounds.position.y;
-                }
-
-//                parentWidget->latestDrawnIMModeWidgetObjectHandler = (MurkaViewHandler<T>*)parentWidget->imChildren[idTuple];
-                return (View_NEW<T>*)parentWidget->imChildren_NEW[idTuple];
-            } else {
-                // Creating new widget
-                
-                auto newWidget = new T();
-                auto resultsObject = newWidget->returnNewResultsObject();
-                newWidget->shape = shape;
-                newWidget->latestShapeThatCameFromOutside = shape;
-                
-                /*
-                MurkaViewHandler<T>* newHandler = new MurkaViewHandler<T>();
-                newHandler->resultsInternal = resultsObject;
-                newHandler->dataToControl = data;
-                newHandler->widgetObjectInternal = newWidget;
-                */
-                
-                auto newView = new View_NEW<T>();
-                
-                parentWidget->imChildren_NEW[idTuple] = (View_NEW<T>*)newView;
-
-                // Updating children bounds (this is needed for automatic scrolling and things like that -
-                // basically informing parent widget of how much space does its children occupy)
-                if (parentWidget->childrenBounds.position.x > shape.position.x) {
-                    parentWidget->childrenBounds.position.x = shape.position.x;
-    //                ofLog() << "updated cb x (1) to " << shape.position.x;
-                }
-                if (parentWidget->childrenBounds.position.y > shape.position.y) {
-                    parentWidget->childrenBounds.position.y = shape.position.y;
-    //                ofLog() << "updated cb y (1) to " << shape.position.y;
-                }
-                if ((parentWidget->childrenBounds.size.x + parentWidget->childrenBounds.position.x) < (shape.position.x + shape.size.x)) {
-                    parentWidget->childrenBounds.size.x = shape.position.x + shape.size.x - parentWidget->childrenBounds.position.x;
-    //                ofLog() << "updated cb sx (2) to " << parentWidget->childrenBounds.size.x;
-                }
-                
-                if ((parentWidget->childrenBounds.size.y + parentWidget->childrenBounds.position.y) < (shape.position.y + shape.size.y)) {
-                    parentWidget->childrenBounds.size.y = shape.position.y + shape.size.y - parentWidget->childrenBounds.position.y;
-                }
-                
-//                parentWidget->latestDrawnIMModeWidgetObjectHandler = newHandler;
-                return newView;
-            }
-        }
     
     static MurkaViewInterface<T>::Results imDrawST2(MurkaContext &c, void* dataToControl, MurkaViewInterface<T>::Parameters parameters, MurkaShape shape) {
     }
@@ -573,39 +587,13 @@ T & drawWidget_NEW(MurkaContext &c, MurkaShape shape) {
     int counter = c.getImCounter();
 
     
-    auto parentView = (ViewBase_NEW*)c.linkedView_NEW;
+    ViewBase_NEW* parentView = c.linkedView_NEW;
     auto widgetObject = T::getOrCreateImModeWidgetObject_NEW(counter, parentView, shape);
-//    auto widgetObject = (View*)widgetHandler->widgetObjectInternal;
+    // TODO: fill the renderer and/or some other helper variables in the new widget object
     
+    c.deferredView = widgetObject;
+    c.defferedViewDrawFunc = std::bind(&T::draw, (T*)widgetObject, std::placeholders::_1);
     
-//    typename T::Results results = typename T::Results();
-    
-    c.pushContext_NEW(widgetObject);
-    if (c.transformTheRenderIntoThisContextShape(c.overlayHolder->disableViewportCrop)) {
-        widgetObject->linearLayout.restart(widgetObject->shape);
-        
-//            widgetObject->draw(NULL, {&parameters}, widgetObject, c, &results);
-        
-        widgetObject->animationRestart();
-        widgetObject->mosaicLayout.restart();
-        
-        /*
-        //DEBUG - drawing the children frame that we had at the last frame end
-        ofSetColor(255, 100, 0);
-            ofNoFill();
-
-        ofDrawRectangle(((View*)c.murkaView)->childrenBounds.position.x, ((View*)c.murkaView)->childrenBounds.position.y, ((View*)c.murkaView)->childrenBounds.size.x, ((View*)c.murkaView)->childrenBounds.size.y);
-            ofFill();
-        //////
-         */
-
-        
-        c.transformTheRenderBackFromThisContextShape();
-    }
-    c.popContext();
-        
-    widgetObject->resetChildrenBounds();
-        
 
     return *((T*)widgetObject);
 }

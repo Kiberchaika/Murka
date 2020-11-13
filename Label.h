@@ -3,39 +3,40 @@
 
 namespace murka {
 
-class Label : public MurkaViewInterface<Label> {
+class Label : public View_NEW<Label> {
 public:
-    MURKA_VIEW_DRAW_FUNCTION  {
+    
+    MURKA_VIEW_DRAW_FUNCTION_NEW  {
         
-        auto params = (Parameters*)parametersObject;
+        bool inside = c.isHovered() * !areChildrenHovered(c);
         
-        bool inside = context.isHovered() * !areChildrenHovered(context);
+        auto font = c.getCurrentFont();
         
-        auto font = context.getCurrentFont();
-        if (params->customFont) {
-            font = params->font;
-        }
+        /*
+        MurkaColor bgColor = MurkaColor(0, 0, 0, 255);
+        c.renderer->enableFill();
         
-        MurkaColor bgColor = params->backgroundColor;
-        context.renderer->enableFill();
         if (bgColor.a != 0.0) {
-            context.renderer->setColor(bgColor);
-            if (params->alignment == TEXT_LEFT) {
-                context.renderer->drawRectangle(0, 0, font->getStringBoundingBox(params->label, 0, 0).width + 10, context.getSize().y);
+            c.renderer->setColor(bgColor);
+            if (alignment == TEXT_LEFT) {
+                c.renderer->drawRectangle(0, 0, font->getStringBoundingBox(label, 0, 0).width + 10, c.getSize().y);
             }
         }
-        MurkaColor fgColor = params->customColor ? params->color : context.renderer->getColor();
-        context.renderer->setColor(fgColor);
-        if (params->alignment == TEXT_LEFT) {
-            font->drawString(params->label, 5, 0);
+        */
+        
+        
+//        MurkaColor fgColor = c.renderer->getColor();
+//        c.renderer->setColor(fgColor);
+        if (alignment == TEXT_LEFT) {
+            font->drawString(label, 5, 0);
         }
-        if (params->alignment == TEXT_CENTER) {
-            float textX = 5 + (shape.size.x - 10) / 2 - font->getStringBoundingBox(params->label, 0, 0).getWidth()  / 2;
-            font->drawString(params->label, textX, 0);
+        if (alignment == TEXT_CENTER) {
+            float textX = 5 + (shape.size.x - 10) / 2 - font->getStringBoundingBox(label, 0, 0).getWidth()  / 2;
+            font->drawString(label, textX, 0);
         }
-        if (params->alignment == TEXT_RIGHT) {
-            float textX = (shape.size.x - 10) - font->getStringBoundingBox(params->label, 0, 0).getWidth();
-            font->drawString(params->label, textX, 0);
+        if (alignment == TEXT_RIGHT) {
+            float textX = (shape.size.x - 10) - font->getStringBoundingBox(label, 0, 0).getWidth();
+            font->drawString(label, textX, 0);
         }
         
         // Testing vertical centering
@@ -47,85 +48,26 @@ public:
             //ofDrawLine(0, context.getSize().y, context.getSize().x, context.getSize().y);
     };
     
+    static Label & draw2(MurkaContext &c, MurkaShape shape) {
+        int counter = c.getImCounter();
+
+        auto parentView = (ViewBase_NEW*)c.linkedView_NEW;
+        auto widgetObject = Label::getOrCreateImModeWidgetObject_NEW(counter, parentView, shape);
+
+        return (Label&)widgetObject;
+    }
+    
+//    MURKA_SUPPORT_DIRECT_DRAW(Label)
+    
+    operator bool() {
+        return true;
+    }
+    
     // Here go parameters and any parameter convenience constructors. You need to define something called Parameters, even if it's NULL.
-    struct Parameters {
-        std::string label;
-        TextAlignment alignment = TEXT_LEFT;
-        
-        MurkaColor color = {0.98, 0.98, 0.98};
-        MurkaColor backgroundColor = {0., 0., 0., 0.};
-        
-        FontObject* font;
-        
-        bool customColor = false;
-        bool customFont = false;
-        
-        Parameters() {}
-        Parameters(std::string labelText) { label = labelText; } // a convenience initializer
-        Parameters(std::string labelText, MurkaColor color_) {
-            label = labelText;
-            color = color_;
-            customColor = true;
-        } // a convenience initializer
-        
-        Parameters(std::string labelText, MurkaColor color_, MurkaColor backgroundColor_) {
-            label = labelText;
-            color = color_;
-            customColor = true;
-            backgroundColor = backgroundColor_;
-        } // a convenience initializer
-        
-        Parameters(std::string labelText, TextAlignment align) {
-            label = labelText;
-            alignment = align;
-        } // a convenience initializer
-        
-        Parameters(std::string labelText, MurkaColor color_, TextAlignment align) {
-            label = labelText;
-            alignment = align;
-            color = color_;
-            customColor = true;
-        } // a convenience initializer
-        
-        // Custom font initializers
-        Parameters(std::string labelText, FontObject* CustomFont) {
-            label = labelText;
-            font = CustomFont;
-            customFont = true;
-        } // a convenience initializer
-        Parameters(std::string labelText, FontObject* CustomFont, MurkaColor color_) {
-            label = labelText;
-            color = color_;
-            customColor = true;
-            font = CustomFont;
-            customFont = true;
-        } // a convenience initializer
-        
-        Parameters(std::string labelText, FontObject* CustomFont, MurkaColor color_, MurkaColor backgroundColor_) {
-            label = labelText;
-            color = color_;
-            customColor = true;
-            backgroundColor = backgroundColor_;
-            font = CustomFont;
-            customFont = true;
-        } // a convenience initializer
-        
-        Parameters(std::string labelText, FontObject* CustomFont, TextAlignment align) {
-            label = labelText;
-            alignment = align;
-            font = CustomFont;
-            customFont = true;
-        } // a convenience initializer
-        
-        Parameters(std::string labelText, FontObject* CustomFont, MurkaColor color_, TextAlignment align) {
-            label = labelText;
-            alignment = align;
-            color = color_;
-            customColor = true;
-            font = CustomFont;
-            customFont = true;
-        } // a convenience initializer
-    };
+    
+    TextAlignment alignment = TEXT_LEFT;
+    std::string label;
+    
     
     // The results type, you also need to define it even if it's nothing.
     typedef bool Results;

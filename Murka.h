@@ -62,7 +62,7 @@
 
 namespace murka {
 
-class Murka : public MurkaViewInterface<Murka>, public ViewBase_NEW, public MurkaInputEventsRegister, public MurkaRenderer, public MurkaOverlayHolder {
+class Murka : public View_NEW<Murka>, public MurkaInputEventsRegister, public MurkaRenderer, public MurkaOverlayHolder {
 public:
 	Murka() {
         setupEvents();
@@ -282,7 +282,7 @@ public:
             return allowedToUseKeyboard((View*)asker);
         };
         
-        latestContext = currentContext;
+//        latestContext = currentContext;
 
         clearEvents();
 	}
@@ -423,7 +423,9 @@ public:
         return addChildToView(getRootView(), child, data, newParameters,                           shapeInParentContainer);
     }
 
-    
+    void draw(MurkaContextBase & c)  {
+        
+    }
     
     ///////////////////
     

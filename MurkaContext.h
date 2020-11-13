@@ -9,8 +9,7 @@
 #include "MurkaRenderer.h"
 #include "MurkaAnimator.h"
 #include "ViewBase.h"
-
-// Here's the global typedefs for cross-render functionality
+#include "MurkaContextBase.h"
 
 #ifdef MURKA_OF
 #include "ofMain.h"
@@ -18,7 +17,7 @@
 
 namespace murka {
 
-class MurkaContext: public MurkaEventState {
+class MurkaContext: public MurkaContextBase {
     /*
 private:
     MurkaContext(const MurkaContext&) {}
@@ -31,41 +30,6 @@ public:
 #ifdef MURKA_OF
         runningTime = ofGetElapsedTimef();
 #endif
-    }
-    
-    // Assets access functions
-    
-    FontObject* getCurrentFont() const {
-        return ((MurkaAssets*)renderer)->getCurrentFont();
-    }
-
-    //
-    
-    MurkaPoint getPosition() const {
-        return {currentViewShape.position.x + getParentContextShape().position.x,
-                currentViewShape.position.y + getParentContextShape().position.y};
-    }
-    
-    MurkaPoint getSize() const {
-        return currentViewShape.size;
-    }
-    
-    bool isHovered() const {
-        return currentViewShape.transformedInside(mousePosition /* / renderer->getScreenScale() */); // using absolute coordinates to calc that
-    }
-    
-    MurkaOverlayHolder* overlayHolder;
-    MurkaRenderer* renderer;
-    
-    MurkaShape getParentContextShape() const {
-        return getParentContextShapeInternal();
-    }
-    
-    MurkaShape currentViewShape;
-    
-    // to add an overlay, give a lambda with the overlays call and an object that asked for it
-    void addOverlay(std::function<void()> func, void* object) {
-        overlayHolder->addOverlay(func, object);
     }
     
     std::pair<MurkaShape, MurkaPoint> getCroppedViewport(MurkaShape parent, MurkaShape view) const {
@@ -153,10 +117,47 @@ public:
     
     // All shapes are absolute
     MurkaShape* currentWidgetShapeSource; // this shape pointer points to a shape of the current
-    // view that you could use inside the widget to use or reshape it if needed
-    void* linkedView = NULL; // the MurkaView that this context once represented
+    // view that you could use inside the widget to reshape it if needed // TODO: get rid of this (v2)
+    void* linkedView = nullptr; // the MurkaView that this context once represented
     
-    void* linkedView_NEW = NULL; // the MurkaView that this context once represented
+    ViewBase_NEW* linkedView_NEW = nullptr; // the MurkaView that this context last represented
+    
+    ViewBase_NEW* deferredView = nullptr;
+    std::function<void(MurkaContextBase &)> defferedViewDrawFunc;
+    
+    void commitDeferredView() {
+        if (deferredView == nullptr) return;
+        
+            pushContext_NEW(deferredView);
+            if (transformTheRenderIntoThisContextShape(overlayHolder->disableViewportCrop)) {
+                deferredView->linearLayout.restart(deferredView->shape);
+                
+//                deferredView->draw(*this);
+                
+                defferedViewDrawFunc(*this);
+                
+                deferredView->animationRestart();
+                deferredView->mosaicLayout.restart();
+                
+                /*
+                //DEBUG - drawing the children frame that we had at the last frame end
+                ofSetColor(255, 100, 0);
+                    ofNoFill();
+
+                ofDrawRectangle(((View*)c.murkaView)->childrenBounds.position.x, ((View*)c.murkaView)->childrenBounds.position.y, ((View*)c.murkaView)->childrenBounds.size.x, ((View*)c.murkaView)->childrenBounds.size.y);
+                    ofFill();
+                //////
+                 */
+
+                
+                transformTheRenderBackFromThisContextShape();
+            }
+            popContext();
+                
+            deferredView->resetChildrenBounds();
+        
+        deferredView = nullptr;
+    }
 
     int getImCounter() {
         imCounter++;
@@ -190,10 +191,6 @@ public:
     std::function<void(ViewBase_NEW*)> pushContextInternal_NEW = [](ViewBase_NEW* v) {};
 //    std::function<void()> popContextInternal_NEW = []() {};
     
-
-    std::function<MurkaShape()> getParentContextShapeInternal = []()->MurkaShape {
-        return MurkaShape();
-    };
 
     double getRunningTime() const {return runningTime;}
     

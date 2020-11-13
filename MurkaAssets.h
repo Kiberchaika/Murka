@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MurkaTypes.h"
+#include <map>
 
 class MurkaRendererBase;
 
@@ -23,7 +24,7 @@ public:
         return resourcesPath;
     }
     
-    typedef tuple<string /* fontName */, int /* fontSize */> FontInfo;
+    typedef std::tuple<std::string /* fontName */, int /* fontSize */> FontInfo;
     
     std::map<FontInfo, FontObject*> fonts;
     std::map<FontInfo, FontObject*>::iterator currentFont;

@@ -13,7 +13,7 @@ public:
 
 class MurTexture {
 public:
-    MurImage(){};
+    MurTexture(){};
 };
 
 #endif
