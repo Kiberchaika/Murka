@@ -165,7 +165,7 @@ public:
     
     // Utility functions for those calling from outside
     
-    static View_NEW<T>* getOrCreateImModeWidgetObject_NEW(int index, ViewBase_NEW* parentWidget, MurkaShape shape) {
+    static T* getOrCreateImModeWidgetObject_NEW(int index, ViewBase_NEW* parentWidget, MurkaShape shape) {
         
         auto idTuple = std::make_tuple(index, typeid(T).name());
         if (parentWidget->imChildren_NEW.find(idTuple) != parentWidget->imChildren_NEW.end()) {
@@ -173,7 +173,7 @@ public:
             
 //            ofLog() << "returning the object";
             
-            auto imChild = ((View_NEW<T>*)parentWidget->imChildren_NEW[idTuple]);
+            auto imChild = ((T*)parentWidget->imChildren_NEW[idTuple]);
             auto widget = imChild;
             
             if (widget->latestShapeThatCameFromOutside != shape) {
@@ -202,7 +202,7 @@ public:
             }
 
 //                parentWidget->latestDrawnIMModeWidgetObjectHandler = (MurkaViewHandler<T>*)parentWidget->imChildren[idTuple];
-            return (View_NEW<T>*)parentWidget->imChildren_NEW[idTuple];
+            return (T*)parentWidget->imChildren_NEW[idTuple];
         } else {
             // Creating new widget
             
@@ -218,7 +218,7 @@ public:
             newHandler->widgetObjectInternal = newWidget;
             */
             
-
+            ofLog() << "creating a new object";
             
             int z = parentWidget->imChildren_NEW.size();
             
@@ -227,7 +227,7 @@ public:
 //                parentWidget->imChildren_NEW = std::map<imIdentifier_NEW, ViewBase_NEW*>();
             }
             
-            parentWidget->imChildren_NEW.insert(std::pair<imIdentifier_NEW, ViewBase_NEW*>(idTuple, new ViewBase_NEW()));
+            parentWidget->imChildren_NEW.insert(std::pair<imIdentifier_NEW, ViewBase_NEW*>(idTuple, newWidget));
 //            parentWidget->imChildren_NEW[idTuple] = new ViewBase_NEW();
 
             // Updating children bounds (this is needed for automatic scrolling and things like that -
@@ -588,12 +588,14 @@ T & drawWidget_NEW(MurkaContext &c, MurkaShape shape) {
 
     
     ViewBase_NEW* parentView = c.linkedView_NEW;
-    auto widgetObject = T::getOrCreateImModeWidgetObject_NEW(counter, parentView, shape);
+    T* widgetObject = T::getOrCreateImModeWidgetObject_NEW(counter, parentView, shape);
     // TODO: fill the renderer and/or some other helper variables in the new widget object
+    
+    ofLog() << parentView->imChildren_NEW.size();
     
     c.deferredView = widgetObject;
     c.defferedViewDrawFunc = std::bind(&T::draw, (T*)widgetObject, std::placeholders::_1);
-    
+    c.commitDeferredView();
 
     return *((T*)widgetObject);
 }

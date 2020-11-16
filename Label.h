@@ -27,6 +27,9 @@ public:
         
 //        MurkaColor fgColor = c.renderer->getColor();
 //        c.renderer->setColor(fgColor);
+        
+//        c.renderer->drawRectangle(0, 0, c.getSize().x, c.getSize().y);
+        
         if (alignment == TEXT_LEFT) {
             font->drawString(label, 5, 0);
         }
