@@ -57,6 +57,8 @@ class TextField : public MurkaViewInterface<TextField> {
 public:
     TextField() {
         
+        lastLeftMousebuttonClicktime = ofGetElapsedTimef();
+        
         // Setting up keystrokes
 #ifdef TARGET_OSX
         copyText = KeyStroke({OF_KEY_COMMAND, 'c'});
@@ -110,6 +112,12 @@ public:
         
         bool doubleClick = false;
         
+        if (params->shouldForceEditorToSelectAll) {
+            updateTextSelectionFirst(0);
+            updateTextSelectionSecond(displayString.length());
+            lastLeftMousebuttonClicktime = ofGetElapsedTimef();
+        }
+        
         // activating if always selected
         
         if (params->alwaysActivated) {
@@ -160,10 +168,9 @@ public:
             auto selectionShape = returnSelectionVisualShape();
             MurkaColor selectionColor = (context.renderer->getColor() * 0.7 +
                                          context.renderer->getColor() * 0.7) * 255;
-            context.renderer->setColor(selectionColor, 200);
+            context.renderer->setColor(100, 100, 100, 200);
             context.renderer->drawRectangle(10 - cameraPanInsideWidget + selectionShape.x(), 4, selectionShape.width(), context.getSize().y - 8);
         }
-
         
         recalcGlyphLengths(displayString, &context);
         
@@ -215,6 +222,7 @@ public:
             }
             
             // Moving text selection if mouse was already pressed, and moving the cursror too
+            
             if ((insideGlyph) && (context.mouseDown[0]) && (!context.mouseDownPressed[0])
                 && (safeToUseMouseClickEventsCauseEnoughTimeSinceDoubleClickPassed)) {
                 if (((context.mousePosition.x - glyphXCoordinate) / currentGlyphLengths[i]) < 0.5) {
@@ -270,7 +278,6 @@ public:
         }
         
 #endif
-        
         
         bool enterPressed = false;
         
@@ -623,6 +630,8 @@ public:
 
         bool numbersOnly = false;
         
+        bool shouldForceEditorToSelectAll = false;
+        
         Parameters() {
         }
         
@@ -730,8 +739,16 @@ public:
         
     }
 
+    bool pastSelectingTextResult = false;
     
     bool isSelectingTextNow() {
+        bool result = (activated && (selectionSymbolsRange.first != selectionSymbolsRange.second));
+        
+        if (pastSelectingTextResult != result) {
+            ofLog() << "ok switch!";
+        }
+        pastSelectingTextResult = result;
+        
         return (activated && (selectionSymbolsRange.first != selectionSymbolsRange.second));
     }
     
