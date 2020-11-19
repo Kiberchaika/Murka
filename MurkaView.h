@@ -591,8 +591,6 @@ T & drawWidget_NEW(MurkaContext &c, MurkaShape shape) {
     T* widgetObject = T::getOrCreateImModeWidgetObject_NEW(counter, parentView, shape);
     // TODO: fill the renderer and/or some other helper variables in the new widget object
     
-    ofLog() << parentView->imChildren_NEW.size();
-    
     c.deferredView = widgetObject;
     c.defferedViewDrawFunc = std::bind(&T::draw, (T*)widgetObject, std::placeholders::_1);
     c.commitDeferredView();

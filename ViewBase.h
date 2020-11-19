@@ -5,9 +5,18 @@
 #include "MosaicLayout.h"
 
 
-#define MURKA_VIEW_DRAW_FUNCTION_NEW void draw(MurkaContextBase & c)
+#define MURKA_PARAMETER(typename, parameterType, parameterName, getterName, setterName, default) \
+parameterType parameterName = default; \
+typename & setterName(parameterType parameterName_) { \
+    parameterName = parameterName_; return *this; } \
+parameterType getterName() { return parameterName; }
 
-
+#define MURKA_CALLBACK(typename, callbackVariable, setter) \
+std::function<void(typename &)> callbackVariable = [](typename&) {}; \
+typename & setter(std::function<void(typename &)> callback) { \
+    callbackVariable = callback; \
+    return *this; \
+}
 
 namespace murka {
 

@@ -1,34 +1,26 @@
 #include "Murka.h"
 
-
 namespace murka {
 
 class Label : public View_NEW<Label> {
 public:
     
-    MURKA_VIEW_DRAW_FUNCTION_NEW  {
+    void internal(MurkaContextBase & c)  {
         
         bool inside = c.isHovered() * !areChildrenHovered(c);
         
-        auto font = c.getCurrentFont();
-        
-        /*
-        MurkaColor bgColor = MurkaColor(0, 0, 0, 255);
-        c.renderer->enableFill();
-        
-        if (bgColor.a != 0.0) {
-            c.renderer->setColor(bgColor);
-            if (alignment == TEXT_LEFT) {
-                c.renderer->drawRectangle(0, 0, font->getStringBoundingBox(label, 0, 0).width + 10, c.getSize().y);
-            }
+        if (isHovered != inside) {
+            isHovered = inside;
+            onHoverChangeCallback(*this);
         }
-        */
         
+//        if (c.mouseButtonsChanged[0] && c.mouseDown[0])
         
-//        MurkaColor fgColor = c.renderer->getColor();
-//        c.renderer->setColor(fgColor);
+        if (c.mouseDownPressed[0]) {
+            onClickCallback(*this);
+        }
         
-//        c.renderer->drawRectangle(0, 0, c.getSize().x, c.getSize().y);
+        auto font = c.getCurrentFont();
         
         if (alignment == TEXT_LEFT) {
             font->drawString(label, 5, 0);
@@ -60,20 +52,39 @@ public:
         return (Label&)widgetObject;
     }
     
+    bool isHovered = false;
+    
+//    private:
+//    std::function<void()> callbackVariable;
+//    public:
+//    Label & setCallback(std::function<void()> cb) {
+//        callbackVariable = cb;
+//    }
+    
+    
+    MURKA_CALLBACK(Label, // class name
+                   onHoverChangeCallback, // callback variable name
+                   onHoverChange) // callback setter
+    
+    MURKA_CALLBACK(Label,
+                   onClickCallback,
+                   onClick)
+    
+    MURKA_PARAMETER(Label, // class name
+                    TextAlignment, // parameter type
+                    alignment, // parameter variable name
+                    getAlignment, // getter
+                    withAlignment, // setter
+                    TEXT_LEFT) // default
+    
+    MURKA_PARAMETER(Label, // class name
+                    std::string, // parameter type
+                    label, // parameter variable name
+                    getLabel, // getter
+                    text, // setter
+                    "") // default
+    
 //    MURKA_SUPPORT_DIRECT_DRAW(Label)
-    
-    operator bool() {
-        return true;
-    }
-    
-    // Here go parameters and any parameter convenience constructors. You need to define something called Parameters, even if it's NULL.
-    
-    TextAlignment alignment = TEXT_LEFT;
-    std::string label;
-    
-    
-    // The results type, you also need to define it even if it's nothing.
-    typedef bool Results;
     
     virtual bool wantsClicks() override { return false; } // override this if you want to signal that you don't want clicks
 

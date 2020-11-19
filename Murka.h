@@ -192,6 +192,11 @@ public:
         maxHoverIndex = hoverIndex;
 
 	}
+    
+    template<typename T>
+    T& draw(MurkaShape place) {
+        return drawWidget_NEW<T>(*this, place);
+    }
 
 	// A recursive OOP draw cycle that starts with this widget
 	void drawCycleRecursive(MurkaViewHandlerInternal* widget) {
