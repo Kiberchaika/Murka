@@ -7,9 +7,12 @@
 #include "ofMain.h"
 
 class MurkaRenderer: public MurkaRendererBase {
-	ofAppBaseWindow* ofWindow;
-    ofBaseGLRenderer* ofRenderer;
+	ofAppBaseWindow* ofWindow = nullptr;
+    ofBaseGLRenderer* ofRenderer = nullptr;
     
+	std::function<std::string(void)> getClipboardCallback = nullptr;
+	std::function<void(std::string)> setClipboardCallback = nullptr;
+
 public:
 	void setWindow(ofAppBaseWindow* window) {
 		ofWindow = window;
@@ -18,8 +21,22 @@ public:
 	void setRenderer(ofBaseGLRenderer* renderer) {
 		ofRenderer = renderer;
 	}
-    
-    // This font loading function needs to be here because
+
+	// Clipboard
+	void setClipboardCallbacks(std::function<std::string(void)> getCallback, std::function<void(std::string)> setCallback) {
+		getClipboardCallback = getCallback;
+		setClipboardCallback = setCallback;
+	}
+
+	void setClipboardString(std::string clipboard) {
+		if (setClipboardCallback) setClipboardCallback(clipboard);  
+	} 
+
+	std::string getClipboardString() {
+		return getClipboardCallback ? getClipboardCallback() : "";
+	}
+
+	// This font loading function needs to be here because
     // downcasting from Renderer to MurkaAssets doesn't work for some reason.
     // TODO: figure a better way to make setFont() accessible like this.
     
@@ -29,7 +46,7 @@ public:
 
 	void drawString(const string & s, float x, float y) {
 		murka::MurkaAssets::getCurrentFont()->drawString(s, x, y);
-	}
+	} 
 
 	// Object drawing
 	virtual void draw(const MurImage & image, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) override {
