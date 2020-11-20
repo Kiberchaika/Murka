@@ -34,6 +34,10 @@ public:
             font->drawString(label, textX, 0);
         }
         
+        c.renderer->setColor(200, 0, 0, 200);
+        
+        c.setColor(200, 0, 0, 200);
+        
         // Testing vertical centering
             //context.renderer->setColor(255);
             //ofDrawLine(0, 0, context.getSize().x, 0);

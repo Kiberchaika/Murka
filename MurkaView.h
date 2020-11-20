@@ -592,7 +592,7 @@ T & drawWidget_NEW(MurkaContext &c, MurkaShape shape) {
     // TODO: fill the renderer and/or some other helper variables in the new widget object
     
     c.deferredView = widgetObject;
-    c.defferedViewDrawFunc = std::bind(&T::draw, (T*)widgetObject, std::placeholders::_1);
+    c.defferedViewDrawFunc = std::bind(&T::internal, (T*)widgetObject, std::placeholders::_1);
     c.commitDeferredView();
 
     return *((T*)widgetObject);
