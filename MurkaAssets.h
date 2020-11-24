@@ -28,16 +28,27 @@ public:
     std::map<FontInfo, FontObject*> fonts;
     std::map<FontInfo, FontObject*>::iterator currentFont;
 
-    
-    FontObject* getCurrentFont() {
+     FontObject* getCurrentFont() {
         return currentFont->second;
     }
 
-	void clearFontsCache() {
-		fonts.clear();
-		currentFont = fonts.begin();
-	}
-
+    void clearFontsCache() {
+        fonts.clear();
+        currentFont = fonts.begin();
+    }
+    
+    void updateFontsTextures(MurkaRendererBase* renderer) {
+        for (auto const& font : fonts) {
+            font.second->updateTexture(renderer);
+        }
+    }
+    
+    void clearFontsTextures() {
+        for (auto const& font : fonts) {
+            font.second->clearTexture();
+        }
+    }
+    
     void setFont(std::string name, int size, MurkaRendererBase* renderer) {
 		// todo: get scale from renderer
 
