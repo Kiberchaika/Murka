@@ -118,20 +118,24 @@ public:
         currentContext.transformTheRenderBackFromThisContextShape();
     }
     
-    View* keyboardFocusHaver = NULL;
+    View* keyboardFocusHaver = nullptr;
     
     void setKeyboardFocusHaver(View* newOwner) {
         keyboardFocusHaver = newOwner;
     }
     
     bool allowedToUseKeyboard(View* asker) {
-        return ((keyboardFocusHaver == asker) || (keyboardFocusHaver == NULL));
+        return ((keyboardFocusHaver == asker) || (keyboardFocusHaver == nullptr));
     }
     
     void resetKeyboardFocus(View* asker) {
         if (asker == keyboardFocusHaver) {
-            keyboardFocusHaver = NULL;
+            keyboardFocusHaver = nullptr;
         }
+    }
+    
+    bool doesHaveAWidgetThatHoldsKeyboardFocus() {
+        return keyboardFocusHaver != nullptr;
     }
     
     int getMaxHoverIndex() {

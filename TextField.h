@@ -123,6 +123,7 @@ public:
         if (params->alwaysActivated) {
             activated = true;
             updateExternalData(dataToControl, params->clampNumber);
+            context.claimKeyboardFocus(this);
         }
 
         // activation & deactivation & doubleclick
