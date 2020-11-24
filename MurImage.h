@@ -7,8 +7,14 @@
 
 class MurImage {
 public:
-    MurImage(){};
+    MurImage(){
+        
+    };
     
+    ~MurImage(){
+        internal.clear();
+    };
+
     ofImage internal;
 	
 	void allocate(int w, int h) {
@@ -35,10 +41,14 @@ public:
 		internal.update();
 	}
 
-	void clear() {
-		internal.clear();
-	}
-
+    void clear() {
+        internal.clear();
+    }
+    
+    void clearTexture() {
+        internal.getTexture().clear();
+    }
+    
 	float getWidth() {
 		return internal.getWidth();
 	}
