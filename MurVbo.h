@@ -5,19 +5,40 @@
 #include "MurkaTypes.h"
 
 class MurVbo {
+    vector<MurkaPoint> verts;
+    vector<MurkaPoint> texCoords;
+    int usage = 0;
+
 public:
-    MurVbo(){};
-    
     ofVbo internal;
-    
+
+    MurVbo(){};
+
 	void setVertexData(MurkaPoint* verts, int total, int usage) {
-		internal.setVertexData(&verts[0].x, 2, total, usage, sizeof(MurkaPoint));
+        this->usage = usage;
+        this->verts.resize(total);
+        memcpy(this->verts.data(), verts, total * sizeof(MurkaPoint));
+
+        internal.setVertexData(&verts[0].x, 2, total, usage, sizeof(MurkaPoint));
 	}
 
-	void setTexCoordData(MurkaPoint* texCoords, int total, int usage) {
-		internal.setTexCoordData(&texCoords[0].x, total, usage, sizeof(MurkaPoint));
-	}
+    void setTexCoordData(MurkaPoint* texCoords, int total, int usage) {
+        this->usage = usage;
+        this->texCoords.resize(total);
+        memcpy(this->texCoords.data(), texCoords, total * sizeof(MurkaPoint));
 
+        internal.setTexCoordData(&texCoords[0].x, total, usage, sizeof(MurkaPoint));
+    }
+    
+    void update() {
+        internal.setVertexData(&this->verts[0].x, 2, this->verts.size(), this->usage, sizeof(MurkaPoint));
+        internal.setTexCoordData(&this->texCoords[0].x, this->texCoords.size(), this->usage, sizeof(MurkaPoint));
+    }
+    
+    void clear() {
+        internal.clear();
+    }
+    
 
     /* // THESE, but through Renderer (with the *Renderer argument)
      
