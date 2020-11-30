@@ -3,7 +3,7 @@
 #include "MurkaContextBase.h"
 #include "MurkaLinearLayoutGenerator.h"
 #include "MosaicLayout.h"
-
+#include "parallel_hashmap/phmap.h"
 
 #define MURKA_PARAMETER(typename, parameterType, parameterName, getterName, setterName, default) \
 parameterType parameterName = default; \
@@ -24,7 +24,7 @@ typedef std::tuple<int, std::string> imIdentifier_NEW;
 
 class ViewBase_NEW: public MurkaAnimator {
 public:
-    std::map<imIdentifier_NEW, ViewBase_NEW*> imChildren_NEW = std::map<imIdentifier_NEW, ViewBase_NEW*>();
+    phmap::flat_hash_map<imIdentifier_NEW, ViewBase_NEW*> imChildren_NEW = phmap::flat_hash_map<imIdentifier_NEW, ViewBase_NEW*>();
     
     ViewBase_NEW() {
     }

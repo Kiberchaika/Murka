@@ -105,7 +105,7 @@ public:
         return false;
     }
 
-    bool areChildrenHovered(MurkaContextBase & c) {
+    bool areChildrenHovered(const MurkaContextBase & c) {
         if (!c.isHovered()) {
             return false;
         }
@@ -592,7 +592,7 @@ T & drawWidget_NEW(MurkaContext &c, MurkaShape shape) {
     // TODO: fill the renderer and/or some other helper variables in the new widget object
     
     c.deferredView = widgetObject;
-    c.defferedViewDrawFunc = std::bind(&T::internal, (T*)widgetObject, std::placeholders::_1);
+    c.defferedViewDrawFunc = std::bind(&T::internalDraw, (T*)widgetObject, std::placeholders::_1);
     c.commitDeferredView();
 
     return *((T*)widgetObject);
