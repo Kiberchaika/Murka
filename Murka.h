@@ -79,7 +79,6 @@ public:
     MurkaContext getParentContext() {
         if (contextStack.size() == 0) {
             return MurkaContext();
-            throw ;
         }
         return contextStack[contextStack.size() - 1];
     }
@@ -328,7 +327,7 @@ public:
         MurkaViewHandler<Z>* newHandler = new MurkaViewHandler<Z>();
         
         newHandler->tParams = newHandler->castParameters(new typename Z::Parameters());
-        if ((parameters != NULL) && (newHandler->tParams != NULL)) {
+        if ((parameters != nullptr) && (newHandler->tParams != NULL)) {
             newHandler->tParams = newHandler->castParameters(parameters);
             newHandler->parametersInternal = newHandler->tParams;
         }

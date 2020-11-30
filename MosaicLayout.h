@@ -113,7 +113,7 @@ public:
                 return {0, yComponent};
             }
             
-        };
+        }
         
         if (upperThanAllFour(leftTopPointA, bottomRightPointB, leftTopPointB, rightTopPointB, bottomLeftPointB) &&
             lowerThanAllFour(bottomLeftPointA, bottomRightPointB, leftTopPointB, rightTopPointB, bottomLeftPointB) &&
@@ -142,14 +142,14 @@ public:
     
     inline MurkaPoint getMaxOverlappingVector(MurkaShape input) {
         bool badShape = false;
-        double maxOverlap = 0;
+        float maxOverlap = 0;
         MurkaPoint maxOverlappingVector;
         for (auto i: thisFrameShapes) {
             auto intersection = getIntersectionVector(input, i);
             
             MurkaPoint biggestIntersection = intersection * float(1);
-            
-            auto len = intersection.length();
+
+            const auto len = intersection.length();
             
             if (len > 0) {
                 badShape = true;
@@ -165,18 +165,18 @@ public:
     
     inline float overlapArea(MurkaShape s1, MurkaShape s2) {
      
-        double left = max(s1.position.x, s2.position.x);
-        double right = min(s1.position.x + s1.size.x, s2.position.x + s2.size.x);
-        double bottom = min(s1.position.y + s1.size.y, s2.position.y + s2.size.y);
-        double top = max(s1.position.y, s2.position.y);
+        float left = max(s1.position.x, s2.position.x);
+		float right = min(s1.position.x + s1.size.x, s2.position.x + s2.size.x);
+		float bottom = min(s1.position.y + s1.size.y, s2.position.y + s2.size.y);
+		float top = max(s1.position.y, s2.position.y);
 
         if ((left < right) && (top < bottom)) {
             return (right - left) * (bottom - top);
         } else return 0;
     }
     
-    inline double overlapAreaOfOneToAll(MurkaShape shape, vector<MurkaShape>& others) {
-        double sumOverlapArea = 0;
+    inline float overlapAreaOfOneToAll(MurkaShape shape, vector<MurkaShape>& others) {
+		float sumOverlapArea = 0;
         for (auto &j: others) {
             sumOverlapArea += overlapArea(shape, j);
         }

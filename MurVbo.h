@@ -12,14 +12,14 @@ class MurVbo {
 public:
     ofVbo internal;
 
-    MurVbo(){};
+    MurVbo(){}
 
-	void setVertexData(MurkaPoint* verts, int total, int usage) {
+	void setVertexData(MurkaPoint* _verts, int total, int usage) {
         this->usage = usage;
         this->verts.resize(total);
-        memcpy(this->verts.data(), verts, total * sizeof(MurkaPoint));
+        memcpy(this->verts.data(), _verts, total * sizeof(MurkaPoint));
 
-        internal.setVertexData(&verts[0].x, 2, total, usage, sizeof(MurkaPoint));
+        internal.setVertexData(&_verts[0].x, 2, total, usage, sizeof(MurkaPoint));
 	}
 
     void setTexCoordData(MurkaPoint* texCoords, int total, int usage) {

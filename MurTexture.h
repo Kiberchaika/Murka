@@ -4,7 +4,7 @@
 
 class MurTexture {
 public:
-    MurTexture(){};
+    MurTexture(){}
     
     ofTexture internal;
 };

@@ -245,7 +245,7 @@ public:
         draw(vbo, drawMode, first, total);
     }
 
-	virtual void drawPath(const vector<MurkaPoint> & verts)  {
+	virtual void drawPath(const vector<MurkaPoint> & verts) override {
 		ofPolyline polyline;
 		polyline.addVertices(*(const vector<glm::vec3>*)&verts);
 		ofRenderer->draw(polyline);
