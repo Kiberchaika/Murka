@@ -372,6 +372,164 @@ public:
 };
 
 
+
+class DropdownElementButton : public MurkaViewInterface<DropdownElementButton> {
+public:
+	MURKA_VIEW_DRAW_FUNCTION{
+
+		auto params = (Parameters*)parametersObject;
+		DropdownElementButton* thisWidget = (DropdownElementButton*)thisWidgetObject;
+
+		auto &castedResults = *(castResults(resultObject));
+
+		bool inside = context.isHovered() * !areChildrenHovered(context);
+
+		context.renderer->setColor(MurkaColor(90 / 255.0, 90 / 255.0, 90 / 255.0) * (0.8 + 0.2 * inside));
+		context.renderer->drawRectangle(0, 0, context.getSize().x, context.getSize().y);
+
+		if (justInitialised) {
+			justInitialised = false;
+			castedResults = false;
+			return;
+			// ^ ghetto way to prevent this button from activating right away
+		}
+
+		auto currentLastFrame = ofGetFrameNum();
+
+		context.renderer->setColor(255);
+		context.renderer->drawString(params->label, 10, 5);
+
+		if ((currentLastFrame - lastFrameItWasRendered) <= 1) { // only allow clicking if it was rendered at last frame - to avoid instant clicks in overlays
+			if ((context.mouseDownPressed[0]) && (inside)) {
+				// click if it's not the same frame it was shown
+				ofLog() << "btn pressd. justInitialised? " << justInitialised;
+				castedResults = true;
+
+				return;
+			}
+		}
+
+		lastFrameItWasRendered = currentLastFrame;
+
+		castedResults = false;
+		return;
+	};
+
+
+
+	struct Parameters {
+		string label;
+
+		Parameters() {}
+		Parameters(string Label) {
+			label = Label;
+		}
+	};
+
+	uint64_t lastFrameItWasRendered = -1;
+
+	// The results type, you also need to define it even if it's nothing.
+	typedef bool Results;
+
+	Results* castResults(void* results) {
+		auto resultsPointer = (Results*)results;
+		return resultsPointer;
+	}
+
+	bool justInitialised = true;
+
+};
+
+
+class DropdownButton : public MurkaViewInterface<DropdownButton> {
+public:
+	MURKA_VIEW_DRAW_FUNCTION{
+
+		auto params = (Parameters*)parametersObject;
+		DropdownButton* thisWidget = (DropdownButton*)thisWidgetObject;
+		auto &castedResults = *(castResults(resultObject));
+
+		bool inside = context.isHovered() * !areChildrenHovered(context);
+
+		int* intToControl = ((int*)dataToControl);
+
+		context.renderer->setColor(MurkaColor(90 / 255.0, 90 / 255.0, 90 / 255.0) * (0.5 + 0.3 * inside));
+		context.renderer->drawRectangle(0, 0, context.getSize().x, context.getSize().y);
+
+		if ((context.mouseDownPressed[0]) && (inside)) {
+			if (!showingTheDropdown) {
+				showingTheDropdown = true;
+			}
+		}
+
+		if (!initialised) {
+			initialised = true;
+			selectedOption = params->selectedOption;
+		}
+
+		options = params->options;
+
+		context.renderer->setColor(MurkaColor(66 / 255.0, 67 / 255.0, 71 / 255.0) * 3.2);
+		context.renderer->drawString(options[selectedOption], 5, 5);
+
+		if (showingTheDropdown) {
+			contextPosition = context.currentViewShape.position;
+			context.addOverlay([&]() {
+				//                         ofLog() << context.currentViewShape.position.x;
+				for (int i = 0; i < options.size(); i++) {
+					std::string buttonLabel = options[i];
+					if (
+						drawWidget<DropdownElementButton>(context, {buttonLabel.c_str()}, {contextPosition.x, contextPosition.y + 30 * i, 150, 30})) {
+						ofLog() << i << " pressed";
+						showingTheDropdown = false;
+						changedSelection = true;
+						selectedOption = i;
+					}
+				}
+			}, thisWidgetObject);
+
+		}
+
+		castedResults = changedSelection;
+		if (changedSelection) {
+			*intToControl = selectedOption;
+			changedSelection = false;
+		}
+	};
+
+	struct Parameters {
+		vector<string> options;
+		int selectedOption;
+
+		Parameters() {}
+		Parameters(vector<string> Options, int SelectedOption) {
+			options = Options;
+			selectedOption = SelectedOption;
+		}
+	};
+
+	// The results type, you also need to define it even if it's nothing.
+	typedef bool Results;
+
+	Results* castResults(void* results) {
+		auto resultsPointer = (Results*)results;
+		return resultsPointer;
+	}
+
+	MurkaPoint contextPosition = { 0,0 };
+
+	bool initialised = false;
+
+	bool showingTheDropdown = false;
+
+	bool changedSelection = false;
+	
+	int selectedOption = 0;
+
+	vector<string> options;
+};
+
+
 class BlankPanel : public MurkaViewInterface<BlankPanel> {
 public:
     MURKA_VIEW_DRAW_FUNCTION  {
