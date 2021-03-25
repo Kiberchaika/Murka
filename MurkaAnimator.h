@@ -50,7 +50,7 @@ public:
         } else {
             // not found, creating
             animationsMap[AIndex + 1] = double(X);
-            ofLog() << "c!...";
+            std::cout << "c!...";
         }
         
         AIndex++;

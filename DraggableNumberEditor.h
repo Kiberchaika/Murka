@@ -23,9 +23,8 @@ public:
         float monospaceSymbolWidth = float(font->stringWidth("x"));
         int highlightedNumber = (context.mousePosition.x - float(10)) / monospaceSymbolWidth;
 
-#ifdef MURKA_OF
 
-        std::string numberString = ofToString(*numberData, params->floatPrecision);
+        std::string numberString = to_string_with_precision(*numberData, params->floatPrecision);
         int dotIndex = numberString.size();
         for (int i = 0; i < numberString.size(); i++) {
             if (numberString[i] == '.') {
@@ -38,33 +37,33 @@ public:
         
 
         MurkaColor c = context.renderer->getColor();
-        ofColor bgColor = context.renderer->getColor();
-        ofColor fgColor = context.renderer->getColor();
+		MurkaColor bgColor = context.renderer->getColor();
+		MurkaColor fgColor = context.renderer->getColor();
         
-        ofPushStyle();
-        ofFill();
-        ofSetColor(bgColor);
-        ofDrawRectangle(0, 0, context.getSize().x, context.getSize().y);
-        ofNoFill();
-        ofSetColor(inside ? fgColor : fgColor / 2);
-        if (activated) ofSetColor(fgColor * 1.2);
-        ofDrawRectangle(1, 1, context.getSize().x-2, context.getSize().y-2);
+		context.renderer->pushStyle();
+		context.renderer->enableFill();
+		context.renderer->setColor(bgColor);
+		context.renderer->drawRectangle(0, 0, context.getSize().x, context.getSize().y);
+		context.renderer->disableFill();
+		context.renderer->setColor(inside ? fgColor : fgColor / 2);
+        if (activated) context.renderer->setColor(fgColor * 1.2);
+		context.renderer->drawRectangle(1, 1, context.getSize().x-2, context.getSize().y-2);
 
-        font->drawString(ofToString(*numberData, params->floatPrecision), 10, 22);
+        font->drawString(to_string_with_precision(*numberData, params->floatPrecision), 10, 22);
 
-        ofNoFill();
+		context.renderer->disableFill();
         if ((inside || dragging) && (highlightedNumber != -1)) {
             if (!dragging) {
-                ofDrawLine(10 + highlightedNumber * monospaceSymbolWidth, 28,
+				context.renderer->drawLine(10 + highlightedNumber * monospaceSymbolWidth, 28,
                            10 + highlightedNumber * monospaceSymbolWidth + monospaceSymbolWidth, 28);
             } else {
-                ofDrawLine(10 + draggingNubmerIndex * monospaceSymbolWidth, 28,
+				context.renderer->drawLine(10 + draggingNubmerIndex * monospaceSymbolWidth, 28,
                            10 + draggingNubmerIndex * monospaceSymbolWidth + monospaceSymbolWidth, 28);
             }
         }
-        ofFill();
-        ofPopStyle();
-#endif
+		context.renderer->enableFill();
+		context.renderer->popStyle();
+
 
         // text editing logic
         
@@ -76,11 +75,11 @@ public:
 
         if (inside && context.mouseDownPressed[0] && (!thisWidget->dragging)) {
             draggingNubmerIndex = highlightedNumber;
-            std::string numberString = ofToString(*numberData, params->floatPrecision);
+            std::string numberString = to_string_with_precision(*numberData, params->floatPrecision);
             if (draggingNubmerIndex < dotIndex) {
-                changeScale = 1. / pow(0.1, dotIndex - draggingNubmerIndex - 1);
+                changeScale = 1. / powf(0.1, dotIndex - draggingNubmerIndex - 1);
             } else {
-                changeScale = 1. / pow(0.1, dotIndex - draggingNubmerIndex);
+                changeScale = 1. / powf(0.1, dotIndex - draggingNubmerIndex);
             }
             dragging = true;
         }

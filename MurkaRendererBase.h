@@ -72,8 +72,8 @@ public:
     virtual void setColor(int gray, int _a) = 0; // 0-255
 
     virtual void clear() = 0;
-    virtual void clear(float r, float g, float b, float a=0) = 0;
-    virtual void clear(float brightness, float a=0) = 0;
+	virtual void clear(int r, int g, int b, int a = 0) = 0;
+	virtual void clear(int gray, int a = 0) = 0;
 
     virtual void drawRectangle(MurkaShape s) = 0;
 	virtual void drawRectangle(float x, float y, float w, float h) = 0;
@@ -85,4 +85,10 @@ public:
 	virtual int getWindowWidth() = 0;
 	virtual int getWindowHeight() = 0;
 
+	virtual bool getUsingArbTex() = 0;
+	virtual void disableArbTex() = 0;
+	virtual void enableArbTex() = 0;
+
+	virtual uint64_t getFrameNum() = 0;
+	virtual float getElapsedTime() = 0;
 };

@@ -70,9 +70,7 @@ public:
         if (font == NULL) {
             return DEFAULT_LINE_HEIGHT;
         } else {
-#ifdef MURKA_OF
             return font->getLineHeight();
-#endif
         }
     }
 };

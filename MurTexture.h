@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef MURKA_OF
+#if defined(MURKA_OF)
 
 class MurTexture {
 public:
@@ -9,11 +9,14 @@ public:
     ofTexture internal;
 };
 
-#else // Default version
+#elif defined(MURKA_JUCE)
 
-class MurTexture {
+#include "MurImage.h"
+
+class MurTexture : public MurImage {
 public:
-    MurImage(){};
+	MurTexture(){};
 };
 
+#else // Default version
 #endif

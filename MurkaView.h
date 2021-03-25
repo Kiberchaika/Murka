@@ -63,11 +63,11 @@ public:
         children.clear();
     }
     
-    MurkaShape childrenBounds = {std::numeric_limits<float>::max(), std::numeric_limits<float>::max(),
+    MurkaShape childrenBounds = {(std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)(),
                                  0, 0};
     
     void resetChildrenBounds() {
-        childrenBounds = {std::numeric_limits<float>::max(), std::numeric_limits<float>::max(),
+        childrenBounds = { (std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)(),
             0, 0};
     }
     
@@ -172,7 +172,7 @@ public:
 //    };
     
     virtual MURKA_VIEW_DRAW_FUNCTION {
-        ofLog() << "drawing an empty func...";
+        std::cout << "drawing an empty func...";
     }
     
     struct Parameters {};
@@ -233,15 +233,15 @@ public:
             // Updating children bounds
             if (parentWidget->childrenBounds.position.x > widget->shape.position.x) {
                 parentWidget->childrenBounds.position.x = widget->shape.position.x;
-//                ofLog() << "updated cb x (2) to " << shape.position.x;
+//                std::cout << "updated cb x (2) to " << shape.position.x;
             }
             if (parentWidget->childrenBounds.position.y > widget->shape.position.y) {
                 parentWidget->childrenBounds.position.y = widget->shape.position.y;
-//                ofLog() << "updated cb y (2) to " << shape.position.y;
+//                std::cout << "updated cb y (2) to " << shape.position.y;
             }
             if ((parentWidget->childrenBounds.size.x + parentWidget->childrenBounds.position.x) < (widget->shape.position.x + widget->shape.size.x)) {
                 parentWidget->childrenBounds.size.x = widget->shape.position.x + widget->shape.size.x - parentWidget->childrenBounds.position.x;
-//                ofLog() << "updated cb sx (2) to " << parentWidget->childrenBounds.size.x;
+//                std::cout << "updated cb sx (2) to " << parentWidget->childrenBounds.size.x;
             }
             
             if ((parentWidget->childrenBounds.size.y + parentWidget->childrenBounds.position.y) < widget->shape.position.y + widget->shape.size.y) {
@@ -267,15 +267,15 @@ public:
             // basically informing parent widget of how much space does its children occupy)
             if (parentWidget->childrenBounds.position.x > shape.position.x) {
                 parentWidget->childrenBounds.position.x = shape.position.x;
-//                ofLog() << "updated cb x (1) to " << shape.position.x;
+//                std::cout << "updated cb x (1) to " << shape.position.x;
             }
             if (parentWidget->childrenBounds.position.y > shape.position.y) {
                 parentWidget->childrenBounds.position.y = shape.position.y;
-//                ofLog() << "updated cb y (1) to " << shape.position.y;
+//                std::cout << "updated cb y (1) to " << shape.position.y;
             }
             if ((parentWidget->childrenBounds.size.x + parentWidget->childrenBounds.position.x) < (shape.position.x + shape.size.x)) {
                 parentWidget->childrenBounds.size.x = shape.position.x + shape.size.x - parentWidget->childrenBounds.position.x;
-//                ofLog() << "updated cb sx (2) to " << parentWidget->childrenBounds.size.x;
+//                std::cout << "updated cb sx (2) to " << parentWidget->childrenBounds.size.x;
             }
             
             if ((parentWidget->childrenBounds.size.y + parentWidget->childrenBounds.position.y) < (shape.position.y + shape.size.y)) {

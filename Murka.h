@@ -213,14 +213,13 @@ public:
         currentContext.murkaView = this;
         currentContext.overlayHolder = this;
         
-#ifdef MURKA_OF
         currentContext.currentViewShape = MurkaShape{0,
                                                   0,
                                                   float(getWindowWidth()),
                                                   float(getWindowHeight())};
 //        currentContext.currentViewShape = currentContext.rootViewShape;
-#endif
-        currentContext.pushContextInternal = [&](MurkaViewHandlerInternal* mvhi) {
+
+		currentContext.pushContextInternal = [&](MurkaViewHandlerInternal* mvhi) {
             pushContext(mvhi);
         };
         

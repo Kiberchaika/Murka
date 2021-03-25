@@ -210,7 +210,15 @@ public:
 #define ATTEMPTS_AT_EACH_STAGE 5
     
     vector<MurkaShape> compactnessShapes;
-    
+
+	float noise(int x, int y) {
+		int n;
+
+		n = x + y * 57;
+		n = (n << 13) ^ n;
+		return (1.0 - ((n * ((n * n * 15731) + 789221) + 1376312589) & 0x7fffffff) / 1073741824.0);
+	}
+
     MurkaShape fit(MurkaShape input, int depth = 25, int compactnessDepth = 10, int compactnessSteps = 3) {
         // 1. Search for shape options until we reach at aleast one 0 overlap option
         // if 1 cycle is not enough, try once more, up until the depth is reached
@@ -232,8 +240,9 @@ public:
                     thisStageAttempts[i]  = input.position;
                 } else {
                 
-                    thisStageAttempts[i] = MurkaPoint((ofNoise(thisFrameShapes.size() + float(i / 5.)) * 2. - 1.) * input.size.length() * stage,
-                                                      (ofNoise(thisFrameShapes.size() + float(i / 5.) + 25) * 2. - 1.) * input.size.length() * stage) + input.position;
+					
+                    thisStageAttempts[i] = MurkaPoint((noise(thisFrameShapes.size() + float(i / 5.), 0) * 2. - 1.) * input.size.length() * stage,
+                                                      (noise(thisFrameShapes.size() + float(i / 5.) + 25, 0) * 2. - 1.) * input.size.length() * stage) + input.position;
                 }
                     
                 fitToOuterBounds(thisStageAttempts[i], input);
