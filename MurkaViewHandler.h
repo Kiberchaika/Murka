@@ -10,9 +10,9 @@ namespace murka {
 // Murka itself manages allocating memory for all of those
 
 struct MurkaViewHandlerInternal {
-    void* parametersInternal = NULL;
-    void* resultsInternal = NULL;
-    void* dataToControl = NULL;
+    void* parametersInternal = nullptr;
+    void* resultsInternal = nullptr;
+    void* dataToControl = nullptr;
     void* widgetObjectInternal;
     
     

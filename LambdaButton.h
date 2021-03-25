@@ -21,7 +21,7 @@ public:
 
                 castedResults = params->lambda(context, this);
 
-    };
+    }
     
     bool wantsClicks() override {
         return true;

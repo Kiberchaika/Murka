@@ -113,7 +113,7 @@ public:
                 return {0, yComponent};
             }
             
-        };
+        }
         
         if (upperThanAllFour(leftTopPointA, bottomRightPointB, leftTopPointB, rightTopPointB, bottomLeftPointB) &&
             lowerThanAllFour(bottomLeftPointA, bottomRightPointB, leftTopPointB, rightTopPointB, bottomLeftPointB) &&
@@ -142,14 +142,14 @@ public:
     
     inline MurkaPoint getMaxOverlappingVector(MurkaShape input) {
         bool badShape = false;
-        double maxOverlap = 0;
+        float maxOverlap = 0;
         MurkaPoint maxOverlappingVector;
         for (auto i: thisFrameShapes) {
             auto intersection = getIntersectionVector(input, i);
             
             MurkaPoint biggestIntersection = intersection * float(1);
-            
-            auto len = intersection.length();
+
+            const auto len = intersection.length();
             
             if (len > 0) {
                 badShape = true;
@@ -165,10 +165,10 @@ public:
     
     inline float overlapArea(MurkaShape s1, MurkaShape s2) {
      
-        double left = max(s1.position.x, s2.position.x);
-        double right = min(s1.position.x + s1.size.x, s2.position.x + s2.size.x);
-        double bottom = min(s1.position.y + s1.size.y, s2.position.y + s2.size.y);
-        double top = max(s1.position.y, s2.position.y);
+        float left = max(s1.position.x, s2.position.x);
+		float right = min(s1.position.x + s1.size.x, s2.position.x + s2.size.x);
+		float bottom = min(s1.position.y + s1.size.y, s2.position.y + s2.size.y);
+		float top = max(s1.position.y, s2.position.y);
 
         if ((left < right) && (top < bottom)) {
             return (right - left) * (bottom - top);
@@ -210,7 +210,15 @@ public:
 #define ATTEMPTS_AT_EACH_STAGE 5
     
     vector<MurkaShape> compactnessShapes;
-    
+
+	float noise(int x, int y) {
+		int n;
+
+		n = x + y * 57;
+		n = (n << 13) ^ n;
+		return (1.0 - ((n * ((n * n * 15731) + 789221) + 1376312589) & 0x7fffffff) / 1073741824.0);
+	}
+
     MurkaShape fit(MurkaShape input, int depth = 25, int compactnessDepth = 10, int compactnessSteps = 3) {
         // 1. Search for shape options until we reach at aleast one 0 overlap option
         // if 1 cycle is not enough, try once more, up until the depth is reached
@@ -232,8 +240,9 @@ public:
                     thisStageAttempts[i]  = input.position;
                 } else {
                 
-                    thisStageAttempts[i] = MurkaPoint((ofNoise(thisFrameShapes.size() + float(i / 5.)) * 2. - 1.) * input.size.length() * stage,
-                                                      (ofNoise(thisFrameShapes.size() + float(i / 5.) + 25) * 2. - 1.) * input.size.length() * stage) + input.position;
+					
+                    thisStageAttempts[i] = MurkaPoint((noise(thisFrameShapes.size() + float(i / 5.), 0) * 2. - 1.) * input.size.length() * stage,
+                                                      (noise(thisFrameShapes.size() + float(i / 5.) + 25, 0) * 2. - 1.) * input.size.length() * stage) + input.position;
                 }
                     
                 fitToOuterBounds(thisStageAttempts[i], input);

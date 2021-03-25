@@ -33,12 +33,12 @@ public:
     }
     
     std::pair<MurkaShape, MurkaPoint> getCroppedViewport(MurkaShape parent, MurkaShape view) const {
-        MurkaPoint pos = {std::max(parent.position.x + view.position.x, parent.position.x),
-                          std::max(parent.position.y + view.position.y, parent.position.y)};
+        MurkaPoint pos = {(std::max)(parent.position.x + view.position.x, parent.position.x),
+						  (std::max)(parent.position.y + view.position.y, parent.position.y)};
         MurkaPoint negativePosition = {view.position.x < 0 ? view.position.x : 0,
                                        view.position.y < 0 ? view.position.y : 0};
-        MurkaPoint size = {std::min(view.size.x + negativePosition.x, parent.size.x - view.position.x),
-                           std::min(view.size.y + negativePosition.y, parent.size.y - view.position.y)};
+        MurkaPoint size = {(std::min)(view.size.x + negativePosition.x, parent.size.x - view.position.x),
+						   (std::min)(view.size.y + negativePosition.y, parent.size.y - view.position.y)};
         
         if ((view.position.x > parent.size.x) ||
             (view.position.y > parent.size.y) ||
@@ -71,7 +71,6 @@ public:
         if (viewport.size.y <= 0) {
             return false;
         }
-#ifdef MURKA_OF
         
 		renderer->pushView();
 		renderer->viewport(viewport.position.x, viewport.position.y, viewport.size.x, viewport.size.y);
@@ -79,17 +78,13 @@ public:
 		renderer->pushMatrix();
 		renderer->translate(offset.x, offset.y, 0); // this is needed to crop the
         // views that are only partly visible
-#endif
         
         return true;
     }
     
     void transformTheRenderBackFromThisContextShape() const {
-#ifdef MURKA_OF
-        
 		renderer->popMatrix();
 		renderer->popView();
-#endif
     }
     
     // Utility function to substitute the matrix for the viewport to occlude

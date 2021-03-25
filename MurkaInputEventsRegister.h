@@ -79,9 +79,6 @@ public:
                 ofAddListener(ofxMacTrackpad::multitouch, this, &MurkaInputEventsRegister::didMultitouch);
 
                 ofxMacTrackpad::startListening();
-                
-                ofSetBackgroundAuto(true);
-
         #endif // TARGET_OSX - trackpad
         
     #endif // MURKA_OF

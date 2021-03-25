@@ -29,9 +29,9 @@ public:
             // found this one
             animationsMap[AIndex + 1].target = double(X);
             if (animationsMap[AIndex + 1].target > animationsMap[AIndex + 1].value) {
-                animationsMap[AIndex + 1].value += (animationsMap[AIndex + 1].target - animationsMap[AIndex + 1].value) / 10;
+                animationsMap[AIndex + 1].value += (animationsMap[AIndex + 1].target - animationsMap[AIndex + 1].value) / 5;
             } else {
-                animationsMap[AIndex + 1].value -= (animationsMap[AIndex + 1].value - animationsMap[AIndex + 1].target) / 10;
+                animationsMap[AIndex + 1].value -= (animationsMap[AIndex + 1].value - animationsMap[AIndex + 1].target) / 5;
             }
         } else {
             animationsMap[AIndex + 1] = AnimationData(double(X), double(X));
@@ -50,7 +50,7 @@ public:
         } else {
             // not found, creating
             animationsMap[AIndex + 1] = double(X);
-            ofLog() << "c!...";
+            std::cout << "c!...";
         }
         
         AIndex++;

@@ -29,11 +29,11 @@ public:
             font->drawString(params->label, 5, 5);
         }
         if (params->alignment == TEXT_CENTER) {
-            float textX = 5 + (shape.size.x - 10) / 2 - font->getStringBoundingBox(params->label, 0, 0).getWidth() / 2;
+            float textX = 5 + (shape.size.x - 10) / 2 - font->getStringBoundingBox(params->label, 0, 0).width / 2;
             font->drawString(params->label, textX, 5);
         }
         if (params->alignment == TEXT_RIGHT) {
-            float textX = (shape.size.x - 10) - font->getStringBoundingBox(params->label, 0, 0).getWidth();
+            float textX = (shape.size.x - 10) - font->getStringBoundingBox(params->label, 0, 0).width;
             font->drawString(params->label, textX, 5);
         }
     };
@@ -66,6 +66,145 @@ public:
             alignment = align;
             color = color_;
             customColor = true;
+        } // a convenience initializer
+    };
+    
+    // The results type, you also need to define it even if it's nothing.
+    typedef bool Results;
+    
+    virtual bool wantsClicks() override { return false; } // override this if you want to signal that you don't want clicks
+
+};
+    
+class Label : public MurkaViewInterface<Label> {
+public:
+    MURKA_VIEW_DRAW_FUNCTION  {
+        
+        auto params = (Parameters*)parametersObject;
+        
+        bool inside = context.isHovered() * !areChildrenHovered(context);
+        
+        auto font = context.getCurrentFont();
+        if (params->customFont) {
+            font = params->font;
+        }
+        
+		MurkaColor bgColor = params->backgroundColor;
+        context.renderer->enableFill();
+        if (bgColor.a != 0.0) {
+            context.renderer->setColor(bgColor);
+            if (params->alignment == TEXT_LEFT) {
+                context.renderer->drawRectangle(0, 0, font->getStringBoundingBox(params->label, 0, 0).width + 10, context.getSize().y);
+            }
+        }
+		MurkaColor fgColor = params->customColor ? params->color : context.renderer->getColor();
+        context.renderer->setColor(fgColor);
+        if (params->alignment == TEXT_LEFT) {
+            font->drawString(params->label, 5, 0);
+        }
+        if (params->alignment == TEXT_CENTER) {
+            float textX = 5 + (shape.size.x - 10) / 2 - font->getStringBoundingBox(params->label, 0, 0).width  / 2;
+            font->drawString(params->label, textX, 0);
+        }
+        if (params->alignment == TEXT_RIGHT) {
+            float textX = (shape.size.x - 10) - font->getStringBoundingBox(params->label, 0, 0).width;
+            font->drawString(params->label, textX, 0);
+        }
+        
+        // Testing vertical centering
+            //context.renderer->setColor(255);
+            //ofDrawLine(0, 0, context.getSize().x, 0);
+            //context.renderer->setColor(255, 0, 0);
+            //ofDrawLine(0, context.getSize().y / 2, context.getSize().x, context.getSize().y / 2);
+            //context.renderer->setColor(255);
+            //ofDrawLine(0, context.getSize().y, context.getSize().x, context.getSize().y);
+    };
+    
+    // Here go parameters and any parameter convenience constructors. You need to define something called Parameters, even if it's NULL.
+    struct Parameters {
+        std::string label;
+        TextAlignment alignment = TEXT_LEFT;
+        
+        MurkaColor color = {0.98, 0.98, 0.98};
+		MurkaColor backgroundColor = {0., 0., 0., 0.};
+        
+        FontObject* font;
+        
+        bool customColor = false;
+        bool customFont = false;
+        
+        Parameters() {}
+        Parameters(std::string labelText) { label = labelText; } // a convenience initializer
+        Parameters(std::string labelText, MurkaColor color_) {
+            label = labelText;
+            color = color_;
+            customColor = true;
+        } // a convenience initializer
+        
+		Parameters(std::string labelText, MurkaColor color_, MurkaColor backgroundColor_) {
+			label = labelText;
+			color = color_;
+			customColor = true;
+			backgroundColor = backgroundColor_;
+		} // a convenience initializer
+
+		Parameters(std::string labelText, MurkaColor color_, MurkaColor backgroundColor_, TextAlignment align) {
+			label = labelText;
+			color = color_;
+			customColor = true;
+			backgroundColor = backgroundColor_;
+			alignment = align;
+		} // a convenience initializer
+
+		Parameters(std::string labelText, TextAlignment align) {
+            label = labelText;
+            alignment = align;
+        } // a convenience initializer
+        
+        Parameters(std::string labelText, MurkaColor color_, TextAlignment align) {
+            label = labelText;
+            alignment = align;
+            color = color_;
+            customColor = true;
+        } // a convenience initializer
+        
+        // Custom font initializers
+        Parameters(std::string labelText, FontObject* CustomFont) {
+            label = labelText;
+            font = CustomFont;
+            customFont = true;
+        } // a convenience initializer
+        Parameters(std::string labelText, FontObject* CustomFont, MurkaColor color_) {
+            label = labelText;
+            color = color_;
+            customColor = true;
+            font = CustomFont;
+            customFont = true;
+        } // a convenience initializer
+        
+        Parameters(std::string labelText, FontObject* CustomFont, MurkaColor color_, MurkaColor backgroundColor_) {
+            label = labelText;
+            color = color_;
+            customColor = true;
+            backgroundColor = backgroundColor_;
+            font = CustomFont;
+            customFont = true;
+        } // a convenience initializer
+        
+        Parameters(std::string labelText, FontObject* CustomFont, TextAlignment align) {
+            label = labelText;
+            alignment = align;
+            font = CustomFont;
+            customFont = true;
+        } // a convenience initializer
+        
+        Parameters(std::string labelText, FontObject* CustomFont, MurkaColor color_, TextAlignment align) {
+            label = labelText;
+            alignment = align;
+            color = color_;
+            customColor = true;
+            font = CustomFont;
+            customFont = true;
         } // a convenience initializer
     };
     
@@ -261,6 +400,164 @@ public:
 };
 
 
+
+class DropdownElementButton : public MurkaViewInterface<DropdownElementButton> {
+public:
+	MURKA_VIEW_DRAW_FUNCTION{
+
+		auto params = (Parameters*)parametersObject;
+		DropdownElementButton* thisWidget = (DropdownElementButton*)thisWidgetObject;
+
+		auto &castedResults = *(castResults(resultObject));
+
+		bool inside = context.isHovered() * !areChildrenHovered(context);
+
+		context.renderer->setColor(MurkaColor(90 / 255.0, 90 / 255.0, 90 / 255.0) * (0.8 + 0.2 * inside));
+		context.renderer->drawRectangle(0, 0, context.getSize().x, context.getSize().y);
+
+		if (justInitialised) {
+			justInitialised = false;
+			castedResults = false;
+			return;
+			// ^ ghetto way to prevent this button from activating right away
+		}
+
+		auto currentLastFrame = context.renderer->getFrameNum();
+
+		context.renderer->setColor(255);
+		context.renderer->drawString(params->label, 10, 5);
+
+		if ((currentLastFrame - lastFrameItWasRendered) <= 1) { // only allow clicking if it was rendered at last frame - to avoid instant clicks in overlays
+			if ((context.mouseDownPressed[0]) && (inside)) {
+				// click if it's not the same frame it was shown
+				std::cout << "btn pressd. justInitialised? " << justInitialised;
+				castedResults = true;
+
+				return;
+			}
+		}
+
+		lastFrameItWasRendered = currentLastFrame;
+
+		castedResults = false;
+		return;
+	};
+
+
+
+	struct Parameters {
+		string label;
+
+		Parameters() {}
+		Parameters(string Label) {
+			label = Label;
+		}
+	};
+
+	uint64_t lastFrameItWasRendered = -1;
+
+	// The results type, you also need to define it even if it's nothing.
+	typedef bool Results;
+
+	Results* castResults(void* results) {
+		auto resultsPointer = (Results*)results;
+		return resultsPointer;
+	}
+
+	bool justInitialised = true;
+
+};
+
+
+class DropdownButton : public MurkaViewInterface<DropdownButton> {
+public:
+	MURKA_VIEW_DRAW_FUNCTION{
+
+		auto params = (Parameters*)parametersObject;
+		DropdownButton* thisWidget = (DropdownButton*)thisWidgetObject;
+		auto &castedResults = *(castResults(resultObject));
+
+		bool inside = context.isHovered() * !areChildrenHovered(context);
+
+		int* intToControl = ((int*)dataToControl);
+
+		context.renderer->setColor(MurkaColor(90 / 255.0, 90 / 255.0, 90 / 255.0) * (0.5 + 0.3 * inside));
+		context.renderer->drawRectangle(0, 0, context.getSize().x, context.getSize().y);
+
+		if ((context.mouseDownPressed[0]) && (inside)) {
+			if (!showingTheDropdown) {
+				showingTheDropdown = true;
+			}
+		}
+
+		if (!initialised) {
+			initialised = true;
+			selectedOption = params->selectedOption;
+		}
+
+		options = params->options;
+
+		context.renderer->setColor(MurkaColor(66 / 255.0, 67 / 255.0, 71 / 255.0) * 3.2);
+		context.renderer->drawString(options[selectedOption], 5, 5);
+
+		if (showingTheDropdown) {
+			contextPosition = context.currentViewShape.position;
+			context.addOverlay([&]() {
+				//                         ofLog() << context.currentViewShape.position.x;
+				for (int i = 0; i < options.size(); i++) {
+					std::string buttonLabel = options[i];
+					if (
+						drawWidget<DropdownElementButton>(context, {buttonLabel.c_str()}, {contextPosition.x, contextPosition.y + 30 * i, 150, 30})) {
+						std::cout << i << " pressed";
+						showingTheDropdown = false;
+						changedSelection = true;
+						selectedOption = i;
+					}
+				}
+			}, thisWidgetObject);
+
+		}
+
+		castedResults = changedSelection;
+		if (changedSelection) {
+			*intToControl = selectedOption;
+			changedSelection = false;
+		}
+	};
+
+	struct Parameters {
+		vector<string> options;
+		int selectedOption;
+
+		Parameters() {}
+		Parameters(vector<string> Options, int SelectedOption) {
+			options = Options;
+			selectedOption = SelectedOption;
+		}
+	};
+
+	// The results type, you also need to define it even if it's nothing.
+	typedef bool Results;
+
+	Results* castResults(void* results) {
+		auto resultsPointer = (Results*)results;
+		return resultsPointer;
+	}
+
+	MurkaPoint contextPosition = { 0,0 };
+
+	bool initialised = false;
+
+	bool showingTheDropdown = false;
+
+	bool changedSelection = false;
+	
+	int selectedOption = 0;
+
+	vector<string> options;
+};
+
+
 class BlankPanel : public MurkaViewInterface<BlankPanel> {
 public:
     MURKA_VIEW_DRAW_FUNCTION  {
@@ -380,7 +677,6 @@ public:
         
          auto font = context.getCurrentFont();
         
-         #ifdef MURKA_OF
         
              float pushed = 0.2 - (context.getRunningTime() - lastTimeClicked);
              if (pushed < 0) pushed = 0;
@@ -397,7 +693,8 @@ public:
              context.renderer->drawRectangle(0, 0, context.getSize().x, context.getSize().y);
         
              context.renderer->setColor(255);
-        
+			 context.renderer->drawRectangle(0, 0, 2,2);
+
              float offset = (font->stringWidth(parameters->label) / 2);
         
 			 font->drawString(parameters->label, context.getSize().x / 2 - offset, context.getSize().y / 2 - font->getLineHeight() / 2);
@@ -408,7 +705,6 @@ public:
 
              auto label = ((Parameters*)parametersObject)->label;
         
-         #endif // MURKA_OF
         
     };
     
@@ -519,7 +815,7 @@ public:
 
         context.renderer->setColor(inside ? fgColor : fgColor / 2);
         auto label = ((Parameters*)parametersObject)->label;
-        auto resultString = label + ": " + ofToString(*((float*)dataToControl));
+        auto resultString = label + ": " + to_string(*((float*)dataToControl));
         
         
         float offset = font->stringWidth(resultString) / 2;

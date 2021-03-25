@@ -79,7 +79,6 @@ public:
     MurkaContext getParentContext() {
         if (contextStack.size() == 0) {
             return MurkaContext();
-            throw ;
         }
         return contextStack[contextStack.size() - 1];
     }
@@ -140,20 +139,24 @@ public:
         currentContext.transformTheRenderBackFromThisContextShape();
     }
     
-    View* keyboardFocusHaver = NULL;
+    View* keyboardFocusHaver = nullptr;
     
     void setKeyboardFocusHaver(View* newOwner) {
         keyboardFocusHaver = newOwner;
     }
     
     bool allowedToUseKeyboard(View* asker) {
-        return ((keyboardFocusHaver == asker) || (keyboardFocusHaver == NULL));
+        return ((keyboardFocusHaver == asker) || (keyboardFocusHaver == nullptr));
     }
     
     void resetKeyboardFocus(View* asker) {
         if (asker == keyboardFocusHaver) {
-            keyboardFocusHaver = NULL;
+            keyboardFocusHaver = nullptr;
         }
+    }
+    
+    bool doesHaveAWidgetThatHoldsKeyboardFocus() {
+        return keyboardFocusHaver != nullptr;
     }
     
     int getMaxHoverIndex() {
@@ -238,14 +241,13 @@ public:
         currentContext.linkedView_NEW = this;
         currentContext.overlayHolder = this;
         
-#ifdef MURKA_OF
         currentContext.currentViewShape = MurkaShape{0,
                                                   0,
                                                   float(getWindowWidth()),
                                                   float(getWindowHeight())};
 //        currentContext.currentViewShape = currentContext.rootViewShape;
-#endif
-        currentContext.pushContextInternal = [&](MurkaViewHandlerInternal* mvhi) {
+
+		currentContext.pushContextInternal = [&](MurkaViewHandlerInternal* mvhi) {
             pushContext(mvhi);
         };
 
@@ -368,7 +370,7 @@ public:
         MurkaViewHandler<Z>* newHandler = new MurkaViewHandler<Z>();
         
         newHandler->tParams = newHandler->castParameters(new typename Z::Parameters());
-        if ((parameters != NULL) && (newHandler->tParams != NULL)) {
+        if ((parameters != nullptr) && (newHandler->tParams != NULL)) {
             newHandler->tParams = newHandler->castParameters(parameters);
             newHandler->parametersInternal = newHandler->tParams;
         }

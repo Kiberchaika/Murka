@@ -3,26 +3,61 @@
 enum TextAlignment {TEXT_LEFT, TEXT_CENTER, TEXT_RIGHT};
 
 
-#ifdef MURKA_OF
+#if defined(MURKA_OF)
 #include "ofMain.h"
+#else defined(MURKA_JUCE)
+
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
+#else
+#include <windows.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
+#endif
+
+#include <stdint.h>
+#include <filesystem>
+#include <limits>
+#include <string>
+#include <vector>
+#include <map>
+#include <chrono>
+#include <random>
+
+using namespace std;
 #endif
 
 // Here's the global typedefs for cross-render functionality
-
-#ifdef MURKA_OF
+#if defined(MURKA_OF)
 #include "ofMain.h"
 #include "ofxFontStash.h"
 typedef ofxFontStash FontObject; // It's important for this object to exist in a render for Murka to work
+#elif defined(MURKA_JUCE)
+#include "juceFontStash.h"
+typedef juceFontStash FontObject; // It's important for this object to exist in a render for Murka to work
 #endif
 
 #include <iostream>
 #include <cmath>
 
+template <typename T>
+std::string to_string_with_precision(const T a_value, const int n = 6)
+{
+	std::ostringstream out;
+	out.precision(n);
+	out << std::fixed << a_value;
+	return out.str();
+}
+
 struct MurkaColor {
-    double r = 0, g = 0, b = 0, a = 1;
-    
-    MurkaColor(float R, float G, float B) {r = R; g = G; b = B; }
-    MurkaColor(float R, float G, float B, float A) {r = R; g = G; b = B; a = A;}
+    float r = 1, g = 1, b = 1, a = 1;
+   
+	MurkaColor() { }
+
+	MurkaColor(float gray) { r = gray; g = gray; b = gray; }
+	MurkaColor(float R, float G, float B) { r = R; g = G; b = B; }
+	MurkaColor(float R, float G, float B, float A) {r = R; g = G; b = B; a = A;}
 
     MurkaColor operator *(int multiplier) const {
         return MurkaColor(r * float(multiplier), g * float(multiplier), b * float(multiplier), a * float(multiplier));

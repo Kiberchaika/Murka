@@ -10,13 +10,14 @@ using namespace murka;
 
 class LambdaPanel : public MurkaViewInterface<LambdaPanel> {
 public:
+	
     MURKA_VIEW_DRAW_FUNCTION  {
         
                 auto params = (Parameters*)parametersObject;
                 auto &castedResults = *(castResults(resultObject));
 
                 params->lambda(context);
-    };
+    }
     
     bool wantsClicks() override {
         return false;

@@ -34,9 +34,7 @@ public:
             performingMultitouchZoomNow = true;
         }
         
-#ifdef MURKA_OF
-        float currentTime = ofGetElapsedTimef(); // time in seconds
-#endif
+        float currentTime = c.renderer->getElapsedTime(); // time in seconds
         
         if (c.mouseScroll.length() != 0.0) {
             lastMouseScrollTime = currentTime;
@@ -53,7 +51,7 @@ public:
         if (c.mouseDownPressed[0] && inside) {
             surface.pointerDownCallback(0, transformedCursorPosition);
             
-            float time = ofGetElapsedTimef();
+            float time = c.renderer->getElapsedTime();
             float timeSinceLastClick = time - lastClickTime;
             lastClickTime = time;
             
@@ -93,7 +91,7 @@ public:
             
             if (!c.mouseDown[0]) {
                 if (draggingData.panActive) {
-//                    ofLog() << "stopping pan.";
+//                    std::cout << "stopping pan.";
                 }
                 draggingData.panActive = false;
                 draggingData.internalDragCaptureActive = false;
@@ -123,7 +121,7 @@ public:
 #endif
             
             if (!performingMultitouchZoomNow) { // checking if this was trackpad gesture
-//                ofLog() << "no multitouch.";
+//                std::cout << "no multitouch.";
                 if (surface.scrollwheelShouldZoom) {
                     zoom(c.mouseScroll.y * 5 * osScrollwheelMultiplier, c);
                 } else
@@ -201,10 +199,10 @@ public:
                 (transformedPosition.y * scale) - panOffset.y};
     }
     
-    MurkaShape panLimits = {-std::numeric_limits<float>::max() / 2,
-                            -std::numeric_limits<float>::max() / 2,
-                            std::numeric_limits<float>::max(),
-                            std::numeric_limits<float>::max()};
+    MurkaShape panLimits = {-(std::numeric_limits<float>::max)() / 2,
+                            -(std::numeric_limits<float>::max)() / 2,
+							(std::numeric_limits<float>::max)(),
+							(std::numeric_limits<float>::max)()};
     
     void limitPan() {
         if (panOffset.x < panLimits.position.x) {
@@ -222,29 +220,27 @@ public:
     }
     
     void drawDebugGrid() {
-            ofSetColor(80);
-            ofSetLineWidth(4);
-            ofDrawLine(-10000, 0 - panOffset.y, 10000, 0 - panOffset.y);
-            ofDrawLine(0 - panOffset.x, -10000, 0 - panOffset.x, 10000);
+			latestContextDebug.renderer->setColor(MurkaColor(80/255.));
+			latestContextDebug.renderer->setLineWidth(4);
+			latestContextDebug.renderer->drawLine(-10000, 0 - panOffset.y, 10000, 0 - panOffset.y);
+			latestContextDebug.renderer->drawLine(0 - panOffset.x, -10000, 0 - panOffset.x, 10000);
             
-            ofSetLineWidth(1);
+			latestContextDebug.renderer->setLineWidth(1);
             
             for (int i = 0; i < 300; i++) {
-                ofDrawLine(((i - 150) * 50) * scale - panOffset.x, -10000,
+				latestContextDebug.renderer->drawLine(((i - 150) * 50) * scale - panOffset.x, -10000,
                            ((i - 150) * 50) * scale - panOffset.x, 10000);
-                ofDrawLine( -10000, ((i - 150) * 50) * scale - panOffset.y,
+				latestContextDebug.renderer->drawLine( -10000, ((i - 150) * 50) * scale - panOffset.y,
                            10000, ((i - 150) * 50) * scale - panOffset.y);
             }
             
-            ofSetColor(255, 0, 0);
-            
-            ofSetColor(255, 0, 0);
-            ofPushMatrix();
-            ofTranslate(-panOffset.x, -panOffset.y);
-            ofScale(scale);
+			latestContextDebug.renderer->setColor(MurkaColor(1, 0, 0));
+			latestContextDebug.renderer->pushMatrix();
+			latestContextDebug.renderer->translate(-panOffset.x, -panOffset.y, 0);
+			latestContextDebug.renderer->scale(scale, scale, scale);
 
                 // this is what you do to test that you could draw the 0 properly
-                ofDrawCircle(0, 0, 25);
+			latestContextDebug.renderer->drawCircle(0, 0, 25);
             /*
                 bool hover = MurkaShape(100 * scale, 100 * scale,
                                         100 * scale, 100 * scale).
@@ -254,18 +250,18 @@ public:
                 ofDrawRectangle(100 , 100 , 100 , 100);
              */
             
-                ofDrawCircle(latestContextDebug.mousePosition.x / scale + panOffset.x / scale,
+			latestContextDebug.renderer->drawCircle(latestContextDebug.mousePosition.x / scale + panOffset.x / scale,
                              latestContextDebug.mousePosition.y / scale + panOffset.y / scale, 5);
                 // this is the mouse coordinate in the virtual space, including the scale.
                 // somehow this is different to the hover code above, hmm...
             
-            ofPopMatrix();
+			latestContextDebug.renderer->popMatrix();
             
             
-            ofSetColor(0, 200, 60, 155);
+			latestContextDebug.renderer->setColor(MurkaColor(0 / 255., 200 / 255., 60 / 255., 155 / 255.));
             auto font = latestContextDebug.getCurrentFont();
-            font->drawString("scale: " + ofToString(scale), 50, 50);
-            font->drawString("panOffset: " + ofToString(panOffset.x) + " : " + ofToString(panOffset.y), 0, 90);
+            font->drawString("scale: " + std::to_string(scale), 50, 50);
+            font->drawString("panOffset: " + std::to_string(panOffset.x) + " : " + std::to_string(panOffset.y), 0, 90);
 
     //        ofDrawBitmapString("scale: " + ofToString(scale), 50, 50);
         }
