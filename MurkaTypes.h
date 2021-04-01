@@ -39,6 +39,7 @@ typedef juceFontStash FontObject; // It's important for this object to exist in 
 #endif
 
 #include <iostream>
+#include <sstream>
 #include <cmath>
 
 template <typename T>
