@@ -580,7 +580,6 @@ public:
 
 	void pushView() override {
 		viewportStack.push_back(currentViewport);
-		//	scale(currentViewport.width() / glAppComp->getWidth(), currentViewport.height() / glAppComp->getHeight(), 1); // undo scale
 	}
 
 	void popView() override {
@@ -862,7 +861,7 @@ public:
 		vboLineOld.setVertexData(verts.data(), verts.size());
 		vboLineOld.update(GL_STATIC_DRAW);
 
-		draw(vboLineOld, GL_LINE, 0, verts.size());
+		draw(vboLineOld, GL_LINES, 0, verts.size());
 	}
 
 	void drawVbo(const MurVbo & vbo, GLuint drawMode, int first, int total) override {
@@ -873,10 +872,7 @@ public:
 		vboLineOld.setVertexData(verts.data(), verts.size());
 		vboLineOld.update(GL_STATIC_DRAW);
 
-		//pushMatrix();
-		//scale(getScreenScale(), getScreenScale(), 1);
 		draw(vboLineOld, GL_LINE_STRIP, 0, verts.size());
-		//popMatrix();
 	}
 
 	int getWindowWidth() override {
