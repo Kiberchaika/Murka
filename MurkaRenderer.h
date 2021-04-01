@@ -862,10 +862,7 @@ public:
 		vboLineOld.setVertexData(verts.data(), verts.size());
 		vboLineOld.update(GL_STATIC_DRAW);
 
-		//pushMatrix();
-		//scale(getScreenScale(), getScreenScale(), 1);
-		draw(vboLineOld, GL_LINES, 0, verts.size());
-		//popMatrix();
+		draw(vboLineOld, GL_LINE, 0, verts.size());
 	}
 
 	void drawVbo(const MurVbo & vbo, GLuint drawMode, int first, int total) override {
