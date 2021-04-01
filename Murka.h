@@ -12,6 +12,7 @@
 #include "MurkaAssets.h"
 #include "MurkaLinearLayoutGenerator.h"
 #include "MurkaRenderer.h"
+#include "MurkaBasicWidgets.h"
 
 /*
  

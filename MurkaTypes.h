@@ -2,16 +2,10 @@
 
 #if defined(MURKA_OF)
 #include "ofMain.h"
-#else defined(MURKA_JUCE)
+#elif defined(MURKA_JUCE)
 
-#ifdef __APPLE__
-#include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
-#else
-#include <windows.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
-#endif
+#include <JuceHeader.h>
+#include <juce_opengl/juce_opengl.h>
 
 #include <stdint.h>
 #include <filesystem>
@@ -23,6 +17,8 @@
 #include <random>
 
 using namespace std;
+using namespace juce;
+
 #endif
 
 // Here's the global typedefs for cross-render functionality

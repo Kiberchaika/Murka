@@ -44,9 +44,6 @@ public:
 
 #elif defined(MURKA_JUCE)
 
-#include "../JuceLibraryCode/JuceHeader.h"
-#include "juce_opengl/juce_opengl.h"
-
 #include "MurkaTypes.h"
 
 
@@ -72,7 +69,8 @@ class MurVbo {
 
 	vector<VboData> vboData;
 
-	GLuint VAO = 0, VBO = 0;
+	GLuint VAO = 0;
+	GLuint VBO = 0;
 	OpenGLContext* openGLContext = nullptr;
 
 public:

@@ -294,7 +294,7 @@ public:
 //            return validOptions[0];
         } else {
             // What happened?
-            ofLog() << "  WARNING!";
+            std::cout << "  WARNING!";
             thisFrameShapes.push_back(input);
             return input;
         }

@@ -1,5 +1,9 @@
 #pragma once
 
+#ifndef GL_TEXTURE_RECTANGLE
+#define GL_TEXTURE_RECTANGLE 0x84F5
+#endif
+
 #if defined(MURKA_OF)
 
 #include "ofMain.h"
@@ -7,16 +11,16 @@
 
 class MurImage {
 public:
-    MurImage(){
-        
-    };
-    
-    ~MurImage(){
-        internal.clear();
-    };
+	MurImage() {
 
-    ofImage internal;
-	
+	};
+
+	~MurImage() {
+		internal.clear();
+	};
+
+	ofImage internal;
+
 	void allocate(int w, int h) {
 		internal.allocate(w, h, OF_IMAGE_COLOR_ALPHA);
 	}
@@ -41,14 +45,14 @@ public:
 		internal.update();
 	}
 
-    void clear() {
-        internal.clear();
-    }
-    
-    void clearTexture() {
-        internal.getTexture().clear();
-    }
-    
+	void clear() {
+		internal.clear();
+	}
+
+	void clearTexture() {
+		internal.getTexture().clear();
+	}
+
 	float getWidth() {
 		return internal.getWidth();
 	}
@@ -74,6 +78,8 @@ class MurImage {
 	bool bAllocated = false;
 
 	vector<float> data;
+	bool arb = false;
+	int gltype = 0;
 
 public:
 	MurImage() {
@@ -89,36 +95,38 @@ public:
 	}
 
 	void allocate(int w, int h) {
+		gltype = !arb ? GL_TEXTURE_2D : GL_TEXTURE_RECTANGLE;
+
 		width = w;
 		height = h;
 
 		data.resize(width * height * 4, 0.0);
 
 		glGenTextures(1, &textureID);
-		glBindTexture(GL_TEXTURE_2D, textureID);
+		glBindTexture(gltype, textureID);
 
 #if JUCE_OPENGL3
 		typedef void(*glGenerateMipmap_type)(GLuint array);
 		glGenerateMipmap_type pglGenerateMipmap;
 		pglGenerateMipmap = (glGenerateMipmap_type)OpenGLHelpers::getExtensionFunction("glGenerateMipmap");
 		if (pglGenerateMipmap) {
-			pglGenerateMipmap(GL_TEXTURE_2D);
+			pglGenerateMipmap(gltype);
 		}
 #else
 #endif
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(gltype, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(gltype, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(gltype, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(gltype, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-		glBindTexture(GL_TEXTURE_2D, 0);
+		glBindTexture(gltype, 0);
 
 		bAllocated = true;
 	}
 
 	bool load(const std::string& fileName) {
 		Image image = ImageFileFormat::loadFrom(File(fileName));
-		
+
 		clearTexture();
 		allocate(image.getWidth(), image.getHeight());
 
@@ -130,7 +138,7 @@ public:
 			for (int x = 0; x < width; x++) {
 				Colour col = srcData.getPixelColour(x, y);
 				int idx = y * width * 4 + x * 4;
-				
+
 				data[idx + 0] = col.getFloatRed();
 				data[idx + 1] = col.getFloatGreen();
 				data[idx + 2] = col.getFloatBlue();
@@ -144,11 +152,11 @@ public:
 	}
 
 	void bind() const {
-		glBindTexture(GL_TEXTURE_2D, textureID);
+		glBindTexture(gltype, textureID);
 	}
 
 	void unbind() const {
-		glBindTexture(GL_TEXTURE_2D, 0);
+		glBindTexture(gltype, 0);
 	}
 
 	void setColor(int x, int y, const MurkaColor col) {
@@ -168,11 +176,11 @@ public:
 	}
 
 	void update() {
-		glBindTexture(GL_TEXTURE_2D, textureID);
+		glBindTexture(gltype, textureID);
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, data.data());
-		//glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_FLOAT, image.getPixelData());
-		glBindTexture(GL_TEXTURE_2D, 0);
+		glTexImage2D(gltype, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, data.data());
+		//glTexSubImage2D(gltype, 0, 0, 0, width, height, GL_RGBA, GL_FLOAT, image.getPixelData());
+		glBindTexture(gltype, 0);
 	}
 
 	void clear() {
@@ -183,7 +191,7 @@ public:
 		if (bAllocated) glDeleteTextures(1, &textureID);
 	}
 
-	float getWidth() const  {
+	float getWidth() const {
 		return width;
 	}
 
