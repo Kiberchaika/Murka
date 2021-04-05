@@ -1,5 +1,7 @@
 #pragma once
 
+#include "MurkaView.h"
+
 namespace murka {
 
 class TextField : public MurkaViewInterface<TextField> {

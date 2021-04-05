@@ -65,7 +65,6 @@ public:
 
 #elif defined(MURKA_JUCE) 
 
-#include "../JuceLibraryCode/JuceHeader.h"
 
 #include "MurkaTypes.h"
 

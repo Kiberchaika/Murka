@@ -319,12 +319,12 @@ class MurkaRenderer : public MurkaRendererBase {
 	MurMatrix<float> viewMatrix;
 
 	std::unique_ptr<OpenGLShaderProgram> shaderMain;
-	OpenGLShaderProgram::Uniform* uniformMatrixModel;
-	OpenGLShaderProgram::Uniform* uniformMatrixView;
-	OpenGLShaderProgram::Uniform* uniformMatrixProj;
-	OpenGLShaderProgram::Uniform* uniformColor;
-	OpenGLShaderProgram::Uniform* uniformVFlip;
-	OpenGLShaderProgram::Uniform* uniformUseTexture;
+	OpenGLShaderProgram::Uniform* uniformMatrixModel = nullptr;
+	OpenGLShaderProgram::Uniform* uniformMatrixView = nullptr;
+	OpenGLShaderProgram::Uniform* uniformMatrixProj = nullptr;
+	OpenGLShaderProgram::Uniform* uniformColor = nullptr;
+	OpenGLShaderProgram::Uniform* uniformVFlip = nullptr;
+	OpenGLShaderProgram::Uniform* uniformUseTexture = nullptr;
 	
 	MurVbo vboRect;
 	MurVbo vboLine;
@@ -361,6 +361,14 @@ class MurkaRenderer : public MurkaRendererBase {
 	std::chrono::steady_clock::time_point begin;
 
 public:
+	~MurkaRenderer() {
+		delete uniformMatrixModel;
+		delete uniformMatrixProj;
+		delete uniformColor;
+		delete uniformVFlip;
+		delete uniformUseTexture;
+	}
+
 
 	void setAppComponent(OpenGLAppComponent* comp) {
 		glAppComp = comp;

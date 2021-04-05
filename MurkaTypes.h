@@ -19,6 +19,7 @@
 using namespace std;
 using namespace juce;
 
+
 #endif
 
 // Here's the global typedefs for cross-render functionality
@@ -35,7 +36,7 @@ typedef juceFontStash FontObject; // It's important for this object to exist in 
 #include <cmath>
 
 template <typename T>
-std::string to_string_with_precision(const T a_value, const int n = 6)
+std::string to_string_with_precision(const T a_value, const int n)
 {
 	std::ostringstream out;
 	out.precision(n);
@@ -143,7 +144,10 @@ struct MurkaPoint {
 		return ((x == right.x) && (y == right.y));
 	}
 	
-    friend std::ostream& operator<<(std::ostream& os, const MurkaPoint& dt);
+    friend std::ostream& operator<<(std::ostream& os, const MurkaPoint& p) {
+		os << p.x << '/' << p.y;
+		return os;
+	}
 
 
     MurkaPoint (float x_, float y_) {

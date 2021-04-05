@@ -3,7 +3,6 @@
 #include "MurkaTypes.h"
 #include "MurkaContext.h"
 #include "MurkaViewHandler.h"
-#include "Murka.h"
 #include "MurkaLinearLayoutGenerator.h"
 #include "MurkaAnimator.h"
 #include "MosaicLayout.h"

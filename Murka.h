@@ -1,18 +1,14 @@
 #pragma once
 
-
 // Murka is a mixed mode data driven user interface library.
 
-
-#include <functional>
 #include "MurkaTypes.h"
-#include "MurkaContext.h"
 #include "MurkaView.h"
+#include "MurkaContext.h"
 #include "MurkaInputEventsRegister.h"
 #include "MurkaAssets.h"
 #include "MurkaLinearLayoutGenerator.h"
 #include "MurkaRenderer.h"
-#include "MurkaBasicWidgets.h"
 
 /*
  

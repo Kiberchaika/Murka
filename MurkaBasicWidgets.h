@@ -1,6 +1,7 @@
 #pragma once
-#include "Murka.h"
 
+#include "Murka.h"
+#include "MurkaView.h"
 
 namespace murka {
 
@@ -129,7 +130,7 @@ public:
         MurkaColor color = {0.98, 0.98, 0.98};
 		MurkaColor backgroundColor = {0., 0., 0., 0.};
         
-        FontObject* font;
+        FontObject* font = nullptr;
         
         bool customColor = false;
         bool customFont = false;
