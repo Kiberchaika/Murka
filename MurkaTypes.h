@@ -19,7 +19,6 @@
 using namespace std;
 using namespace juce;
 
-
 #endif
 
 // Here's the global typedefs for cross-render functionality
@@ -28,7 +27,7 @@ using namespace juce;
 #include "ofxFontStash.h"
 typedef ofxFontStash FontObject; // It's important for this object to exist in a render for Murka to work
 #elif defined(MURKA_JUCE)
-#include "juceFontStash.h"
+#include "../../juceFontStash/juceFontStash.h"
 typedef juceFontStash FontObject; // It's important for this object to exist in a render for Murka to work
 #endif
 
