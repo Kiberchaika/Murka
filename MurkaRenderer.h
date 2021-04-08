@@ -374,12 +374,19 @@ class MurkaRenderer : public MurkaRendererBase {
 public:
 	~MurkaRenderer() {
 		delete uniformMatrixModel;
+		delete uniformMatrixView;
 		delete uniformMatrixProj;
 		delete uniformColor;
 		delete uniformVFlip;
 		delete uniformUseTexture;
-	}
 
+		uniformMatrixModel = nullptr;
+		uniformMatrixView = nullptr;
+		uniformMatrixProj = nullptr;
+		uniformColor = nullptr;
+		uniformVFlip = nullptr;
+		uniformUseTexture = nullptr;
+	}
 
 	void setAppComponent(juce::OpenGLAppComponent* comp) {
 		glAppComp = comp;
@@ -840,7 +847,7 @@ public:
 		}
 	}
 
-	void drawLine(float x1, float y1, float x2, float y2) override {
+	void drawLineNew(float x1, float y1, float x2, float y2) {
 		x1 = x1 * getScreenScale();
 		y1 = y1 * getScreenScale();
 		x2 = x2 * getScreenScale();
@@ -866,7 +873,7 @@ public:
 		vboLine.internalDraw(GL_TRIANGLE_FAN, 0, 4);
 	}
 
-	void drawLineOld(float x1, float y1, float x2, float y2)  {
+	void drawLine(float x1, float y1, float x2, float y2) override {
 		x1 = x1 * getScreenScale();
 		y1 = y1 * getScreenScale();
 		x2 = x2 * getScreenScale();
