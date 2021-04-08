@@ -120,7 +120,12 @@ public:
     void update(int usage =  GL_STATIC_DRAW) {
 		int size = (std::max)(verts.size(), texCoords.size());
 
-		vboData.resize(size);
+		bool needToRecreate = false;
+		if (vboData.size() != size) {
+			vboData.resize(size);
+			needToRecreate = true;
+		}
+
 		for (int i = 0; i < verts.size(); i++) {
 			vboData[i].vert.x = verts[i].x;
 			vboData[i].vert.y = verts[i].y;
@@ -136,26 +141,20 @@ public:
 		openGLContext->extensions.glBindVertexArray(VAO);
         openGLContext->extensions.glBindBuffer(GL_ARRAY_BUFFER, VBO);
         
-        if(!loaded) {
+        if(!loaded || needToRecreate) {
 			openGLContext->extensions.glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VboData), (GLvoid*)offsetof(VboData, vert));
 			openGLContext->extensions.glEnableVertexAttribArray(0);
 
 			openGLContext->extensions.glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(VboData), (GLvoid*)offsetof(VboData, texCoord));
 			openGLContext->extensions.glEnableVertexAttribArray(1);
 
-			//openGLContext->extensions.glBufferData(GL_ARRAY_BUFFER, size * sizeof(VboData), 0, GL_STREAM_DRAW);
 			openGLContext->extensions.glBufferData(GL_ARRAY_BUFFER, size * sizeof(VboData), 0, usage);
 			openGLContext->extensions.glBufferSubData(GL_ARRAY_BUFFER, 0, size * sizeof(VboData), vboData.data());
-
-			
 
 			loaded = true;
-        }
+		}
         else {
-			openGLContext->extensions.glBufferData(GL_ARRAY_BUFFER, size * sizeof(VboData), 0, usage);
 			openGLContext->extensions.glBufferSubData(GL_ARRAY_BUFFER, 0, size * sizeof(VboData), vboData.data());
-			//openGLContext->extensions.glBufferSubData(GL_ARRAY_BUFFER, 0, size * sizeof(VboData), vboData.data());
-			//openGLContext->extensions.glBufferData(GL_ARRAY_BUFFER, size * sizeof(VboData), vboData.data(), usage);
 		}
 
         openGLContext->extensions.glBindBuffer(GL_ARRAY_BUFFER, 0);
