@@ -14,7 +14,6 @@
 #include <OpenGL/OpenGL.h>
 #endif
 
-
 namespace murka {
 
 #if defined(MURKA_OF)
@@ -298,8 +297,6 @@ public:
 
 #elif defined(MURKA_JUCE)
 
-using namespace juce;
-
 class MurkaRenderer : public MurkaRendererBase {
 
 	juce::OpenGLAppComponent* glAppComp = nullptr;
@@ -355,7 +352,7 @@ class MurkaRenderer : public MurkaRendererBase {
 		vboCircle.setOpenGLContext(openGLContext);
 		vboCircle.setup();
 		vboCircle.setVertexData(verts.data(), verts.size());
-		vboCircle.update(GL_STREAM_DRAW);
+		vboCircle.update(GL_STREAM_DRAW, attribLocationPosition, attribLocationUv);
 	}
 
 	void updateStackedMatrix() {
@@ -368,6 +365,9 @@ class MurkaRenderer : public MurkaRendererBase {
 	bool vflip = true;
 	bool useTexture = false;
 	
+    int attribLocationPosition = 0;
+    int attribLocationUv = 1;
+    
 	uint64_t frameNum = 0;
 	std::chrono::steady_clock::time_point begin;
 
@@ -395,13 +395,74 @@ public:
 	void setOpenGLContext(juce::OpenGLContext* ctx) {
 		openGLContext = ctx;
 	}
+    
+    int getAttribLocationPosition() {
+        return attribLocationPosition;
+    }
+    
+    int getAttribLocationUv() {
+        return attribLocationUv;
+    }
 
 	juce::OpenGLContext* getOpenGLContext() {
 		return openGLContext;
 	}
 
 	void setup() {
-		// vbo for primitives
+        // create main shader
+        {
+            string vertexShader =
+                "varying vec2 vUv;\n"
+                "uniform mat4 matrixModel;\n"
+                "uniform mat4 matrixView;\n"
+                "uniform mat4 matrixProj;\n"
+                "uniform vec4 color;\n"
+                "uniform bool vflip;\n"
+                "attribute vec3 position;\n"
+                "attribute vec2 uv;\n"
+                "\n"
+                "void main()\n"
+                "{\n"
+                "    vUv = uv;"
+                "    vec4 pos = matrixProj * matrixView * matrixModel * vec4(position, 1.0) ; \n"
+                "    gl_Position = vflip ? vec4(pos.x, 1 - pos.y, pos.z, pos.w) : vec4(position, 1.0); \n"
+                "}\n";
+
+            string fragmentShader =
+                "varying vec2 vUv;\n"
+                "uniform sampler2D mainTexture;\n"
+                "uniform vec4 color;\n"
+                "uniform bool useTexture;\n"
+                "\n"
+                "void main()\n"
+                "{\n"
+                "    gl_FragColor = color * (useTexture ? texture(mainTexture, vUv) : vec4 (1.0, 1.0, 1.0, 1.0));\n"
+                "}\n";
+
+            shaderMain = std::make_unique<juce::OpenGLShaderProgram>(*openGLContext);
+            if (shaderMain->addVertexShader(juce::OpenGLHelpers::translateVertexShaderToV3(vertexShader)) &&
+                shaderMain->addFragmentShader(juce::OpenGLHelpers::translateFragmentShaderToV3(fragmentShader)) &&
+                shaderMain->link()) {
+                //if (openGLContext->extensions.glGetUniformLocation(shaderProgram.getProgramID(), "name"))
+                uniformMatrixModel = new juce::OpenGLShaderProgram::Uniform(*shaderMain, "matrixModel");
+                uniformMatrixView = new juce::OpenGLShaderProgram::Uniform(*shaderMain, "matrixView");
+                uniformMatrixProj = new juce::OpenGLShaderProgram::Uniform(*shaderMain, "matrixProj");
+                uniformColor = new juce::OpenGLShaderProgram::Uniform(*shaderMain, "color");
+                uniformVFlip = new juce::OpenGLShaderProgram::Uniform(*shaderMain, "vflip");
+                uniformUseTexture = new juce::OpenGLShaderProgram::Uniform(*shaderMain, "useTexture");
+            
+                
+                GLuint programID = shaderMain->getProgramID();
+				attribLocationPosition = openGLContext->extensions.glGetAttribLocation(programID, "position");
+				attribLocationUv = openGLContext->extensions.glGetAttribLocation(programID, "uv");
+            }
+            else {
+                string err = shaderMain->getLastError().toStdString();
+                err = err + "";
+            }
+        }
+
+        // vbo for primitives
 		{
 			vector<MurkaPoint> verts;
 			verts.push_back(MurkaPoint(0.0f, 0.0f));
@@ -412,14 +473,14 @@ public:
 			vector<MurkaPoint> texCoords;
 			texCoords.push_back(MurkaPoint(0.0f, 0.0f));
 			texCoords.push_back(MurkaPoint(0.0f, 1.0f));
-			texCoords.push_back(MurkaPoint(1.0f, 1.0f));
+            texCoords.push_back(MurkaPoint(1.0f, 1.0f));
 			texCoords.push_back(MurkaPoint(1.0f, 0.0f));
 
 			vboRect.setOpenGLContext(openGLContext);
 			vboRect.setup();
 			vboRect.setVertexData(verts.data(), verts.size());
 			vboRect.setTexCoordData(texCoords.data(), texCoords.size());
-			vboRect.update(GL_STATIC_DRAW);
+			vboRect.update(GL_STATIC_DRAW, attribLocationPosition, attribLocationUv);
 		}
 
 		{
@@ -439,7 +500,7 @@ public:
 			vboLine.setup();
 			vboLine.setVertexData(verts.data(), verts.size());
             vboLine.setTexCoordData(texCoords.data(), texCoords.size());
-            vboLine.update(GL_STREAM_DRAW);
+            vboLine.update(GL_STREAM_DRAW, attribLocationPosition, attribLocationUv);
 		}
 
 		{
@@ -455,62 +516,16 @@ public:
 			vboLineOld.setup();
 			vboLineOld.setVertexData(verts.data(), verts.size());
             vboLineOld.setTexCoordData(texCoords.data(), texCoords.size());
-            vboLineOld.update(GL_STREAM_DRAW);
+            vboLineOld.update(GL_STREAM_DRAW, attribLocationPosition, attribLocationUv);
 		}
 
 		{
 			recreateCircleVbo();
 		}
 
-		// create main shader
-		{
-			string vertexShader =
-				"varying vec2 vUv;\n"
-				"uniform mat4 matrixModel;\n"
-				"uniform mat4 matrixView;\n"
-				"uniform mat4 matrixProj;\n"
-				"uniform vec4 color;\n"
-				"uniform bool vflip;\n"
-				"attribute vec3 position;\n"
-				"attribute vec2 uv;\n"
-				"\n"
-				"void main()\n"
-				"{\n"
-				"    vUv = uv;"
-				"    vec4 pos = matrixProj * matrixView * matrixModel * vec4(position, 1.0) ; \n"
-				"    gl_Position = vflip ? vec4(pos.x, 1 - pos.y, pos.z, pos.w) : vec4(position, 1.0); \n"
-				"}\n";
+        currentViewport = MurkaShape(0, 0, glAppComp->getWidth(), glAppComp->getHeight());
 
-			string fragmentShader =
-				"varying vec2 vUv;\n"
-				"uniform sampler2D mainTexture;\n"
-				"uniform vec4 color;\n"
-				"uniform bool useTexture;\n"
-				"\n"
-				"void main()\n"
-				"{\n"
-				"    gl_FragColor = color * (useTexture ? texture(mainTexture, vUv) : vec4 (1.0, 1.0, 1.0, 1.0));\n"
-				"}\n";
-
-			shaderMain = std::make_unique<juce::OpenGLShaderProgram>(*openGLContext);
-			if (shaderMain->addVertexShader(juce::OpenGLHelpers::translateVertexShaderToV3(vertexShader)) &&
-				shaderMain->addFragmentShader(juce::OpenGLHelpers::translateFragmentShaderToV3(fragmentShader)) &&
-				shaderMain->link()) {
-				//if (openGLContext->extensions.glGetUniformLocation(shaderProgram.getProgramID(), "name"))
-				uniformMatrixModel = new juce::OpenGLShaderProgram::Uniform(*shaderMain, "matrixModel");
-				uniformMatrixView = new juce::OpenGLShaderProgram::Uniform(*shaderMain, "matrixView");
-				uniformMatrixProj = new juce::OpenGLShaderProgram::Uniform(*shaderMain, "matrixProj");
-				uniformColor = new juce::OpenGLShaderProgram::Uniform(*shaderMain, "color");
-				uniformVFlip = new juce::OpenGLShaderProgram::Uniform(*shaderMain, "vflip");
-				uniformUseTexture = new juce::OpenGLShaderProgram::Uniform(*shaderMain, "useTexture");
-			}
-			else {
-				string err = shaderMain->getLastError().toStdString();
-				err = err + "";
-			}
-		}
-
-		begin = std::chrono::steady_clock::now();
+        begin = std::chrono::steady_clock::now();
 	}
 
 	void startFrame() {
@@ -523,7 +538,6 @@ public:
 
 		viewportStack.clear();
 		currentViewport = MurkaShape(0, 0, glAppComp->getWidth(), glAppComp->getHeight());
-		//viewport(0, 0, glAppComp->getWidth(), glAppComp->getHeight(), true);
 
 		frameNum++;
 
@@ -804,7 +818,7 @@ public:
 			uniformUseTexture->set(useTexture);
 			uniformVFlip->set(vflip);
 			uniformColor->set(currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
-			vboRect.update(GL_STATIC_DRAW);
+			vboRect.update(GL_STATIC_DRAW, attribLocationPosition, attribLocationUv);
 			vboRect.internalDraw(GL_TRIANGLE_FAN, 0, 4);
 		}
 		else {
@@ -883,7 +897,7 @@ public:
 		verts.push_back(MurkaPoint(x1, y1));
 		verts.push_back(MurkaPoint(x2, y2));
 		vboLineOld.setVertexData(verts.data(), verts.size());
-		vboLineOld.update(GL_STREAM_DRAW);
+		vboLineOld.update(GL_STREAM_DRAW, attribLocationPosition, attribLocationUv);
 
 		draw(vboLineOld, GL_LINES, 0, verts.size());
 	}
@@ -894,7 +908,7 @@ public:
 
 	void drawPath(const vector<MurkaPoint> & verts) override {
 		vboLineOld.setVertexData(verts.data(), verts.size());
-		vboLineOld.update(GL_STATIC_DRAW);
+		vboLineOld.update(GL_STATIC_DRAW, attribLocationPosition, attribLocationUv);
 
 		draw(vboLineOld, GL_LINE_STRIP, 0, verts.size());
 	}

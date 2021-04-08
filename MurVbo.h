@@ -47,8 +47,6 @@ public:
 
 #elif defined(MURKA_JUCE)
 
-using namespace juce;
-
 class MurVbo {
 	struct UVCoord {
 		float u = 0;
@@ -65,8 +63,8 @@ class MurVbo {
     vector<MurkaPoint> texCoords;
 
 	struct VboData {
-		VertexCoord vert;
-		UVCoord texCoord;
+        VertexCoord vert;
+        UVCoord texCoord;
 	};
 
 	vector<VboData> vboData;
@@ -117,7 +115,7 @@ public:
 	}
 
     
-    void update(int usage =  GL_STATIC_DRAW) {
+    void update(int usage, int attribLocationPosition, int attribLocationUv) {
 		int size = (std::max)(verts.size(), texCoords.size());
 
 		bool needToRecreate = false;
@@ -136,25 +134,25 @@ public:
 			vboData[i].texCoord.u = texCoords[i].x;
 			vboData[i].texCoord.v = texCoords[i].y;
 		}
-		 
 
 		openGLContext->extensions.glBindVertexArray(VAO);
         openGLContext->extensions.glBindBuffer(GL_ARRAY_BUFFER, VBO);
         
         if(!loaded || needToRecreate) {
-			openGLContext->extensions.glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VboData), (GLvoid*)offsetof(VboData, vert));
-			openGLContext->extensions.glEnableVertexAttribArray(0);
+            openGLContext->extensions.glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VboData), (GLvoid*)offsetof(VboData, vert));
+            openGLContext->extensions.glEnableVertexAttribArray(1);
 
-			openGLContext->extensions.glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(VboData), (GLvoid*)offsetof(VboData, texCoord));
-			openGLContext->extensions.glEnableVertexAttribArray(1);
+            openGLContext->extensions.glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(VboData), (GLvoid*)offsetof(VboData, texCoord));
+            openGLContext->extensions.glEnableVertexAttribArray(0);
 
 			openGLContext->extensions.glBufferData(GL_ARRAY_BUFFER, size * sizeof(VboData), 0, usage);
 			openGLContext->extensions.glBufferSubData(GL_ARRAY_BUFFER, 0, size * sizeof(VboData), vboData.data());
 
+            needToRecreate = false;
 			loaded = true;
 		}
         else {
-			openGLContext->extensions.glBufferSubData(GL_ARRAY_BUFFER, 0, size * sizeof(VboData), vboData.data());
+            openGLContext->extensions.glBufferSubData(GL_ARRAY_BUFFER, 0, size * sizeof(VboData), vboData.data());
 		}
 
         openGLContext->extensions.glBindBuffer(GL_ARRAY_BUFFER, 0);

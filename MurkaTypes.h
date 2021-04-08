@@ -7,6 +7,15 @@
 #include <JuceHeader.h>
 #include <juce_opengl/juce_opengl.h>
 
+#if defined(MURKA_JUCE) && defined(WIN32)
+#define GL_STREAM_DRAW juce::GL_STREAM_DRAW
+#define GL_ARRAY_BUFFER juce::GL_ARRAY_BUFFER
+#define GL_RGBA32F juce::GL_RGBA32F
+#define GL_STATIC_DRAW juce::GL_STATIC_DRAW
+#define GL_TEXTURE0 juce::GL_TEXTURE0
+#endif
+
+
 #include <stdint.h>
 #include <filesystem>
 #include <limits>
