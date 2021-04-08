@@ -192,7 +192,10 @@ public:
 	}
 
 	void clearTexture() {
-		if (bAllocated) glDeleteTextures(1, &textureID);
+        if (bAllocated) {
+            glDeleteTextures(1, &textureID);
+            bAllocated = false;
+        }
 	}
 
 	float getWidth() const {

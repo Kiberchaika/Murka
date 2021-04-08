@@ -73,6 +73,7 @@ class MurVbo {
 	GLuint VBO = 0;
 	juce::OpenGLContext* openGLContext = nullptr;
 	bool loaded = false;
+    bool inited = false;
 
 public:
 	MurVbo() {
@@ -84,7 +85,7 @@ public:
 	}
 
 	bool isInited() {
-		return VAO && VBO;
+		return inited;
 	}
 
 	void setOpenGLContext(juce::OpenGLContext* openGLContext) {
@@ -94,14 +95,17 @@ public:
 	void setup() {
 		openGLContext->extensions.glGenVertexArrays(1, &VAO);
 		openGLContext->extensions.glGenBuffers(1, &VBO);
+        
+        inited = true;
 	}
 
 	void clear() {
-		openGLContext->extensions.glDeleteVertexArrays(1, &VAO);
-		openGLContext->extensions.glDeleteBuffers(1, &VBO);
+        if(inited) {
+            openGLContext->extensions.glDeleteVertexArrays(1, &VAO);
+            openGLContext->extensions.glDeleteBuffers(1, &VBO);
 
-		VAO = 0;
-		VBO = 0;
+            inited = false;
+        }
 	}
 
 	void setVertexData(const MurkaPoint* _verts, int total) {
@@ -116,6 +120,8 @@ public:
 
     
     void update(int usage, int attribLocationPosition, int attribLocationUv) {
+		if (!inited) return;
+
 		int size = (std::max)(verts.size(), texCoords.size());
 
 		bool needToRecreate = false;
@@ -139,11 +145,11 @@ public:
         openGLContext->extensions.glBindBuffer(GL_ARRAY_BUFFER, VBO);
         
         if(!loaded || needToRecreate) {
-            openGLContext->extensions.glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VboData), (GLvoid*)offsetof(VboData, vert));
-            openGLContext->extensions.glEnableVertexAttribArray(1);
+            openGLContext->extensions.glVertexAttribPointer(attribLocationPosition, 3, GL_FLOAT, GL_FALSE, sizeof(VboData), (GLvoid*)offsetof(VboData, vert));
+            openGLContext->extensions.glEnableVertexAttribArray(attribLocationPosition);
 
-            openGLContext->extensions.glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(VboData), (GLvoid*)offsetof(VboData, texCoord));
-            openGLContext->extensions.glEnableVertexAttribArray(0);
+            openGLContext->extensions.glVertexAttribPointer(attribLocationUv, 2, GL_FLOAT, GL_FALSE, sizeof(VboData), (GLvoid*)offsetof(VboData, texCoord));
+            openGLContext->extensions.glEnableVertexAttribArray(attribLocationUv);
 
 			openGLContext->extensions.glBufferData(GL_ARRAY_BUFFER, size * sizeof(VboData), 0, usage);
 			openGLContext->extensions.glBufferSubData(GL_ARRAY_BUFFER, 0, size * sizeof(VboData), vboData.data());
@@ -160,6 +166,8 @@ public:
 	}
 
 	void internalDraw(GLuint drawMode, int first, int total) const {
+		if (!inited) return;
+
 		openGLContext->extensions.glBindVertexArray(VAO);
 		openGLContext->extensions.glBindBuffer(GL_ARRAY_BUFFER, VBO);
 		glDrawArrays(drawMode, first, total);
