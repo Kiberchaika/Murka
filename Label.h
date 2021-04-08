@@ -5,7 +5,6 @@ namespace murka {
 class Label : public View_NEW<Label> {
 public:
     
-    // TODO: rename it to internalDraw ?
     void internalDraw(const MurkaContextBase & c)  {
         
         bool inside = c.isHovered() * !areChildrenHovered(c);
@@ -35,7 +34,8 @@ public:
             font->drawString(label, textX, 0);
         }
         
-        c.renderer->setColor(200, 0, 0, 200);
+        c.pointerToRenderer->setColor(200, 0, 0, 200);
+        c.pointerToRenderer->drawLine(0, 0, c.getSize().x, c.getSize().y);
         
         // Testing vertical centering
             //context.renderer->setColor(255);

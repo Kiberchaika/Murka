@@ -72,19 +72,19 @@ public:
             return false;
         }
         
-		renderer->pushView();
-		renderer->viewport(viewport.position.x, viewport.position.y, viewport.size.x, viewport.size.y);
-		renderer->setupScreen();
-		renderer->pushMatrix();
-		renderer->translate(offset.x, offset.y, 0); // this is needed to crop the
+		pointerToRenderer->pushView();
+		pointerToRenderer->viewport(viewport.position.x, viewport.position.y, viewport.size.x, viewport.size.y);
+		pointerToRenderer->setupScreen();
+		pointerToRenderer->pushMatrix();
+		pointerToRenderer->translate(offset.x, offset.y, 0); // this is needed to crop the
         // views that are only partly visible
         
         return true;
     }
     
     void transformTheRenderBackFromThisContextShape() const {
-		renderer->popMatrix();
-		renderer->popView();
+		pointerToRenderer->popMatrix();
+		pointerToRenderer->popView();
     }
     
     // Utility function to substitute the matrix for the viewport to occlude
@@ -92,19 +92,19 @@ public:
     void startViewport() const {
         transformTheRenderBackFromThisContextShape();
 
-        renderer->pushView();
-        auto vport = renderer->getCurrentViewport(); 
-        renderer->viewport(MurkaShape(currentViewShape.position.x,
+        pointerToRenderer->pushView();
+        auto vport = pointerToRenderer->getCurrentViewport(); 
+        pointerToRenderer->viewport(MurkaShape(currentViewShape.position.x,
                                currentViewShape.position.y,
                                currentViewShape.size.x,
                                currentViewShape.size.y));
-		renderer->scale(vport.size.x / currentViewShape.size.x,
+		pointerToRenderer->scale(vport.size.x / currentViewShape.size.x,
 			vport.size.y / currentViewShape.size.y, 
 			1);
     }
     
     void endViewport() const {
-        renderer->popView();
+        pointerToRenderer->popView();
 
         transformTheRenderIntoThisContextShape();
     }

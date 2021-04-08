@@ -116,7 +116,7 @@ public:
         if (params->shouldForceEditorToSelectAll) {
             updateTextSelectionFirst(0);
             updateTextSelectionSecond(displayString.length());
-            lastLeftMousebuttonClicktime = context.renderer->getElapsedTime();
+            lastLeftMousebuttonClicktime = context.pointerToRenderer->getElapsedTime();
         }
         
         // activating if always selected
@@ -142,49 +142,49 @@ public:
                 
             }
             
-            if (((context.renderer->getElapsedTime() - lastLeftMousebuttonClicktime) < 0.2) && (activated)) {
+            if (((context.pointerToRenderer->getElapsedTime() - lastLeftMousebuttonClicktime) < 0.2) && (activated)) {
                 doubleClick = true;
             }
 
-            lastLeftMousebuttonClicktime = context.renderer->getElapsedTime();
+            lastLeftMousebuttonClicktime = context.pointerToRenderer->getElapsedTime();
         }
 
 #ifdef MURKA_OF
-        MurkaColor c = context.renderer->getColor();
+        MurkaColor c = context.pointerToRenderer->getColor();
         
         if (params->drawBounds) {
-            context.renderer->pushStyle();
-            context.renderer->enableFill();
-            context.renderer->setColor(params->widgetBgColor);
-            context.renderer->drawRectangle(0, 0, context.getSize().x, context.getSize().y);
+            context.pointerToRenderer->pushStyle();
+            context.pointerToRenderer->enableFill();
+            context.pointerToRenderer->setColor(params->widgetBgColor);
+            context.pointerToRenderer->drawRectangle(0, 0, context.getSize().x, context.getSize().y);
             
-            context.renderer->disableFill();
-            context.renderer->setColor(inside ? params->widgetFgColor : params->widgetFgColor / 2);
-            if (activated) context.renderer->setColor(params->widgetFgColor * 1.2);
-            context.renderer->drawRectangle(1, 1, context.getSize().x-2, context.getSize().y-2);
-            context.renderer->popStyle();
+            context.pointerToRenderer->disableFill();
+            context.pointerToRenderer->setColor(inside ? params->widgetFgColor : params->widgetFgColor / 2);
+            if (activated) context.pointerToRenderer->setColor(params->widgetFgColor * 1.2);
+            context.pointerToRenderer->drawRectangle(1, 1, context.getSize().x-2, context.getSize().y-2);
+            context.pointerToRenderer->popStyle();
         }
         
         if (isSelectingTextNow()) {
 
             auto selectionShape = returnSelectionVisualShape();
-            MurkaColor selectionColor = (context.renderer->getColor() * 0.7 +
-                                         context.renderer->getColor() * 0.7) * 255;
-            context.renderer->setColor(100, 100, 100, 200);
-            context.renderer->drawRectangle(10 - cameraPanInsideWidget + selectionShape.x(), 4, selectionShape.width(), context.getSize().y - 8);
+            MurkaColor selectionColor = (context.pointerToRenderer->getColor() * 0.7 +
+                                         context.pointerToRenderer->getColor() * 0.7) * 255;
+            context.pointerToRenderer->setColor(100, 100, 100, 200);
+            context.pointerToRenderer->drawRectangle(10 - cameraPanInsideWidget + selectionShape.x(), 4, selectionShape.width(), context.getSize().y - 8);
         }
         
         recalcGlyphLengths(displayString, &context);
         
         float glyphXCoordinate = 10;
-        context.renderer->setColor(params->widgetFgColor);
+        context.pointerToRenderer->setColor(params->widgetFgColor);
         font->drawString(displayString, 10 - cameraPanInsideWidget, context.getSize().y / 2 - font->getLineHeight());
         
         if (displayString.size() == 0) {
             // drawing hint
-            MurkaColor hintColor = context.renderer->getColor() * 0.5 +
-                                   context.renderer->getColor() * 0.5;
-            context.renderer->setColor(hintColor * 255);
+            MurkaColor hintColor = context.pointerToRenderer->getColor() * 0.5 +
+                                   context.pointerToRenderer->getColor() * 0.5;
+            context.pointerToRenderer->setColor(hintColor * 255);
             font->drawString(params->hint, 10, context.getSize().y / 2 - font->getLineHeight() / 2);
         }
         
@@ -273,9 +273,9 @@ public:
         // drawing cursor
         if (activated && !isSelectingTextNow()) {
             float timeMod = context.getRunningTime() / 1.0 - int(context.getRunningTime() / 1.0);
-            context.renderer->setColor(200);
+            context.pointerToRenderer->setColor(200);
             if (timeMod > 0.5)
-                context.renderer->drawLine(cursorPositionInPixels - cameraPanInsideWidget, 3,
+                context.pointerToRenderer->drawLine(cursorPositionInPixels - cameraPanInsideWidget, 3,
                            cursorPositionInPixels - cameraPanInsideWidget, 30);
         }
         
@@ -299,7 +299,7 @@ public:
                 
                 auto substr = displayString.substr(selectionSymbolsRange.first, selectionSymbolsRange.second - selectionSymbolsRange.first);
                 
-				context.renderer->setClipboardString(substr);
+				context.pointerToRenderer->setClipboardString(substr);
 
                 copyText.fire();
             } else
@@ -309,7 +309,7 @@ public:
                 if (isSelectingTextNow()) { // if we select now, backspace just deletes
                     auto substr = displayString.substr(selectionSymbolsRange.first, selectionSymbolsRange.second - selectionSymbolsRange.first);
                     
-					context.renderer->setClipboardString(substr);
+					context.pointerToRenderer->setClipboardString(substr);
                     
                     displayString.replace(selectionSymbolsRange.first, selectionSymbolsRange.second - selectionSymbolsRange.first, "");
                     cursorPosition = selectionSymbolsRange.first;
@@ -327,8 +327,8 @@ public:
                     cursorPosition = selectionSymbolsRange.first;
                 }
 				
-                displayString.insert(cursorPosition, context.renderer->getClipboardString());
-                cursorPosition += context.renderer->getClipboardString().length();
+                displayString.insert(cursorPosition, context.pointerToRenderer->getClipboardString());
+                cursorPosition += context.pointerToRenderer->getClipboardString().length();
                 
                 pasteText.fire();
             } else

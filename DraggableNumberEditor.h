@@ -36,33 +36,33 @@ public:
         if (highlightedNumber >= numberString.size()) highlightedNumber = numberString.size() - 1;
         
 
-        MurkaColor c = context.renderer->getColor();
-		MurkaColor bgColor = context.renderer->getColor();
-		MurkaColor fgColor = context.renderer->getColor();
+        MurkaColor c = context.pointerToRenderer->getColor();
+		MurkaColor bgColor = context.pointerToRenderer->getColor();
+		MurkaColor fgColor = context.pointerToRenderer->getColor();
         
-		context.renderer->pushStyle();
-		context.renderer->enableFill();
-		context.renderer->setColor(bgColor);
-		context.renderer->drawRectangle(0, 0, context.getSize().x, context.getSize().y);
-		context.renderer->disableFill();
-		context.renderer->setColor(inside ? fgColor : fgColor / 2);
-        if (activated) context.renderer->setColor(fgColor * 1.2);
-		context.renderer->drawRectangle(1, 1, context.getSize().x-2, context.getSize().y-2);
+		context.pointerToRenderer->pushStyle();
+		context.pointerToRenderer->enableFill();
+		context.pointerToRenderer->setColor(bgColor);
+		context.pointerToRenderer->drawRectangle(0, 0, context.getSize().x, context.getSize().y);
+		context.pointerToRenderer->disableFill();
+		context.pointerToRenderer->setColor(inside ? fgColor : fgColor / 2);
+        if (activated) context.pointerToRenderer->setColor(fgColor * 1.2);
+		context.pointerToRenderer->drawRectangle(1, 1, context.getSize().x-2, context.getSize().y-2);
 
         font->drawString(to_string_with_precision(*numberData, params->floatPrecision), 10, 22);
 
-		context.renderer->disableFill();
+		context.pointerToRenderer->disableFill();
         if ((inside || dragging) && (highlightedNumber != -1)) {
             if (!dragging) {
-				context.renderer->drawLine(10 + highlightedNumber * monospaceSymbolWidth, 28,
+				context.pointerToRenderer->drawLine(10 + highlightedNumber * monospaceSymbolWidth, 28,
                            10 + highlightedNumber * monospaceSymbolWidth + monospaceSymbolWidth, 28);
             } else {
-				context.renderer->drawLine(10 + draggingNubmerIndex * monospaceSymbolWidth, 28,
+				context.pointerToRenderer->drawLine(10 + draggingNubmerIndex * monospaceSymbolWidth, 28,
                            10 + draggingNubmerIndex * monospaceSymbolWidth + monospaceSymbolWidth, 28);
             }
         }
-		context.renderer->enableFill();
-		context.renderer->popStyle();
+		context.pointerToRenderer->enableFill();
+		context.pointerToRenderer->popStyle();
 
 
         // text editing logic

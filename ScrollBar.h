@@ -98,8 +98,8 @@ namespace murka {
 			MurkaSurface* surfaceToControl;
         
 			std::function<void(MurkaContext & c, MurkaShape scrollbarShape, MurkaShape handleShape, bool hover, bool draggingNow)> drawScrollBar = [](MurkaContext & c, MurkaShape scrollbarShape, MurkaShape handleShape, bool hover, bool draggingNow) {
-								c.renderer->setColor((80 + hover * 40 + draggingNow * 80));
-								c.renderer->drawRectangle(handleShape);
+								c.pointerToRenderer->setColor((80 + hover * 40 + draggingNow * 80));
+								c.pointerToRenderer->drawRectangle(handleShape);
 							};
 			int kind = 0; // 0 = vertical
 						  // 1 = horizontal

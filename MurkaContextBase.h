@@ -3,15 +3,15 @@
 
 namespace murka {
 
-class MurkaContextBase: public MurkaEventState {
+class MurkaContextBase: public MurkaEventState, public MurkaRenderer {
 public:
     MurkaOverlayHolder* overlayHolder;
-    MurkaRenderer* renderer;
+    MurkaRenderer* pointerToRenderer;
     
     // Assets access functions
     
     FontObject* getCurrentFont() const {
-        return ((MurkaAssets*)renderer)->getCurrentFont();
+        return ((MurkaAssets*)pointerToRenderer)->getCurrentFont();
     }
 
     //

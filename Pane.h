@@ -111,12 +111,12 @@ public:
         std::function<void(MurkaContext &, MurkaShape, bool, bool)> drawPaneControl =
             [](MurkaContext & c, MurkaShape shape, bool hover, bool draggingNow) {
                 
-                c.renderer->setColor((80 + (hover || draggingNow) * 40 + draggingNow * 80));
+                c.pointerToRenderer->setColor((80 + (hover || draggingNow) * 40 + draggingNow * 80));
                 
-                c.renderer->drawRectangle(shape);
+                c.pointerToRenderer->drawRectangle(shape);
                 
-                c.renderer->setColor((75 + hover * 100));
-                c.renderer->drawCircle(shape.x() + shape.width() / 2, shape.y() + shape.height() / 2, 4);
+                c.pointerToRenderer->setColor((75 + hover * 100));
+                c.pointerToRenderer->drawCircle(shape.x() + shape.width() / 2, shape.y() + shape.height() / 2, 4);
             };
     
         Parameters() {};

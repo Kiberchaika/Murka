@@ -23,8 +23,8 @@ public:
         // widget that is drawn on screen.
         auto font = context.getCurrentFont();
         
-        MurkaColor fgColor = params->customColor ? params->color : context.renderer->getColor();
-        context.renderer->setColor(fgColor);
+        MurkaColor fgColor = params->customColor ? params->color : context.pointerToRenderer->getColor();
+        context.pointerToRenderer->setColor(fgColor);
         if (params->alignment == TEXT_LEFT) {
             font->drawString(params->label, 5, 5);
         }
@@ -75,7 +75,8 @@ public:
     virtual bool wantsClicks() override { return false; } // override this if you want to signal that you don't want clicks
 
 };
-    
+
+/*
 class Label : public MurkaViewInterface<Label> {
 public:
     MURKA_VIEW_DRAW_FUNCTION  {
@@ -214,6 +215,7 @@ public:
     virtual bool wantsClicks() override { return false; } // override this if you want to signal that you don't want clicks
 
 };
+ */
     
 class Checkbox : public MurkaViewInterface<Checkbox> {
 public:
@@ -231,24 +233,24 @@ public:
 		Results* results = (Results*)resultObject;
 		*results = false;
 
-		MurkaColor fgColor = context.renderer->getColor();
+		MurkaColor fgColor = context.pointerToRenderer->getColor();
 
         float pushed = 0.2 - (context.getRunningTime() - lastTimeClicked);
         if (pushed < 0) pushed = 0;
         pushed /= 0.2;
 
-        context.renderer->pushStyle();
-        context.renderer->setColor((inside ? fgColor : fgColor / 2) * (1.0 + 0.2 * pushed));
+        context.pointerToRenderer->pushStyle();
+        context.pointerToRenderer->setColor((inside ? fgColor : fgColor / 2) * (1.0 + 0.2 * pushed));
 
-        context.renderer->disableFill();
-        context.renderer->drawRectangle(5, 5, 20, 20);
+        context.pointerToRenderer->disableFill();
+        context.pointerToRenderer->drawRectangle(5, 5, 20, 20);
         if (*booleanToControl) {
             float symbolOffset = 4;
-            context.renderer->drawLine(5 + symbolOffset, 5 + symbolOffset, 25 - symbolOffset, 25 - symbolOffset);
-            context.renderer->drawLine(25 - symbolOffset, 5 + symbolOffset, 5 + symbolOffset, 25 - symbolOffset);
+            context.pointerToRenderer->drawLine(5 + symbolOffset, 5 + symbolOffset, 25 - symbolOffset, 25 - symbolOffset);
+            context.pointerToRenderer->drawLine(25 - symbolOffset, 5 + symbolOffset, 5 + symbolOffset, 25 - symbolOffset);
         }
         
-        context.renderer->enableFill();
+        context.pointerToRenderer->enableFill();
         
         auto font = context.getCurrentFont();
         font->drawString(params->label, 30, 0);
@@ -261,7 +263,7 @@ public:
 		}
 		else castedResults = false;
 
-        context.renderer->popStyle();
+        context.pointerToRenderer->popStyle();
     };
     
     
@@ -339,7 +341,7 @@ public:
 
 		int* intToControl = ((int*)dataToControl);
 
-		MurkaColor fgColor = context.renderer->getColor();
+		MurkaColor fgColor = context.pointerToRenderer->getColor();
 
 		float pushed = 0.2 - (context.getRunningTime() - lastTimeClicked);
 		if (pushed < 0) pushed = 0;
@@ -348,21 +350,21 @@ public:
         int lineHeight = 25;
 
 		for (int i = 0; i < params->labels.size(); i++) {
-			context.renderer->pushMatrix();
-			context.renderer->pushStyle();
-			context.renderer->translate(0, lineHeight * i, 0);
+			context.pointerToRenderer->pushMatrix();
+			context.pointerToRenderer->pushStyle();
+			context.pointerToRenderer->translate(0, lineHeight * i, 0);
 			MurkaShape rowShape = { 0, lineHeight * i, context.getSize().x, lineHeight };
 			bool rowHover = rowShape.inside(context.mousePosition);
 
-			context.renderer->setColor((rowHover * inside ? fgColor : fgColor / 2) * (1.0 + 0.2 * pushed));
+			context.pointerToRenderer->setColor((rowHover * inside ? fgColor : fgColor / 2) * (1.0 + 0.2 * pushed));
 
-			context.renderer->disableFill();
-			context.renderer->drawCircle(5 + 20 / 2, 5 + 20 / 2, 10);
+			context.pointerToRenderer->disableFill();
+			context.pointerToRenderer->drawCircle(5 + 20 / 2, 5 + 20 / 2, 10);
 			if (*intToControl == i) {
-				context.renderer->enableFill();
-				context.renderer->drawCircle(5 + 20 / 2, 5 + 20 / 2, 6);
+				context.pointerToRenderer->enableFill();
+				context.pointerToRenderer->drawCircle(5 + 20 / 2, 5 + 20 / 2, 6);
 			}
-			context.renderer->enableFill();
+			context.pointerToRenderer->enableFill();
 
 			auto font = context.getCurrentFont();
 			font->drawString(params->labels[i], 30, 10);
@@ -373,8 +375,8 @@ public:
 				lastTimeClicked = context.getRunningTime();
 			}
 
-			context.renderer->popStyle();
-			context.renderer->popMatrix();
+			context.pointerToRenderer->popStyle();
+			context.pointerToRenderer->popMatrix();
 		}
 	};
 
@@ -412,8 +414,8 @@ public:
 
 		bool inside = context.isHovered() * !areChildrenHovered(context);
 
-		context.renderer->setColor(MurkaColor(90 / 255.0, 90 / 255.0, 90 / 255.0) * (0.8 + 0.2 * inside));
-		context.renderer->drawRectangle(0, 0, context.getSize().x, context.getSize().y);
+		context.pointerToRenderer->setColor(MurkaColor(90 / 255.0, 90 / 255.0, 90 / 255.0) * (0.8 + 0.2 * inside));
+		context.pointerToRenderer->drawRectangle(0, 0, context.getSize().x, context.getSize().y);
 
 		if (justInitialised) {
 			justInitialised = false;
@@ -422,10 +424,10 @@ public:
 			// ^ ghetto way to prevent this button from activating right away
 		}
 
-		auto currentLastFrame = context.renderer->getFrameNum();
+		auto currentLastFrame = context.pointerToRenderer->getFrameNum();
 
-		context.renderer->setColor(255);
-		context.renderer->drawString(params->label, 10, 5);
+		context.pointerToRenderer->setColor(255);
+		context.pointerToRenderer->drawString(params->label, 10, 5);
 
 		if ((currentLastFrame - lastFrameItWasRendered) <= 1) { // only allow clicking if it was rendered at last frame - to avoid instant clicks in overlays
 			if ((context.mouseDownPressed[0]) && (inside)) {
@@ -481,8 +483,8 @@ public:
 
 		int* intToControl = ((int*)dataToControl);
 
-		context.renderer->setColor(MurkaColor(90 / 255.0, 90 / 255.0, 90 / 255.0) * (0.5 + 0.3 * inside));
-		context.renderer->drawRectangle(0, 0, context.getSize().x, context.getSize().y);
+		context.pointerToRenderer->setColor(MurkaColor(90 / 255.0, 90 / 255.0, 90 / 255.0) * (0.5 + 0.3 * inside));
+		context.pointerToRenderer->drawRectangle(0, 0, context.getSize().x, context.getSize().y);
 
 		if ((context.mouseDownPressed[0]) && (inside)) {
 			if (!showingTheDropdown) {
@@ -497,8 +499,8 @@ public:
 
 		options = params->options;
 
-		context.renderer->setColor(MurkaColor(66 / 255.0, 67 / 255.0, 71 / 255.0) * 3.2);
-		context.renderer->drawString(options[selectedOption], 5, 5);
+		context.pointerToRenderer->setColor(MurkaColor(66 / 255.0, 67 / 255.0, 71 / 255.0) * 3.2);
+		context.pointerToRenderer->drawString(options[selectedOption], 5, 5);
 
 		if (showingTheDropdown) {
 			contextPosition = context.currentViewShape.position;
@@ -575,28 +577,28 @@ public:
             } else gonnaResize = true;
         }
 
-        context.renderer->pushStyle();
-        context.renderer->enableFill();
-        context.renderer->setColor(params->r, params->g, params->b, params->a);
-        context.renderer->drawRectangle(0, 0, context.getSize().x, context.getSize().y);
+        context.pointerToRenderer->pushStyle();
+        context.pointerToRenderer->enableFill();
+        context.pointerToRenderer->setColor(params->r, params->g, params->b, params->a);
+        context.pointerToRenderer->drawRectangle(0, 0, context.getSize().x, context.getSize().y);
         if (params->drawBorder) {
-            context.renderer->setColor(30);
-            context.renderer->disableFill();
-            context.renderer->drawRectangle(0, 0, context.getSize().x, context.getSize().y);
+            context.pointerToRenderer->setColor(30);
+            context.pointerToRenderer->disableFill();
+            context.pointerToRenderer->drawRectangle(0, 0, context.getSize().x, context.getSize().y);
         }
         
-        context.renderer->setColor(255);
+        context.pointerToRenderer->setColor(255);
         auto font = context.getCurrentFont();
         font->drawString(params->label, 0, 0);
         
         // Drawing symbols to show that we're going to resize this widget
         if ((gonnaResize) && (inside)) {
-            context.renderer->drawLine(context.currentViewShape.size.x - 5, context.currentViewShape.size.y - 5,
+            context.pointerToRenderer->drawLine(context.currentViewShape.size.x - 5, context.currentViewShape.size.y - 5,
                        context.currentViewShape.size.x - 15, context.currentViewShape.size.y - 5);
-            context.renderer->drawLine(context.currentViewShape.size.x - 5, context.currentViewShape.size.y - 5,
+            context.pointerToRenderer->drawLine(context.currentViewShape.size.x - 5, context.currentViewShape.size.y - 5,
                        context.currentViewShape.size.x - 5, context.currentViewShape.size.y - 15);
         }
-        context.renderer->popStyle();
+        context.pointerToRenderer->popStyle();
 
         // Moving & resizing logic
         
@@ -682,18 +684,18 @@ public:
              if (pushed < 0) pushed = 0;
              pushed /= 0.2;
          
-             context.renderer->pushStyle();
-             context.renderer->enableFill();
+             context.pointerToRenderer->pushStyle();
+             context.pointerToRenderer->enableFill();
              if (inside) {
-                 context.renderer->setColor(MurkaColor(parameters->r, parameters->g, parameters->b) * (1.0 + 0.2 * pushed));
-             } else context.renderer->setColor(75 * (1.0 + 0.2 * pushed));
-             context.renderer->drawRectangle(0, 0, context.getSize().x, context.getSize().y);
-             context.renderer->setColor(30);
-             context.renderer->disableFill();
-             context.renderer->drawRectangle(0, 0, context.getSize().x, context.getSize().y);
+                 context.pointerToRenderer->setColor(MurkaColor(parameters->r, parameters->g, parameters->b) * (1.0 + 0.2 * pushed));
+             } else context.pointerToRenderer->setColor(75 * (1.0 + 0.2 * pushed));
+             context.pointerToRenderer->drawRectangle(0, 0, context.getSize().x, context.getSize().y);
+             context.pointerToRenderer->setColor(30);
+             context.pointerToRenderer->disableFill();
+             context.pointerToRenderer->drawRectangle(0, 0, context.getSize().x, context.getSize().y);
         
-             context.renderer->setColor(255);
-			 context.renderer->drawRectangle(0, 0, 2,2);
+             context.pointerToRenderer->setColor(255);
+			 context.pointerToRenderer->drawRectangle(0, 0, 2,2);
 
              float offset = (font->stringWidth(parameters->label) / 2);
         
@@ -701,7 +703,7 @@ public:
 
 //                 float offset = parameters->label.length() * 4;
 //                 ofDrawBitmapString(parameters->label, context.getSize().x / 2 - offset, context.getSize().y / 2 + 5);
-             context.renderer->popStyle();
+             context.pointerToRenderer->popStyle();
 
              auto label = ((Parameters*)parametersObject)->label;
         
@@ -788,14 +790,14 @@ public:
         
 
         
-		MurkaColor fgColor = context.renderer->getColor();
+		MurkaColor fgColor = context.pointerToRenderer->getColor();
 
-        context.renderer->pushStyle();
-        context.renderer->enableFill();
-        context.renderer->setColor(15);
-        context.renderer->drawRectangle(0, 0, context.getSize().x, context.getSize().y);
+        context.pointerToRenderer->pushStyle();
+        context.pointerToRenderer->enableFill();
+        context.pointerToRenderer->setColor(15);
+        context.pointerToRenderer->drawRectangle(0, 0, context.getSize().x, context.getSize().y);
         
-        context.renderer->setColor(parameters->r + (inside ? 20 : 0),
+        context.pointerToRenderer->setColor(parameters->r + (inside ? 20 : 0),
                    parameters->g + (inside ? 20 : 0),
                    parameters->b + (inside ? 20 : 0), 200);
         float currentValue = *((float*)dataToControl);
@@ -805,15 +807,15 @@ public:
         if (currentValue < parameters->minValue) {
             currentValue = parameters->minValue;
         }
-        context.renderer->drawRectangle(0, 0, context.getSize().x * ((currentValue - parameters->minValue) / (parameters->maxValue - parameters->minValue)), context.getSize().y);
-        context.renderer->setColor(80);
-		context.renderer->disableFill();
+        context.pointerToRenderer->drawRectangle(0, 0, context.getSize().x * ((currentValue - parameters->minValue) / (parameters->maxValue - parameters->minValue)), context.getSize().y);
+        context.pointerToRenderer->setColor(80);
+		context.pointerToRenderer->disableFill();
         if (inside) {
-            context.renderer->drawRectangle(0, 0, context.getSize().x, context.getSize().y);
+            context.pointerToRenderer->drawRectangle(0, 0, context.getSize().x, context.getSize().y);
         }
         
 
-        context.renderer->setColor(inside ? fgColor : fgColor / 2);
+        context.pointerToRenderer->setColor(inside ? fgColor : fgColor / 2);
         auto label = ((Parameters*)parametersObject)->label;
         auto resultString = label + ": " + to_string(*((float*)dataToControl));
         
@@ -821,7 +823,7 @@ public:
         float offset = font->stringWidth(resultString) / 2;
         
         font->drawString(resultString, context.getSize().x / 2 - offset, context.getSize().y / 2 - font->getLineHeight()/2);
-        context.renderer->popStyle();
+        context.pointerToRenderer->popStyle();
 
         
 

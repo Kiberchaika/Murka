@@ -235,8 +235,13 @@ public:
         
         
 		currentContext = MurkaContext();
-        *((MurkaEventState*)&currentContext) = eventState;
-        currentContext.renderer = this;
+
+        *((MurkaEventState*)&currentContext) = eventState; // copying eventState
+//        MurkaRenderer* pointerToRenderer = (MurkaRenderer*)&currentContext;
+//        pointerToRenderer = this; // Switching this MurkaContext's Renderer base class for a pointer to this renderer
+
+        
+        currentContext.pointerToRenderer = this;
         currentContext.linkedView = this;
         currentContext.linkedView_NEW = this;
         currentContext.overlayHolder = this;
