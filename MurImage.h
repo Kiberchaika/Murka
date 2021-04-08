@@ -4,10 +4,13 @@
 #define GL_TEXTURE_RECTANGLE 0x84F5
 #endif
 
+#include "MurkaTypes.h"
+
 #if defined(MURKA_OF)
 
 #include "ofMain.h"
-#include "MurkaTypes.h"
+
+namespace murka {
 
 class MurImage {
 public:
@@ -62,18 +65,18 @@ public:
 	}
 };
 
+}
 
 #elif defined(MURKA_JUCE) 
 
-
-#include "MurkaTypes.h"
+namespace murka {
 
 class MurImage {
 
 	GLuint textureID;
 	int width, height;
 
-	OpenGLContext* openGLContext = nullptr;
+	juce::OpenGLContext* openGLContext = nullptr;
 	bool bAllocated = false;
 
 	vector<float> data;
@@ -89,7 +92,7 @@ public:
 		clear();
 	};
 
-	void setOpenGLContext(OpenGLContext* openGLContext) {
+	void setOpenGLContext(juce::OpenGLContext* openGLContext) {
 		this->openGLContext = openGLContext;
 	}
 
@@ -107,7 +110,7 @@ public:
 #if JUCE_OPENGL3
 		typedef void(*glGenerateMipmap_type)(GLuint array);
 		glGenerateMipmap_type pglGenerateMipmap;
-		pglGenerateMipmap = (glGenerateMipmap_type)OpenGLHelpers::getExtensionFunction("glGenerateMipmap");
+		pglGenerateMipmap = (glGenerateMipmap_type)juce::OpenGLHelpers::getExtensionFunction("glGenerateMipmap");
 		if (pglGenerateMipmap) {
 			pglGenerateMipmap(gltype);
 		}
@@ -124,18 +127,20 @@ public:
 	}
 
 	bool load(const std::string& fileName) {
-		Image image = ImageFileFormat::loadFrom(File(fileName));
+        if(!juce::File(fileName).exists()) return false;
+        
+		juce::Image image = juce::ImageFileFormat::loadFrom(juce::File(fileName));
 
 		clearTexture();
 		allocate(image.getWidth(), image.getHeight());
 
-		Image::BitmapData srcData(image, Image::BitmapData::readOnly);
-		Image::PixelFormat fmt = srcData.pixelFormat;
+		juce::Image::BitmapData srcData(image, juce::Image::BitmapData::readOnly);
+		juce::Image::PixelFormat fmt = srcData.pixelFormat;
 
 		data.resize(width * height * 4);
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
-				Colour col = srcData.getPixelColour(x, y);
+				juce::Colour col = srcData.getPixelColour(x, y);
 				int idx = y * width * 4 + x * 4;
 
 				data[idx + 0] = col.getFloatRed();
@@ -199,7 +204,6 @@ public:
 	}
 };
 
-
+}
 
 #endif
-

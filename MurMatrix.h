@@ -3,6 +3,9 @@
 #ifdef MURKA_JUCE
 
 
+namespace murka {
+
+
 //==============================================================================
 /**
 	A 4x4 3D transformation matrix.
@@ -56,7 +59,7 @@ public:
 	}
 
 	/** Creates a matrix from a 2D affine transform. */
-	MurMatrix(const AffineTransform& transform) noexcept
+	MurMatrix(const juce::AffineTransform& transform) noexcept
 	{
 		mat[0] = transform.mat00;  mat[1] = transform.mat10;  mat[2] = 0;         mat[3] = 0;
 		mat[4] = transform.mat01;  mat[5] = transform.mat11;  mat[6] = 0;         mat[7] = 0;
@@ -65,7 +68,7 @@ public:
 	}
 
 	/** Creates a matrix from a 3D vector translation. */
-	MurMatrix(Vector3D<Type> vector) noexcept
+	MurMatrix(juce::Vector3D<Type> vector) noexcept
 	{
 		mat[0] = Type(1); mat[1] = 0;        mat[2] = 0;         mat[3] = 0;
 		mat[4] = 0;        mat[5] = Type(1); mat[6] = 0;         mat[7] = 0;
@@ -120,10 +123,10 @@ public:
 	}
 
 	/** Returns a new look-at matrix from the provided vectors. */
-	static MurMatrix fromLookAt(Vector3D<Type> eye, Vector3D<Type> center, Vector3D<Type> up) noexcept
+	static MurMatrix fromLookAt(juce::Vector3D<Type> eye, juce::Vector3D<Type> center, juce::Vector3D<Type> up) noexcept
 	{
-		const auto f = Vector3D<Type>(center - eye).normalised();
-		const auto s = Vector3D<Type>(f ^ up).normalised();
+		const auto f = juce::Vector3D<Type>(center - eye).normalised();
+		const auto s = juce::Vector3D<Type>(f ^ up).normalised();
 		const auto u = s ^ f;
 
 		return{ s.x, s.y, s.z, 0,
@@ -133,7 +136,7 @@ public:
 	}
 
 	/** Returns a matrix which will apply a rotation through the X, Y, and Z angles specified by a vector. */
-	static MurMatrix rotation(Vector3D<Type> eulerAngleRadians) noexcept
+	static MurMatrix rotation(juce::Vector3D<Type> eulerAngleRadians) noexcept
 	{
 		auto cx = std::cos(eulerAngleRadians.x), sx = std::sin(eulerAngleRadians.x),
 			cy = std::cos(eulerAngleRadians.y), sy = std::sin(eulerAngleRadians.y),
@@ -146,19 +149,19 @@ public:
 	}
 
 	/** Returns a version of this matrix rotated by the provided vector. */
-	MurMatrix rotated(Vector3D<Type> eulerAngleRadians) noexcept
+	MurMatrix rotated(juce::Vector3D<Type> eulerAngleRadians) noexcept
 	{
 		return *this * rotation(eulerAngleRadians);
 	}
 
 	/** Rotates this matrix by the provided vector. */
-	void rotate(Vector3D<Type> eulerAngleRadians) noexcept
+	void rotate(juce::Vector3D<Type> eulerAngleRadians) noexcept
 	{
 		*this = rotated(eulerAngleRadians);
 	}
 
 	/** Returns a matrix which will apply a scale specified by a vector. */
-	MurMatrix scaled(Vector3D<Type> scalar) noexcept
+	MurMatrix scaled(juce::Vector3D<Type> scalar) noexcept
 	{
 		return{ mat[0] * scalar.x, mat[1] * scalar.x, mat[2] * scalar.x, mat[3] * scalar.x,
 				 mat[4] * scalar.x, mat[5] * scalar.y, mat[6] * scalar.y, mat[7] * scalar.y,
@@ -178,13 +181,13 @@ public:
 	}
 
 	/** Scales this matrix by the provided vector. */
-	void scale(Vector3D<Type> scalar) noexcept
+	void scale(juce::Vector3D<Type> scalar) noexcept
 	{
 		*this = scaled(scalar);
 	}
 
 	/** Returns a translation matrix. */
-	static MurMatrix translation(Vector3D<Type> delta) noexcept
+	static MurMatrix translation(juce::Vector3D<Type> delta) noexcept
 	{
 		return{ Type(1), 0, 0, 0,
 				 0, Type(1), 0, 0,
@@ -193,7 +196,7 @@ public:
 	}
 
 	/** Returns a matrix which will apply a translation specified by the provided vector. */
-	MurMatrix translated(Vector3D<Type> delta) noexcept
+	MurMatrix translated(juce::Vector3D<Type> delta) noexcept
 	{
 		return{ mat[0], mat[1], mat[2], mat[3] * delta.x,
 				 mat[4], mat[5], mat[6], mat[7] * delta.y,
@@ -202,7 +205,7 @@ public:
 	}
 
 	/** Translates this matrix by the provided vector. */
-	void translate(Vector3D<Type> delta) noexcept
+	void translate(juce::Vector3D<Type> delta) noexcept
 	{
 		*this = translated(delta);
 	}
@@ -240,3 +243,6 @@ public:
 	Type mat[16];
 };
 #endif
+
+
+}

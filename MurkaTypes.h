@@ -17,7 +17,6 @@
 #include <random>
 
 using namespace std;
-using namespace juce;
 
 #endif
 
@@ -27,7 +26,7 @@ using namespace juce;
 #include "ofxFontStash.h"
 typedef ofxFontStash FontObject; // It's important for this object to exist in a render for Murka to work
 #elif defined(MURKA_JUCE)
-#include "../../juce_FontStash.h"
+#include "juceFontStash.h"
 typedef juceFontStash FontObject; // It's important for this object to exist in a render for Murka to work
 #endif
 
@@ -35,13 +34,17 @@ typedef juceFontStash FontObject; // It's important for this object to exist in 
 #include <cmath>
 
 template <typename T>
-std::string to_string_with_precision(const T a_value, const int n)
+std::string to_string_with_precision(const T a_value, const int n = 6)
 {
-	std::ostringstream out;
-	out.precision(n);
-	out << std::fixed << a_value;
-	return out.str();
+    std::ostringstream out;
+    out.precision(n);
+    out << std::fixed << a_value;
+    return out.str();
 }
+
+
+namespace murka {
+
 
 struct MurkaColor {
     float r = 1, g = 1, b = 1, a = 1;
@@ -144,9 +147,9 @@ struct MurkaPoint {
 	}
 	
     friend std::ostream& operator<<(std::ostream& os, const MurkaPoint& p) {
-		os << p.x << '/' << p.y;
-		return os;
-	}
+        os << p.x << '/' << p.y;
+        return os;
+    }
 
 
     MurkaPoint (float x_, float y_) {
@@ -287,3 +290,5 @@ struct MurkaShape {
     }
 #endif
 };
+
+}

@@ -16,7 +16,7 @@ typedef std::function<void (void* dataToControl,
                             MurkaContext & context,
                             void* resultObject)> viewDrawFunction;
 
-#define MURKA_VIEW_DRAW_FUNCTION void draw(void* dataToControl, void* parametersObject, void* thisWidgetObject, MurkaContext & context, void* resultObject)
+#define MURKA_VIEW_DRAW_FUNCTION void draw(void* dataToControl, void* parametersObject, void* thisWidgetObject, murka::MurkaContext & context, void* resultObject)
 
 // // View heirarchy
 

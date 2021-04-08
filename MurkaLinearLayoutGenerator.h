@@ -20,7 +20,7 @@ public:
     MurkaShape shapeAlreadyOccupied;
     MurkaShape availableShape;
     
-    LayoutAnchoring layoutAnchoring = TOP;
+    LayoutAnchoring layoutAnchoring = LayoutAnchoring::TOP;
     
     int cursorX = 0, cursorY = 0; // the cursor that we iterate through the graph
     float currentLineHeight = MURKA_DEFAULT_AUTOLAYOUT_LINE_HEIGHT, currentLineWidth = 0;
@@ -35,7 +35,7 @@ public:
     struct ShapePartDescriptor {
         ShapePartDescriptorKind kind;
         float value;
-        ShapeAlignment alignment = ALIGN_LEFT;
+        ShapeAlignment alignment = ShapeAlignment::ALIGN_LEFT;
         
         ShapePartDescriptor(int v) {
             kind = ShapePartDescriptorKind::Value;

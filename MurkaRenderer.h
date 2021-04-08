@@ -6,9 +6,19 @@
 #include "MurVbo.h"
 #include "MurMatrix.h"
 
+
+#if defined(MURKA_OF)
+#include "ofMain.h"
+#elif defined(MURKA_JUCE) && !defined(WIN32)
+#include <GLUT/glut.h>
+#include <OpenGL/OpenGL.h>
+#endif
+
+
+namespace murka {
+
 #if defined(MURKA_OF)
 
-#include "ofMain.h"
 
 class MurkaRenderer: public MurkaRendererBase {
 	ofAppBaseWindow* ofWindow = nullptr;
@@ -45,11 +55,11 @@ public:
     // TODO: figure a better way to make setFont() accessible like this.
     
     void setFont(std::string name, int size) {
-        murka::MurkaAssets::setFont(name, size * getScreenScale(), this);
+        MurkaAssets::setFont(name, size * getScreenScale(), this);
     }
 
 	void drawString(const string & s, float x, float y) {
-		murka::MurkaAssets::getCurrentFont()->drawString(s, x, y);
+		MurkaAssets::getCurrentFont()->drawString(s, x, y);
 	} 
 
 	// Object drawing
@@ -288,11 +298,12 @@ public:
 
 #elif defined(MURKA_JUCE)
 
+using namespace juce;
 
 class MurkaRenderer : public MurkaRendererBase {
 
-	OpenGLAppComponent* glAppComp = nullptr;
-	OpenGLContext* openGLContext = nullptr;
+	juce::OpenGLAppComponent* glAppComp = nullptr;
+	juce::OpenGLContext* openGLContext = nullptr;
 
 	std::function<std::string(void)> getClipboardCallback = nullptr;
 	std::function<void(std::string)> setClipboardCallback = nullptr;
@@ -318,13 +329,13 @@ class MurkaRenderer : public MurkaRendererBase {
 	MurMatrix<float> projMatrix;
 	MurMatrix<float> viewMatrix;
 
-	std::unique_ptr<OpenGLShaderProgram> shaderMain;
-	OpenGLShaderProgram::Uniform* uniformMatrixModel = nullptr;
-	OpenGLShaderProgram::Uniform* uniformMatrixView = nullptr;
-	OpenGLShaderProgram::Uniform* uniformMatrixProj = nullptr;
-	OpenGLShaderProgram::Uniform* uniformColor = nullptr;
-	OpenGLShaderProgram::Uniform* uniformVFlip = nullptr;
-	OpenGLShaderProgram::Uniform* uniformUseTexture = nullptr;
+	std::unique_ptr<juce::OpenGLShaderProgram> shaderMain;
+	juce::OpenGLShaderProgram::Uniform* uniformMatrixModel = nullptr;
+	juce::OpenGLShaderProgram::Uniform* uniformMatrixView = nullptr;
+	juce::OpenGLShaderProgram::Uniform* uniformMatrixProj = nullptr;
+	juce::OpenGLShaderProgram::Uniform* uniformColor = nullptr;
+	juce::OpenGLShaderProgram::Uniform* uniformVFlip = nullptr;
+	juce::OpenGLShaderProgram::Uniform* uniformUseTexture = nullptr;
 	
 	MurVbo vboRect;
 	MurVbo vboLine;
@@ -335,7 +346,7 @@ class MurkaRenderer : public MurkaRendererBase {
 		vector<MurkaPoint> verts;
 		for (int i = 0; i < circleResolution; i++)
 		{
-			float theta = 2.0f * MathConstants<float>::pi * float(i) / float(circleResolution);
+			float theta = 2.0f * juce::MathConstants<float>::pi * float(i) / float(circleResolution);
 			float x = 1.0 * cosf(theta);
 			float y = 1.0 * sinf(theta);
 			verts.push_back(MurkaPoint(x, y));
@@ -344,7 +355,7 @@ class MurkaRenderer : public MurkaRendererBase {
 		vboCircle.setOpenGLContext(openGLContext);
 		vboCircle.setup();
 		vboCircle.setVertexData(verts.data(), verts.size());
-		vboCircle.update(GL_STATIC_DRAW);
+		vboCircle.update(GL_STREAM_DRAW);
 	}
 
 	void updateStackedMatrix() {
@@ -370,15 +381,15 @@ public:
 	}
 
 
-	void setAppComponent(OpenGLAppComponent* comp) {
+	void setAppComponent(juce::OpenGLAppComponent* comp) {
 		glAppComp = comp;
 	}
 
-	void setOpenGLContext(OpenGLContext* ctx) {
+	void setOpenGLContext(juce::OpenGLContext* ctx) {
 		openGLContext = ctx;
 	}
 
-	OpenGLContext* getOpenGLContext() {
+	juce::OpenGLContext* getOpenGLContext() {
 		return openGLContext;
 	}
 
@@ -411,10 +422,17 @@ public:
 			verts.push_back(MurkaPoint(1.0f, 0.5f));
 			verts.push_back(MurkaPoint(1.0f, -0.5f));
 
+            vector<MurkaPoint> texCoords;
+            texCoords.push_back(MurkaPoint(0.0f, 0.0f));
+            texCoords.push_back(MurkaPoint(0.0f, 1.0f));
+            texCoords.push_back(MurkaPoint(1.0f, 1.0f));
+            texCoords.push_back(MurkaPoint(1.0f, 0.0f));
+
 			vboLine.setOpenGLContext(openGLContext);
 			vboLine.setup();
 			vboLine.setVertexData(verts.data(), verts.size());
-			vboLine.update(GL_STATIC_DRAW);
+            vboLine.setTexCoordData(texCoords.data(), texCoords.size());
+            vboLine.update(GL_STREAM_DRAW);
 		}
 
 		{
@@ -422,10 +440,15 @@ public:
 			verts.push_back(MurkaPoint(0.0f, 0.0f));
 			verts.push_back(MurkaPoint(0.0f, 0.0f));
 
+            vector<MurkaPoint> texCoords;
+            texCoords.push_back(MurkaPoint(0.0f, 0.0f));
+            texCoords.push_back(MurkaPoint(1.0f, 1.0f));
+
 			vboLineOld.setOpenGLContext(openGLContext);
 			vboLineOld.setup();
 			vboLineOld.setVertexData(verts.data(), verts.size());
-			vboLineOld.update(GL_STATIC_DRAW);
+            vboLineOld.setTexCoordData(texCoords.data(), texCoords.size());
+            vboLineOld.update(GL_STREAM_DRAW);
 		}
 
 		{
@@ -462,17 +485,17 @@ public:
 				"    gl_FragColor = color * (useTexture ? texture(mainTexture, vUv) : vec4 (1.0, 1.0, 1.0, 1.0));\n"
 				"}\n";
 
-			shaderMain = std::make_unique<OpenGLShaderProgram>(*openGLContext);
-			if (shaderMain->addVertexShader(OpenGLHelpers::translateVertexShaderToV3(vertexShader)) &&
-				shaderMain->addFragmentShader(OpenGLHelpers::translateFragmentShaderToV3(fragmentShader)) &&
+			shaderMain = std::make_unique<juce::OpenGLShaderProgram>(*openGLContext);
+			if (shaderMain->addVertexShader(juce::OpenGLHelpers::translateVertexShaderToV3(vertexShader)) &&
+				shaderMain->addFragmentShader(juce::OpenGLHelpers::translateFragmentShaderToV3(fragmentShader)) &&
 				shaderMain->link()) {
 				//if (openGLContext->extensions.glGetUniformLocation(shaderProgram.getProgramID(), "name"))
-				uniformMatrixModel = new OpenGLShaderProgram::Uniform(*shaderMain, "matrixModel");
-				uniformMatrixView = new OpenGLShaderProgram::Uniform(*shaderMain, "matrixView");
-				uniformMatrixProj = new OpenGLShaderProgram::Uniform(*shaderMain, "matrixProj");
-				uniformColor = new OpenGLShaderProgram::Uniform(*shaderMain, "color");
-				uniformVFlip = new OpenGLShaderProgram::Uniform(*shaderMain, "vflip");
-				uniformUseTexture = new OpenGLShaderProgram::Uniform(*shaderMain, "useTexture");
+				uniformMatrixModel = new juce::OpenGLShaderProgram::Uniform(*shaderMain, "matrixModel");
+				uniformMatrixView = new juce::OpenGLShaderProgram::Uniform(*shaderMain, "matrixView");
+				uniformMatrixProj = new juce::OpenGLShaderProgram::Uniform(*shaderMain, "matrixProj");
+				uniformColor = new juce::OpenGLShaderProgram::Uniform(*shaderMain, "color");
+				uniformVFlip = new juce::OpenGLShaderProgram::Uniform(*shaderMain, "vflip");
+				uniformUseTexture = new juce::OpenGLShaderProgram::Uniform(*shaderMain, "useTexture");
 			}
 			else {
 				string err = shaderMain->getLastError().toStdString();
@@ -519,11 +542,11 @@ public:
 	// TODO: figure a better way to make setFont() accessible like this.
 
 	void setFont(std::string name, int size) {
-		murka::MurkaAssets::setFont(name, size * getScreenScale(), this);
+		MurkaAssets::setFont(name, size * getScreenScale(), this);
 	}
 
 	void drawString(const string & s, float x, float y) {
-		murka::MurkaAssets::getCurrentFont()->drawString(s, x, y);// *getScreenScale(), y * getScreenScale()); FIX THIS
+		MurkaAssets::getCurrentFont()->drawString(s, x, y);// *getScreenScale(), y * getScreenScale()); FIX THIS
 	}
 
 	// Object drawing
@@ -610,15 +633,15 @@ public:
 	}
 
 	void translate(float x, float y, float z) override {
-		currentMatrix = MurMatrix<float>::translation(Vector3D<float>(x * getScreenScale(), y * getScreenScale(), z * getScreenScale())) * currentMatrix;
+		currentMatrix = MurMatrix<float>::translation(juce::Vector3D<float>(x * getScreenScale(), y * getScreenScale(), z * getScreenScale())) * currentMatrix;
 	}
 
 	void rotateZRad(float radians) override {
-		currentMatrix = MurMatrix<float>().rotated(Vector3D<float>(0.0, 0.0, radians)) * currentMatrix;
+		currentMatrix = MurMatrix<float>().rotated(juce::Vector3D<float>(0.0, 0.0, radians)) * currentMatrix;
 	}
 
 	void scale(float x, float y, float z) override {
-		currentMatrix = MurMatrix<float>().scaled(Vector3D<float>(x * getScreenScale(), y * getScreenScale(), z * getScreenScale())) * currentMatrix;
+		currentMatrix = MurMatrix<float>().scaled(juce::Vector3D<float>(x * getScreenScale(), y * getScreenScale(), z * getScreenScale())) * currentMatrix;
 	}
 
 	// setup matrices and viewport (upto you to push and pop view before and after)
@@ -642,7 +665,7 @@ public:
 		float fov = 60;
 		float eyeX = viewW / 2;
 		float eyeY = viewH / 2;
-		float halfFov = MathConstants<float>::pi * fov / 360;
+		float halfFov = juce::MathConstants<float>::pi * fov / 360;
 		float theTan = tanf(halfFov);
 		float dist = eyeY / theTan;
 		float aspect = (float)viewW / viewH;
@@ -650,8 +673,8 @@ public:
 		float nearDist = dist / 10.0f;
 		float farDist = dist * 10.0f;
 
-		projMatrix = MurMatrix<float>::fromPerspective(degreesToRadians(fov), aspect, nearDist, farDist);
-		viewMatrix = MurMatrix<float>::fromLookAt(Vector3D<float>(eyeX, eyeY, dist), Vector3D<float>(eyeX, eyeY, 0), Vector3D<float>(0, 1, 0));
+		projMatrix = MurMatrix<float>::fromPerspective(juce::degreesToRadians(fov), aspect, nearDist, farDist);
+		viewMatrix = MurMatrix<float>::fromLookAt(juce::Vector3D<float>(eyeX, eyeY, dist), juce::Vector3D<float>(eyeX, eyeY, 0), juce::Vector3D<float>(0, 1, 0));
 	}
 
 	// rendering setup
@@ -760,27 +783,10 @@ public:
 	};
 
 	void drawRectangle(float x, float y, float w, float h) override {
-		MurMatrix<float> modelMatrix;
-		modelMatrix = modelMatrix * MurMatrix<float>::translation(Vector3D<float>(x * getScreenScale(), y * getScreenScale(), 0.0));
-		modelMatrix = modelMatrix.scaled(Vector3D<float>(w * getScreenScale(), h * getScreenScale(), 1.0));
-
-		modelMatrix = modelMatrix * stackedMatrix * currentMatrix;
-
-		shaderMain->use();
-		uniformMatrixModel->setMatrix4((GLfloat*)&(modelMatrix.mat[0]), 1, false);
-		uniformMatrixView->setMatrix4((GLfloat*)&(viewMatrix.mat[0]), 1, false);
-		uniformMatrixProj->setMatrix4((GLfloat*)&(projMatrix.mat[0]), 1, false);
-		uniformUseTexture->set(useTexture);
-		uniformVFlip->set(vflip);
-		uniformColor->set(currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
-		vboRect.internalDraw(GL_TRIANGLE_FAN, 0, 4);
-	}
-
-	void drawRectangle(MurkaShape s) override {
 		if (currentStyle.fill) {
 			MurMatrix<float> modelMatrix;
-			modelMatrix = modelMatrix * MurMatrix<float>::translation(Vector3D<float>(s.position.x * getScreenScale(), s.position.y * getScreenScale(), 0.0));
-			modelMatrix = modelMatrix.scaled(Vector3D<float>(s.size.x * getScreenScale(), s.size.y * getScreenScale(), 1.0));
+			modelMatrix = modelMatrix * MurMatrix<float>::translation(juce::Vector3D<float>(x * getScreenScale(), y * getScreenScale(), 0.0));
+			modelMatrix = modelMatrix.scaled(juce::Vector3D<float>(w * getScreenScale(), h * getScreenScale(), 1.0));
 
 			modelMatrix = modelMatrix * stackedMatrix * currentMatrix;
 
@@ -791,23 +797,27 @@ public:
 			uniformUseTexture->set(useTexture);
 			uniformVFlip->set(vflip);
 			uniformColor->set(currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
+			vboRect.update(GL_STATIC_DRAW);
 			vboRect.internalDraw(GL_TRIANGLE_FAN, 0, 4);
 		}
 		else {
 			pushMatrix();
-			translate(s.position.x , s.position.y, 0.0);
-			scale(s.size.x , s.size.y , 1.0);
+			translate(x, y, 0.0);
+			scale(w, h, 1.0);
 			draw(vboRect, GL_LINE_LOOP, 0, 4);
 			popMatrix();
 		}
 	}
 
+	void drawRectangle(MurkaShape s) override {
+		drawRectangle(s.position.x, s.position.y, s.size.x, s.size.y);
+	}
 
 	void drawCircle(float x, float y, float radius) override {
 		if (currentStyle.fill) {
 			MurMatrix<float> modelMatrix;
-			modelMatrix = modelMatrix * MurMatrix<float>::translation(Vector3D<float>(x * getScreenScale(), y * getScreenScale(), 0.0));
-			modelMatrix = modelMatrix.scaled(Vector3D<float>(radius * getScreenScale(), radius * getScreenScale(), 1.0));
+			modelMatrix = modelMatrix * MurMatrix<float>::translation(juce::Vector3D<float>(x * getScreenScale(), y * getScreenScale(), 0.0));
+			modelMatrix = modelMatrix.scaled(juce::Vector3D<float>(radius * getScreenScale(), radius * getScreenScale(), 1.0));
 
 			modelMatrix = modelMatrix * stackedMatrix * currentMatrix;
 
@@ -830,7 +840,7 @@ public:
 		}
 	}
 
-	void drawLineNew(float x1, float y1, float x2, float y2)  {
+	void drawLine(float x1, float y1, float x2, float y2) override {
 		x1 = x1 * getScreenScale();
 		y1 = y1 * getScreenScale();
 		x2 = x2 * getScreenScale();
@@ -841,9 +851,9 @@ public:
 		float dist = sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
 
 		MurMatrix<float> modelMatrix;
-		modelMatrix = modelMatrix.scaled(Vector3D<float>(dist, lineWidth * getScreenScale(), 1.0));
-		modelMatrix = modelMatrix * MurMatrix<float>().rotated(Vector3D<float>(0.0, 0.0, a));
-		modelMatrix = modelMatrix * MurMatrix<float>::translation(Vector3D<float>(x1, y1, 0.0));
+		modelMatrix = modelMatrix.scaled(juce::Vector3D<float>(dist, lineWidth * getScreenScale(), 1.0));
+		modelMatrix = modelMatrix * MurMatrix<float>().rotated(juce::Vector3D<float>(0.0, 0.0, a));
+		modelMatrix = modelMatrix * MurMatrix<float>::translation(juce::Vector3D<float>(x1, y1, 0.0));
 
 		shaderMain->use();
 		uniformMatrixModel->setMatrix4((GLfloat*)&(modelMatrix.mat[0]), 1, false);
@@ -852,22 +862,21 @@ public:
 		uniformUseTexture->set(useTexture);
 		uniformVFlip->set(vflip);
 		uniformColor->set(currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
+ 
 		vboLine.internalDraw(GL_TRIANGLE_FAN, 0, 4);
 	}
 
-	void drawLine(float x1, float y1, float x2, float y2) override {
+	void drawLineOld(float x1, float y1, float x2, float y2)  {
 		x1 = x1 * getScreenScale();
 		y1 = y1 * getScreenScale();
 		x2 = x2 * getScreenScale();
 		y2 = y2 * getScreenScale();
 
-		MurMatrix<float> modelMatrix;
-
 		vector<MurkaPoint> verts;
 		verts.push_back(MurkaPoint(x1, y1));
 		verts.push_back(MurkaPoint(x2, y2));
 		vboLineOld.setVertexData(verts.data(), verts.size());
-		vboLineOld.update(GL_STATIC_DRAW);
+		vboLineOld.update(GL_STREAM_DRAW);
 
 		draw(vboLineOld, GL_LINES, 0, verts.size());
 	}
@@ -919,3 +928,5 @@ class MurkaRender: public MurkaRenderBase {
 };
 
 #endif
+
+}

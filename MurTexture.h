@@ -1,5 +1,9 @@
 #pragma once
 
+#include "MurImage.h"
+
+namespace murka {
+
 #if defined(MURKA_OF)
 
 class MurTexture {
@@ -11,8 +15,6 @@ public:
 
 #elif defined(MURKA_JUCE)
 
-#include "MurImage.h"
-
 class MurTexture : public MurImage {
 public:
 	MurTexture(){};
@@ -20,3 +22,5 @@ public:
 
 #else // Default version
 #endif
+
+}

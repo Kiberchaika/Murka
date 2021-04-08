@@ -6,6 +6,7 @@
 #include "MurkaInputEventsRegister.h"
 #include "MurkaLinearLayoutGenerator.h"
 
+namespace murka {
 
 class MosaicLayout {
     ///
@@ -330,3 +331,5 @@ public:
     
 
 };
+
+}

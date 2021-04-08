@@ -44,7 +44,7 @@ public:
     struct Parameters {
         std::string label;
         
-        TextAlignment alignment = TEXT_LEFT;
+        TextAlignment alignment = TextAlignment::TEXT_LEFT;
         
         MurkaColor color = {0.98, 0.98, 0.98};
         
@@ -95,7 +95,7 @@ public:
         context.renderer->enableFill();
         if (bgColor.a != 0.0) {
             context.renderer->setColor(bgColor);
-            if (params->alignment == TEXT_LEFT) {
+            if (params->alignment == TextAlignment::TEXT_LEFT) {
                 context.renderer->drawRectangle(0, 0, font->getStringBoundingBox(params->label, 0, 0).width + 10, context.getSize().y);
             }
         }
@@ -125,7 +125,7 @@ public:
     // Here go parameters and any parameter convenience constructors. You need to define something called Parameters, even if it's NULL.
     struct Parameters {
         std::string label;
-        TextAlignment alignment = TEXT_LEFT;
+        TextAlignment alignment = TextAlignment::TEXT_LEFT;
         
         MurkaColor color = {0.98, 0.98, 0.98};
 		MurkaColor backgroundColor = {0., 0., 0., 0.};

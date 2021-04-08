@@ -2,13 +2,13 @@
 
 #include "MurkaTypes.h"
 
-class MurkaRendererBase;
+#define DEFAULT_LINE_HEIGHT 20
+
 
 namespace murka {
-    
-// Global defines
 
-#define DEFAULT_LINE_HEIGHT 20
+class MurkaRendererBase;
+
 
 class MurkaAssets {
 public:

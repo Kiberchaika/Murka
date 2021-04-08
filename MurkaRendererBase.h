@@ -6,7 +6,10 @@
 #include "MurkaTypes.h"
 #include "MurkaAssets.h"
 
-class MurkaRendererBase : public murka::MurkaAssets {
+
+namespace murka {
+
+class MurkaRendererBase : public MurkaAssets {
 	float screenScale = 1.0;
 
 public:
@@ -92,3 +95,5 @@ public:
 	virtual uint64_t getFrameNum() = 0;
 	virtual float getElapsedTime() = 0;
 };
+
+}
