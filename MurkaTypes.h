@@ -15,7 +15,6 @@
 #define GL_TEXTURE0 juce::GL_TEXTURE0
 #endif
 
-
 #include <stdint.h>
 #include <filesystem>
 #include <limits>
@@ -35,7 +34,7 @@ using namespace std;
 #include "ofxFontStash.h"
 typedef ofxFontStash FontObject; // It's important for this object to exist in a render for Murka to work
 #elif defined(MURKA_JUCE)
-#include "juce_FontStash.h"
+#include "juce_murka/juce_fontStash.h"
 typedef juceFontStash FontObject; // It's important for this object to exist in a render for Murka to work
 #endif
 
@@ -51,9 +50,44 @@ std::string to_string_with_precision(const T a_value, const int n = 6)
     return out.str();
 }
 
-
 namespace murka {
 
+enum MurkaKey {
+	MURKA_KEY_SHIFT = 0x1,
+	MURKA_KEY_CONTROL = 0x2,
+	MURKA_KEY_ALT = 0x4,
+	MURKA_KEY_SUPER = 0x10,
+	MURKA_KEY_COMMAND = MURKA_KEY_SUPER,
+
+	MURKA_KEY_BACKSPACE = 8,
+	MURKA_KEY_DEL = 127,
+
+	MURKA_KEY_RETURN = 13,
+	MURKA_KEY_ESC = 27,
+	MURKA_KEY_TAB = 9,
+
+	MURKA_KEY_F1 = 0xe000,
+	MURKA_KEY_F2 = 0xe001,
+	MURKA_KEY_F3 = 0xe002,
+	MURKA_KEY_F4 = 0xe003,
+	MURKA_KEY_F5 = 0xe004,
+	MURKA_KEY_F6 = 0xe005,
+	MURKA_KEY_F7 = 0xe006,
+	MURKA_KEY_F8 = 0xe007,
+	MURKA_KEY_F9 = 0xe008,
+	MURKA_KEY_F10 = 0xe009,
+	MURKA_KEY_F11 = 0xe00A,
+	MURKA_KEY_F12 = 0xe00B,
+	MURKA_KEY_LEFT = 0xe00C,
+	MURKA_KEY_UP = 0xe00D,
+	MURKA_KEY_RIGHT = 0xe00E,
+	MURKA_KEY_DOWN = 0xe00F,
+	MURKA_KEY_PAGE_UP = 0xe010,
+	MURKA_KEY_PAGE_DOWN = 0xe011,
+	MURKA_KEY_HOME = 0xe012,
+	MURKA_KEY_END = 0xe013,
+	MURKA_KEY_INSERT = 0xe014,
+};
 
 struct MurkaColor {
     float r = 1, g = 1, b = 1, a = 1;

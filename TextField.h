@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MurkaView.h"
+#include <chrono>
 
 namespace murka {
 
@@ -11,7 +12,7 @@ class TextField : public MurkaViewInterface<TextField> {
         
         bool fired = false;
         
-        double timeItFired = 0;
+		std::chrono::steady_clock::time_point timeItFired;
     public:
         
         operator vector<int>() { return keys; };
@@ -34,14 +35,12 @@ class TextField : public MurkaViewInterface<TextField> {
     
 			bool result = true;
 
-#ifdef MURKA_OF
-            
             for (auto &i: keys) { if (!m.isKeyPressed(i)) result = false; }
             
-            if ((ofGetElapsedTimef() - timeItFired) < 0.5) {
+
+            if ((std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - timeItFired).count() / 1000.0) < 0.5) {
                 result = false; // too little time since it was last pressed
             }
-#endif
 
             return result;
         }
@@ -49,9 +48,7 @@ class TextField : public MurkaViewInterface<TextField> {
         void fire() {
             fired = true;
             
-#ifdef MURKA_OF
-            timeItFired = ofGetElapsedTimef();
-#endif
+			timeItFired = std::chrono::steady_clock::now();
         }
     };
     
@@ -151,7 +148,7 @@ public:
             lastLeftMousebuttonClicktime = context.renderer->getElapsedTime();
         }
 
-#ifdef MURKA_OF
+
         MurkaColor c = context.renderer->getColor();
         
         if (params->drawBounds) {
@@ -210,7 +207,7 @@ public:
             
             MurkaShape currentSymbolShape = {glyphXCoordinate, 0, currentGlyphLengths[i], context.getSize().y};
             
-            bool safeToUseMouseClickEventsCauseEnoughTimeSinceDoubleClickPassed = ((ofGetElapsedTimef() - lastLeftMousebuttonClicktime) > 0.2);
+            bool safeToUseMouseClickEventsCauseEnoughTimeSinceDoubleClickPassed = ((context.renderer->getElapsedTime() - lastLeftMousebuttonClicktime) > 0.2);
             
             // Setting cursor position inside the string if pressed inside it
             if ((insideGlyph) && (context.mouseDownPressed[0])) {
@@ -281,7 +278,7 @@ public:
                            cursorPositionInPixels - cameraPanInsideWidget, 30);
         }
         
-#endif
+
         
         bool enterPressed = false;
         
@@ -386,14 +383,14 @@ public:
                 selectAll.fire();
             } else
             if (context.keyPresses.size() != 0) {
-#ifdef MURKA_OF                
+           
                 for (auto key: context.keyPresses) {
 //                        std::cout << key;
                     
-                    if (key == OF_KEY_RETURN) { // enter
+                    if (key == MURKA_KEY_RETURN) { // enter
                         enterPressed = true;
                     }
-                    else if (key == OF_KEY_BACKSPACE) { // backspace
+                    else if (key == MURKA_KEY_BACKSPACE) { // backspace
 						if (isSelectingTextNow()) { // if we select now, backspace just deletes
 							displayString.replace(selectionSymbolsRange.first, selectionSymbolsRange.second - selectionSymbolsRange.first, "");
 							cursorPosition = selectionSymbolsRange.first;
@@ -407,7 +404,7 @@ public:
 							}
 						}
 					}
-					else if (key == OF_KEY_DEL) { 
+					else if (key == MURKA_KEY_DEL) {
 						if (isSelectingTextNow()) { // if we select now, backspace just deletes
 							displayString.replace(selectionSymbolsRange.first, selectionSymbolsRange.second - selectionSymbolsRange.first, "");
 							cursorPosition = selectionSymbolsRange.first;
@@ -420,7 +417,7 @@ public:
 							}
 						}
 					}
-					else if (key == OF_KEY_LEFT) { // left
+					else if (key == MURKA_KEY_LEFT) { // left
                         if (cursorPosition > 0) {
                             if (isSelectingTextNow()) {
                                 if (cursorPosition != selectionSymbolsRange.first) {
@@ -443,7 +440,7 @@ public:
                         }
                         
                     }
-                    else if (key == OF_KEY_RIGHT) { // right
+                    else if (key == MURKA_KEY_RIGHT) { // right
                         if (cursorPosition < displayString.size()) {
                             if (isSelectingTextNow()) {
                                 if (cursorPosition != selectionSymbolsRange.second) {
@@ -501,7 +498,7 @@ public:
 					}
 
                 }
-#endif
+
 			}
         }
         
@@ -530,22 +527,20 @@ public:
             }
             if (dataTypeName == typeid(float*).name()) {
                 float* floatData = ((float*)dataToControl);
-#ifdef MURKA_OF
-                *floatData = ofToFloat(displayString);
-#endif
-                std::cout << "setting it to " << *floatData;
+
+				*floatData = std::stof(displayString);
+                
+				std::cout << "setting it to " << *floatData;
             }
             if (dataTypeName == typeid(double*).name()) {
                 double* doubleData = ((double*)dataToControl);
-#ifdef MURKA_OF
-                *doubleData = ofToDouble(displayString);
-#endif
+                
+				*doubleData = std::stod(displayString);
             }
             if (dataTypeName == typeid(int*).name()) {
                 int* intData = ((int*)dataToControl);
-#ifdef MURKA_OF
-                *intData = ofToInt(displayString);
-#endif
+
+                *intData = std::stoi(displayString);
             }
     }
     
@@ -564,45 +559,44 @@ public:
         
         if (dataTypeName == typeid(float*).name()) {
             float* floatData = ((float*)dataToControl);
-#ifdef MURKA_OF
-            displayString = ofToString(*floatData, precision);
+            displayString = to_string_with_precision(*floatData, precision);
             if (clamp) {
                 if (*floatData < min) {
-                    displayString = ofToString(min, precision);
+                    displayString = to_string_with_precision(min, precision);
                 }
                 if (*floatData > max) {
-                    displayString = ofToString(max, precision);
+                    displayString = to_string_with_precision(max, precision);
                 }
             }
-#endif
+
         }
         if (dataTypeName == typeid(double*).name()) {
             double* doubleData = ((double*)dataToControl);
-#ifdef MURKA_OF
-            displayString = ofToString(*doubleData);
+
+			displayString = to_string_with_precision(*doubleData);
             if (clamp) {
                 if (*doubleData < min) {
-                    displayString = ofToString(min, precision);
+                    displayString = to_string_with_precision(min, precision);
                 }
                 if (*doubleData > max) {
-                    displayString = ofToString(max, precision);
+                    displayString = to_string_with_precision(max, precision);
                 }
             }
-#endif
+
         }
         if (dataTypeName == typeid(int*).name()) {
             int* intData = ((int*)dataToControl);
-#ifdef MURKA_OF
-            displayString = ofToString(*intData);
+
+            displayString = to_string_with_precision(*intData);
             if (clamp) {
                 if (*intData < min) {
-                    displayString = ofToString(int(min));
+                    displayString = to_string_with_precision(int(min));
                 }
                 if (*intData > max) {
-                    displayString = ofToString(int(max));
+                    displayString = to_string_with_precision(int(max));
                 }
             }
-#endif
+
         }
         
         if (!isItStringData) {

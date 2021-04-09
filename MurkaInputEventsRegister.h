@@ -53,8 +53,8 @@ struct MurkaEventState {
 class MurkaInputEventsRegister {
 
 	float inputEventsScale = 1.0;
-	double lastLeftMousebuttonClicktime = -10000;
-    MurkaPoint mousePositionWhenMouseLeftPressed = {0, 0};
+	std::chrono::steady_clock::time_point lastLeftMousebuttonClicktime;
+	MurkaPoint mousePositionWhenMouseLeftPressed = {0, 0};
 
 protected:
 	void setInputEventsScale(float newInputEventsScale) {
@@ -62,7 +62,6 @@ protected:
 	}
 
 public:
-    
 
     MurkaEventState eventState;
     
@@ -148,14 +147,14 @@ public:
             }
             
             // Doubleclick support
-    
-    #ifdef MURKA_OF
-            if ((ofGetElapsedTimef() - lastLeftMousebuttonClicktime) < 0.2) {
+			float t = (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - lastLeftMousebuttonClicktime).count() / 1000.0);
+            if ((std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - lastLeftMousebuttonClicktime).count() / 1000.0) < 0.2) {
                 eventState.doubleClick = true;
-            } else eventState.doubleClick = false;
-            lastLeftMousebuttonClicktime = ofGetElapsedTimef();
-    #endif
-     
+			}
+			else {
+				eventState.doubleClick = false;
+			}
+			lastLeftMousebuttonClicktime = std::chrono::steady_clock::now();
         }
         
     void registerMouseReleased(int mouseX, int mouseY, int mouseButtonIndex) {
@@ -234,12 +233,11 @@ public:
         
         // Doubleclick support
         
-#ifdef MURKA_OF
+
         if ((ofGetElapsedTimef() - lastLeftMousebuttonClicktime) < 0.2) {
             eventState.doubleClick = true;
         } else eventState.doubleClick = false;
         lastLeftMousebuttonClicktime = ofGetElapsedTimef();
-#endif
 
     }
     
