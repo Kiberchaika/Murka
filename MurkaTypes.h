@@ -35,7 +35,7 @@ using namespace std;
 #include "ofxFontStash.h"
 typedef ofxFontStash FontObject; // It's important for this object to exist in a render for Murka to work
 #elif defined(MURKA_JUCE)
-#include "juceFontStash.h"
+#include "juce_FontStash.h"
 typedef juceFontStash FontObject; // It's important for this object to exist in a render for Murka to work
 #endif
 
