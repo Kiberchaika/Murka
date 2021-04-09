@@ -167,8 +167,7 @@ public:
         if (isSelectingTextNow()) {
 
             auto selectionShape = returnSelectionVisualShape();
-            MurkaColor selectionColor = (context.renderer->getColor() * 0.7 +
-                                         context.renderer->getColor() * 0.7) * 255;
+            MurkaColor selectionColor = context.renderer->getColor() * 0.7;
             context.renderer->setColor(100, 100, 100, 200);
             context.renderer->drawRectangle(10 - cameraPanInsideWidget + selectionShape.x(), 4, selectionShape.width(), context.getSize().y - 8);
         }
@@ -183,7 +182,7 @@ public:
             // drawing hint
             MurkaColor hintColor = context.renderer->getColor() * 0.5 +
                                    context.renderer->getColor() * 0.5;
-            context.renderer->setColor(hintColor * 255);
+            context.renderer->setColor(hintColor);
             font->drawString(params->hint, 10, context.getSize().y / 2 - font->getLineHeight() / 2);
         }
         

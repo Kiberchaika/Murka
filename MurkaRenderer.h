@@ -754,7 +754,7 @@ public:
 	MurkaColor getColor() override {
 		return currentStyle.color;
 	}
-
+	 
 	void setColor(int r, int g, int b) override {
 		currentStyle.color = MurkaColor(1.0 * r / 255, 1.0 * g / 255, 1.0 * b / 255);
 		glColor4f(currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
