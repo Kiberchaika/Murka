@@ -55,33 +55,20 @@ class TextField : public MurkaViewInterface<TextField> {
     KeyStroke copyText, cutText, pasteText, goLeft, goRight, shiftLeft, shiftRight, selectAll;
     
 public:
-    TextField() {
-        
-        lastLeftMousebuttonClicktime = 0.0;
-        
-        // Setting up keystrokes
-#ifdef TARGET_OSX
-        copyText = KeyStroke({OF_KEY_COMMAND, 'c'});
-        cutText = KeyStroke({OF_KEY_COMMAND, 'x'});
-        pasteText = KeyStroke({OF_KEY_COMMAND, 'v'});
-        goLeft = KeyStroke({OF_KEY_COMMAND, OF_KEY_LEFT});
-        goRight = KeyStroke({OF_KEY_COMMAND, OF_KEY_RIGHT});
-        shiftLeft = KeyStroke({ OF_KEY_SHIFT, OF_KEY_LEFT });
-        shiftRight = KeyStroke({ OF_KEY_SHIFT, OF_KEY_RIGHT });
-        selectAll = KeyStroke({OF_KEY_COMMAND, 'a'});
-#endif
-        
-#ifdef TARGET_WIN32
-        copyText = KeyStroke({ OF_KEY_CONTROL, 'c' });
-        cutText = KeyStroke({ OF_KEY_CONTROL, 'x' });
-        pasteText = KeyStroke({ OF_KEY_CONTROL, 'v' });
-		goLeft = KeyStroke({ OF_KEY_CONTROL, OF_KEY_LEFT });
-		goRight = KeyStroke({ OF_KEY_CONTROL, OF_KEY_RIGHT });
-		shiftLeft = KeyStroke({ OF_KEY_SHIFT, OF_KEY_LEFT });
-		shiftRight = KeyStroke({ OF_KEY_SHIFT, OF_KEY_RIGHT });
-		selectAll = KeyStroke({ OF_KEY_CONTROL, 'a' });
-#endif
-        }
+	TextField() {
+
+		lastLeftMousebuttonClicktime = 0.0;
+
+		// Setting up keystrokes
+		copyText = KeyStroke({ MURKA_KEY_COMMAND, 'c' });
+		cutText = KeyStroke({ MURKA_KEY_COMMAND, 'x' });
+		pasteText = KeyStroke({ MURKA_KEY_COMMAND, 'v' });
+		goLeft = KeyStroke({ MURKA_KEY_COMMAND, MURKA_KEY_LEFT });
+		goRight = KeyStroke({ MURKA_KEY_COMMAND, MURKA_KEY_RIGHT });
+		shiftLeft = KeyStroke({ MURKA_KEY_SHIFT, MURKA_KEY_LEFT });
+		shiftRight = KeyStroke({ MURKA_KEY_SHIFT, MURKA_KEY_RIGHT });
+		selectAll = KeyStroke({ MURKA_KEY_COMMAND, 'a' });
+	}
 
         //
     
@@ -270,8 +257,9 @@ public:
 
         // drawing cursor
         if (activated && !isSelectingTextNow()) {
-            float timeMod = context.getRunningTime() / 1.0 - int(context.getRunningTime() / 1.0);
+            float timeMod = context.renderer->getElapsedTime() / 1.0 - int(context.renderer->getElapsedTime() / 1.0);
             context.renderer->setColor(200);
+
             if (timeMod > 0.5)
                 context.renderer->drawLine(cursorPositionInPixels - cameraPanInsideWidget, 3,
                            cursorPositionInPixels - cameraPanInsideWidget, 30);

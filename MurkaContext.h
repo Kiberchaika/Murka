@@ -26,9 +26,6 @@ private:
 public:
     
     MurkaContext() {
-#ifdef MURKA_OF
-        runningTime = ofGetElapsedTimef();
-#endif
     }
     
     // Assets access functions
@@ -177,13 +174,9 @@ public:
         return MurkaShape();
     };
 
-    double getRunningTime() const {return runningTime;}
-    
 private:
     int imCounter = 0; // the counter that we use to distinguish new widgets from the ones we
     // want to reuse in IM mode.
-
-    double runningTime;
 };
 
 }

@@ -936,7 +936,7 @@ public:
 	}
 
 	float getElapsedTime() override {
-		return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - begin).count() / 1000.0;
+		return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - begin).count() / 1000.0;
 	}
 };
 

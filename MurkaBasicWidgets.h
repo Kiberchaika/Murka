@@ -235,7 +235,7 @@ public:
 
 		MurkaColor fgColor = context.renderer->getColor();
 
-        float pushed = 0.2 - (context.getRunningTime() - lastTimeClicked);
+        float pushed = 0.2 - (context.renderer->getElapsedTime() - lastTimeClicked);
         if (pushed < 0) pushed = 0;
         pushed /= 0.2;
 
@@ -257,7 +257,7 @@ public:
         
         if (inside && context.mouseDownPressed[0]) {
             *booleanToControl = !*booleanToControl;
-            lastTimeClicked = context.getRunningTime();
+            lastTimeClicked = context.renderer->getElapsedTime();
 			castedResults = booleanToControl;
 			*results = true;
 		}
@@ -314,7 +314,7 @@ public:
 
 		MurkaColor fgColor = context.renderer->getColor();
 
-		float pushed = 0.2 - (context.getRunningTime() - lastTimeClicked);
+		float pushed = 0.2 - (context.renderer->getElapsedTime() - lastTimeClicked);
 		if (pushed < 0) pushed = 0;
 		pushed /= 0.2;
             
@@ -343,7 +343,7 @@ public:
 			if (rowHover * inside && context.mouseDownPressed[0]) {
 				*intToControl = i;
 				*results = true;
-				lastTimeClicked = context.getRunningTime();
+				lastTimeClicked = context.renderer->getElapsedTime();
 			}
 
 			context.renderer->popStyle();
@@ -645,13 +645,13 @@ public:
 
          if ((context.mouseDownPressed[0]) && (context.isHovered())) {
             castedResults = true;
-            lastTimeClicked = context.getRunningTime();
+            lastTimeClicked = context.renderer->getElapsedTime();
          } else castedResults = false;
         
          auto font = context.getCurrentFont();
         
         
-             float pushed = 0.2 - (context.getRunningTime() - lastTimeClicked);
+             float pushed = 0.2 - (context.renderer->getElapsedTime() - lastTimeClicked);
              if (pushed < 0) pushed = 0;
              pushed /= 0.2;
          
