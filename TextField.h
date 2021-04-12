@@ -56,7 +56,6 @@ class TextField : public MurkaViewInterface<TextField> {
     
 public:
 	TextField() {
-
 		lastLeftMousebuttonClicktime = 0.0;
 
 		// Setting up keystrokes
@@ -69,8 +68,6 @@ public:
 		shiftRight = KeyStroke({ MURKA_KEY_SHIFT, MURKA_KEY_RIGHT });
 		selectAll = KeyStroke({ MURKA_KEY_COMMAND, 'a' });
 	}
-
-        //
     
     MURKA_VIEW_DRAW_FUNCTION  {
 
@@ -125,7 +122,6 @@ public:
                 if (activated) context.claimKeyboardFocus(this);
                 
                 updateInternalRepresenation(dataToControl, params->precision, params->clampNumber, params->minNumber, params->maxNumber);
-                
             }
             
             if (((context.renderer->getElapsedTime() - lastLeftMousebuttonClicktime) < 0.2) && (activated)) {

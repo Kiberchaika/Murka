@@ -373,6 +373,18 @@ class MurkaRenderer : public MurkaRendererBase {
 
 public:
 	~MurkaRenderer() {
+		
+	}
+
+	void setAppComponent(juce::OpenGLAppComponent* comp) {
+		glAppComp = comp;
+	}
+
+	void setOpenGLContext(juce::OpenGLContext* ctx) {
+		openGLContext = ctx;
+	}
+
+	void closeOpenGLContext() {
 		delete uniformMatrixModel;
 		delete uniformMatrixView;
 		delete uniformMatrixProj;
@@ -386,16 +398,11 @@ public:
 		uniformColor = nullptr;
 		uniformVFlip = nullptr;
 		uniformUseTexture = nullptr;
-	}
 
-	void setAppComponent(juce::OpenGLAppComponent* comp) {
-		glAppComp = comp;
+		shaderMain = nullptr;
 	}
+   
 
-	void setOpenGLContext(juce::OpenGLContext* ctx) {
-		openGLContext = ctx;
-	}
-    
     int getAttribLocationPosition() {
         return attribLocationPosition;
     }
