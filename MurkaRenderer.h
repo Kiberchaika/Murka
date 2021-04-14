@@ -707,8 +707,10 @@ public:
 
 	// rendering setup
 	void setCircleResolution(int resolution) override {
-		this->circleResolution = resolution;
-		recreateCircleVbo();
+		if (this->circleResolution != resolution) {
+			this->circleResolution = resolution;
+			recreateCircleVbo();
+		}
 	}
 
 	void setLineWidth(float lineWidth) override {
