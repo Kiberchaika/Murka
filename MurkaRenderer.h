@@ -530,7 +530,8 @@ public:
 			recreateCircleVbo();
 		}
 
-        currentViewport = MurkaShape(0, 0, glAppComp->getWidth(), glAppComp->getHeight());
+        float w  = openGLContext->getRenderingScale();
+        currentViewport = MurkaShape(0, 0, glAppComp->getWidth() * openGLContext->getRenderingScale(), glAppComp->getHeight() * openGLContext->getRenderingScale());
 
         begin = std::chrono::steady_clock::now();
 	}
@@ -544,11 +545,12 @@ public:
 		currentStyle = Style();
 
 		viewportStack.clear();
-		currentViewport = MurkaShape(0, 0, glAppComp->getWidth(), glAppComp->getHeight());
+        currentViewport = MurkaShape(0, 0, glAppComp->getWidth() * openGLContext->getRenderingScale(), glAppComp->getHeight() *  openGLContext->getRenderingScale());
 
 		frameNum++;
-
 		//enableAlphaBlending();
+        
+        setupScreen();
 	}
 	
 	// Clipboard
@@ -679,7 +681,7 @@ public:
 
 	void viewport(float x, float y, float width, float height, bool vflip = true) override {
 		currentViewport = MurkaShape(x * getScreenScale(), y * getScreenScale(), width * getScreenScale(), height * getScreenScale());
-		glViewport(currentViewport.x(), vflip ? glAppComp->getHeight() - currentViewport.height() - currentViewport.y() : currentViewport.y(), currentViewport.width(), currentViewport.height());
+		glViewport(currentViewport.x(), vflip ? glAppComp->getHeight() * openGLContext->getRenderingScale() - currentViewport.height() - currentViewport.y() : currentViewport.y(), currentViewport.width(), currentViewport.height());
 	}
 
 	MurkaShape getCurrentViewport() override {
@@ -923,11 +925,11 @@ public:
 	}
 
 	int getWindowWidth() override {
-		return glAppComp->getWidth() / getScreenScale();
+		return glAppComp->getWidth() * openGLContext->getRenderingScale() / getScreenScale();
 	}
 
 	int getWindowHeight() override {
-		return glAppComp->getHeight() / getScreenScale();
+		return glAppComp->getHeight() * openGLContext->getRenderingScale() / getScreenScale();
 	}
 
 	bool getUsingArbTex() override {
