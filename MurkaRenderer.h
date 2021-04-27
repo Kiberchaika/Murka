@@ -548,7 +548,7 @@ public:
         currentViewport = MurkaShape(0, 0, glAppComp->getWidth() * openGLContext->getRenderingScale(), glAppComp->getHeight() *  openGLContext->getRenderingScale());
 
 		frameNum++;
-		//enableAlphaBlending();
+		enableAlphaBlending();
         
         setupScreen();
 	}
