@@ -5,7 +5,7 @@
 #include "MurImage.h"
 #include "MurVbo.h"
 #include "MurMatrix.h"
-
+#include "MurShader.h"
 
 #if defined(MURKA_OF)
 #include "ofMain.h"
@@ -17,7 +17,6 @@
 namespace murka {
 
 #if defined(MURKA_OF)
-
 
 class MurkaRenderer: public MurkaRendererBase {
 	ofAppBaseWindow* ofWindow = nullptr;
@@ -258,7 +257,7 @@ public:
         draw(vbo, drawMode, first, total);
     }
 
-	void drawPath(const vector<MurkaPoint> & verts) override {
+	void drawPath(const vector<MurkaPoint3D> & verts) override {
 		ofPolyline polyline;
 		polyline.addVertices(*(const vector<glm::vec3>*)&verts);
 		ofRenderer->draw(polyline);
@@ -326,13 +325,7 @@ class MurkaRenderer : public MurkaRendererBase {
 	MurMatrix<float> projMatrix;
 	MurMatrix<float> viewMatrix;
 
-	std::unique_ptr<juce::OpenGLShaderProgram> shaderMain;
-	juce::OpenGLShaderProgram::Uniform* uniformMatrixModel = nullptr;
-	juce::OpenGLShaderProgram::Uniform* uniformMatrixView = nullptr;
-	juce::OpenGLShaderProgram::Uniform* uniformMatrixProj = nullptr;
-	juce::OpenGLShaderProgram::Uniform* uniformColor = nullptr;
-	juce::OpenGLShaderProgram::Uniform* uniformVFlip = nullptr;
-	juce::OpenGLShaderProgram::Uniform* uniformUseTexture = nullptr;
+	MurShader shaderMain;
 	
 	MurVbo vboRect;
 	MurVbo vboLine;
@@ -340,19 +333,19 @@ class MurkaRenderer : public MurkaRendererBase {
 	MurVbo vboCircle;
 
 	void recreateCircleVbo() {
-		vector<MurkaPoint> verts;
+		vector<MurkaPoint3D> verts;
 		for (int i = 0; i < circleResolution; i++)
 		{
 			float theta = 2.0f * juce::MathConstants<float>::pi * float(i) / float(circleResolution);
 			float x = 1.0 * cosf(theta);
 			float y = 1.0 * sinf(theta);
-			verts.push_back(MurkaPoint(x, y));
+			verts.push_back(MurkaPoint3D(x, y, 0));
 		}
 
 		vboCircle.setOpenGLContext(openGLContext);
 		vboCircle.setup();
 		vboCircle.setVertexData(verts.data(), verts.size());
-		vboCircle.update(GL_STREAM_DRAW, attribLocationPosition, attribLocationUv);
+		vboCircle.update(GL_STREAM_DRAW, shaderMain.getAttributeLocation("position"), shaderMain.getAttributeLocation("uv"), shaderMain.getAttributeLocation("col"));
 	}
 
 	void updateStackedMatrix() {
@@ -365,9 +358,6 @@ class MurkaRenderer : public MurkaRendererBase {
 	bool vflip = true;
 	bool useTexture = false;
 	
-    int attribLocationPosition = 0;
-    int attribLocationUv = 1;
-    
 	uint64_t frameNum = 0;
 	std::chrono::steady_clock::time_point begin;
 
@@ -385,31 +375,11 @@ public:
 	}
 
 	void closeOpenGLContext() {
-		delete uniformMatrixModel;
-		delete uniformMatrixView;
-		delete uniformMatrixProj;
-		delete uniformColor;
-		delete uniformVFlip;
-		delete uniformUseTexture;
-
-		uniformMatrixModel = nullptr;
-		uniformMatrixView = nullptr;
-		uniformMatrixProj = nullptr;
-		uniformColor = nullptr;
-		uniformVFlip = nullptr;
-		uniformUseTexture = nullptr;
-
-		shaderMain = nullptr;
 	}
    
-
-    int getAttribLocationPosition() {
-        return attribLocationPosition;
-    }
-    
-    int getAttribLocationUv() {
-        return attribLocationUv;
-    }
+	void bindMainShader() {
+		shaderMain.bind();
+	}
 
 	juce::OpenGLContext* getOpenGLContext() {
 		return openGLContext;
@@ -419,63 +389,48 @@ public:
         // create main shader
         {
             string vertexShader =
-                "varying vec2 vUv;\n"
-                "uniform mat4 matrixModel;\n"
+				"varying vec2 vUv;\n"
+				"varying vec4 vCol;\n"
+				"uniform mat4 matrixModel;\n"
                 "uniform mat4 matrixView;\n"
                 "uniform mat4 matrixProj;\n"
                 "uniform vec4 color;\n"
                 "uniform bool vflip;\n"
                 "attribute vec3 position;\n"
-                "attribute vec2 uv;\n"
-                "\n"
+				"attribute vec2 uv;\n"
+				"attribute vec4 col;\n"
+				"\n"
                 "void main()\n"
                 "{\n"
-                "    vUv = uv;"
-                "    vec4 pos = matrixProj * matrixView * matrixModel * vec4(position, 1.0) ; \n"
+				"    vUv = uv;"
+				"    vCol = col;"
+				"    vec4 pos = matrixProj * matrixView * matrixModel * vec4(position, 1.0) ; \n"
                 "    gl_Position = vflip ? vec4(pos.x, 1 - pos.y, pos.z, pos.w) : vec4(position, 1.0); \n"
                 "}\n";
 
             string fragmentShader =
                 "varying vec2 vUv;\n"
-                "uniform sampler2D mainTexture;\n"
+				"varying vec4 vCol;\n"
+				"uniform sampler2D mainTexture;\n"
                 "uniform vec4 color;\n"
                 "uniform bool useTexture;\n"
                 "\n"
                 "void main()\n"
                 "{\n"
-                "    gl_FragColor = color * (useTexture ? texture(mainTexture, vUv) : vec4 (1.0, 1.0, 1.0, 1.0));\n"
+				"    gl_FragColor = color * vCol * (useTexture ? texture(mainTexture, vUv) : vec4 (1.0, 1.0, 1.0, 1.0));\n"
                 "}\n";
 
-            shaderMain = std::make_unique<juce::OpenGLShaderProgram>(*openGLContext);
-            if (shaderMain->addVertexShader(juce::OpenGLHelpers::translateVertexShaderToV3(vertexShader)) &&
-                shaderMain->addFragmentShader(juce::OpenGLHelpers::translateFragmentShaderToV3(fragmentShader)) &&
-                shaderMain->link()) {
-                //if (openGLContext->extensions.glGetUniformLocation(shaderProgram.getProgramID(), "name"))
-                uniformMatrixModel = new juce::OpenGLShaderProgram::Uniform(*shaderMain, "matrixModel");
-                uniformMatrixView = new juce::OpenGLShaderProgram::Uniform(*shaderMain, "matrixView");
-                uniformMatrixProj = new juce::OpenGLShaderProgram::Uniform(*shaderMain, "matrixProj");
-                uniformColor = new juce::OpenGLShaderProgram::Uniform(*shaderMain, "color");
-                uniformVFlip = new juce::OpenGLShaderProgram::Uniform(*shaderMain, "vflip");
-                uniformUseTexture = new juce::OpenGLShaderProgram::Uniform(*shaderMain, "useTexture");
-            
-                
-                GLuint programID = shaderMain->getProgramID();
-				attribLocationPosition = openGLContext->extensions.glGetAttribLocation(programID, "position");
-				attribLocationUv = openGLContext->extensions.glGetAttribLocation(programID, "uv");
-            }
-            else {
-                string err = shaderMain->getLastError().toStdString();
-                err = err + "";
-            }
+			shaderMain.setOpenGLContext(openGLContext);
+			shaderMain.load(vertexShader, fragmentShader);
         }
 
         // vbo for primitives
 		{
-			vector<MurkaPoint> verts;
-			verts.push_back(MurkaPoint(0.0f, 0.0f));
-			verts.push_back(MurkaPoint(0.0f, 1.0f));
-			verts.push_back(MurkaPoint(1.0f, 1.0f));
-			verts.push_back(MurkaPoint(1.0f, 0.0f));
+			vector<MurkaPoint3D> verts;
+			verts.push_back(MurkaPoint3D(0.0f, 0.0f, 0.0f));
+			verts.push_back(MurkaPoint3D(0.0f, 1.0f, 0.0f));
+			verts.push_back(MurkaPoint3D(1.0f, 1.0f, 0.0f));
+			verts.push_back(MurkaPoint3D(1.0f, 0.0f, 0.0f));
 
 			vector<MurkaPoint> texCoords;
 			texCoords.push_back(MurkaPoint(0.0f, 0.0f));
@@ -487,15 +442,15 @@ public:
 			vboRect.setup();
 			vboRect.setVertexData(verts.data(), verts.size());
 			vboRect.setTexCoordData(texCoords.data(), texCoords.size());
-			vboRect.update(GL_STATIC_DRAW, attribLocationPosition, attribLocationUv);
+			vboRect.update(GL_STATIC_DRAW, shaderMain.getAttributeLocation("position"), shaderMain.getAttributeLocation("uv"), shaderMain.getAttributeLocation("col"));
 		}
 
 		{
-			vector<MurkaPoint> verts;
-			verts.push_back(MurkaPoint(0.0f, -0.5f));
-			verts.push_back(MurkaPoint(0.0f, 0.5f));
-			verts.push_back(MurkaPoint(1.0f, 0.5f));
-			verts.push_back(MurkaPoint(1.0f, -0.5f));
+			vector<MurkaPoint3D> verts;
+			verts.push_back(MurkaPoint3D(0.0f, -0.5f, 0.0f));
+			verts.push_back(MurkaPoint3D(0.0f, 0.5f, 0.0f));
+			verts.push_back(MurkaPoint3D(1.0f, 0.5f, 0.0f));
+			verts.push_back(MurkaPoint3D(1.0f, -0.5f, 0.0f));
 
             vector<MurkaPoint> texCoords;
             texCoords.push_back(MurkaPoint(0.0f, 0.0f));
@@ -507,13 +462,13 @@ public:
 			vboLine.setup();
 			vboLine.setVertexData(verts.data(), verts.size());
             vboLine.setTexCoordData(texCoords.data(), texCoords.size());
-            vboLine.update(GL_STREAM_DRAW, attribLocationPosition, attribLocationUv);
+            vboLine.update(GL_STREAM_DRAW, shaderMain.getAttributeLocation("position"), shaderMain.getAttributeLocation("uv"), shaderMain.getAttributeLocation("col"));
 		}
 
 		{
-			vector<MurkaPoint> verts;
-			verts.push_back(MurkaPoint(0.0f, 0.0f));
-			verts.push_back(MurkaPoint(0.0f, 0.0f));
+			vector<MurkaPoint3D> verts;
+			verts.push_back(MurkaPoint3D(0.0f, 0.0f, 0.0f));
+			verts.push_back(MurkaPoint3D(0.0f, 0.0f, 0.0f));
 
             vector<MurkaPoint> texCoords;
             texCoords.push_back(MurkaPoint(0.0f, 0.0f));
@@ -523,7 +478,7 @@ public:
 			vboLineOld.setup();
 			vboLineOld.setVertexData(verts.data(), verts.size());
             vboLineOld.setTexCoordData(texCoords.data(), texCoords.size());
-            vboLineOld.update(GL_STREAM_DRAW, attribLocationPosition, attribLocationUv);
+            vboLineOld.update(GL_STREAM_DRAW, shaderMain.getAttributeLocation("position"), shaderMain.getAttributeLocation("uv"), shaderMain.getAttributeLocation("col"));
 		}
 
 		{
@@ -604,13 +559,14 @@ public:
 		MurMatrix<float> modelMatrix;
 		modelMatrix = modelMatrix * stackedMatrix * currentMatrix;
 
-		shaderMain->use();
-		uniformMatrixModel->setMatrix4((GLfloat*)&(modelMatrix.mat[0]), 1, false);
-		uniformMatrixView->setMatrix4((GLfloat*)&(viewMatrix.mat[0]), 1, false);
-		uniformMatrixProj->setMatrix4((GLfloat*)&(projMatrix.mat[0]), 1, false);
-		uniformUseTexture->set(useTexture);
-		uniformVFlip->set(vflip);
-		uniformColor->set(currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
+		shaderMain.bind();
+		shaderMain.setUniformMatrix4f("matrixModel", modelMatrix);
+		shaderMain.setUniformMatrix4f("matrixView", viewMatrix);
+		shaderMain.setUniformMatrix4f("matrixProj", projMatrix);
+		
+		shaderMain.setUniform1i("useTexture", useTexture);
+		shaderMain.setUniform1i("vflip", vflip);
+		shaderMain.setUniform4f("color", currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
 		vbo.internalDraw(drawMode, first, total);
 	}
 
@@ -822,14 +778,14 @@ public:
 
 			modelMatrix = modelMatrix * stackedMatrix * currentMatrix;
 
-			shaderMain->use();
-			uniformMatrixModel->setMatrix4((GLfloat*)&(modelMatrix.mat[0]), 1, false);
-			uniformMatrixView->setMatrix4((GLfloat*)&(viewMatrix.mat[0]), 1, false);
-			uniformMatrixProj->setMatrix4((GLfloat*)&(projMatrix.mat[0]), 1, false);
-			uniformUseTexture->set(useTexture);
-			uniformVFlip->set(vflip);
-			uniformColor->set(currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
-			vboRect.update(GL_STATIC_DRAW, attribLocationPosition, attribLocationUv);
+			shaderMain.bind();
+			shaderMain.setUniformMatrix4f("matrixModel", modelMatrix);
+			shaderMain.setUniformMatrix4f("matrixView", viewMatrix);
+			shaderMain.setUniformMatrix4f("matrixProj", projMatrix);
+			shaderMain.setUniform1i("useTexture", useTexture);
+			shaderMain.setUniform1i("vflip", vflip);
+			shaderMain.setUniform4f("color", currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
+			vboRect.update(GL_STATIC_DRAW, shaderMain.getAttributeLocation("position"), shaderMain.getAttributeLocation("uv"), shaderMain.getAttributeLocation("col"));
 			vboRect.internalDraw(GL_TRIANGLE_FAN, 0, 4);
 		}
 		else {
@@ -853,14 +809,14 @@ public:
 
 			modelMatrix = modelMatrix * stackedMatrix * currentMatrix;
 
-			shaderMain->use();
-			uniformMatrixModel->setMatrix4((GLfloat*)&(modelMatrix.mat[0]), 1, false);
-			uniformMatrixView->setMatrix4((GLfloat*)&(viewMatrix.mat[0]), 1, false);
-			uniformMatrixProj->setMatrix4((GLfloat*)&(projMatrix.mat[0]), 1, false);
-			uniformUseTexture->set(useTexture);
-			uniformVFlip->set(vflip);
-			uniformColor->set(currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
-			
+			shaderMain.bind();
+			shaderMain.setUniformMatrix4f("matrixModel", modelMatrix);
+			shaderMain.setUniformMatrix4f("matrixView", viewMatrix);
+			shaderMain.setUniformMatrix4f("matrixProj", projMatrix);
+			shaderMain.setUniform1i("useTexture", useTexture);
+			shaderMain.setUniform1i("vflip", vflip);
+			shaderMain.setUniform4f("color", currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
+
 			vboCircle.internalDraw(GL_TRIANGLE_FAN, 0, circleResolution);
 		}
 		else {
@@ -887,15 +843,19 @@ public:
 		modelMatrix = modelMatrix * MurMatrix<float>().rotated(juce::Vector3D<float>(0.0, 0.0, a));
 		modelMatrix = modelMatrix * MurMatrix<float>::translation(juce::Vector3D<float>(x1, y1, 0.0));
 
-		shaderMain->use();
-		uniformMatrixModel->setMatrix4((GLfloat*)&(modelMatrix.mat[0]), 1, false);
-		uniformMatrixView->setMatrix4((GLfloat*)&(viewMatrix.mat[0]), 1, false);
-		uniformMatrixProj->setMatrix4((GLfloat*)&(projMatrix.mat[0]), 1, false);
-		uniformUseTexture->set(useTexture);
-		uniformVFlip->set(vflip);
-		uniformColor->set(currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
- 
+		shaderMain.bind();
+		shaderMain.setUniformMatrix4f("matrixModel", modelMatrix);
+		shaderMain.setUniformMatrix4f("matrixView", viewMatrix);
+		shaderMain.setUniformMatrix4f("matrixProj", projMatrix);
+		shaderMain.setUniform1i("useTexture", useTexture);
+		shaderMain.setUniform1i("vflip", vflip);
+		shaderMain.setUniform4f("color", currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
+
 		vboLine.internalDraw(GL_TRIANGLE_FAN, 0, 4);
+	}
+
+	int getMainShaderAttribLocation(std::string name) {
+		return shaderMain.getAttributeLocation(name);
 	}
 
 	void drawLine(float x1, float y1, float x2, float y2) override {
@@ -904,11 +864,11 @@ public:
 		x2 = x2 * getScreenScale();
 		y2 = y2 * getScreenScale();
 
-		vector<MurkaPoint> verts;
-		verts.push_back(MurkaPoint(x1, y1));
-		verts.push_back(MurkaPoint(x2, y2));
+		vector<MurkaPoint3D> verts;
+		verts.push_back(MurkaPoint3D(x1, y1, 0));
+		verts.push_back(MurkaPoint3D(x2, y2, 0));
 		vboLineOld.setVertexData(verts.data(), verts.size());
-		vboLineOld.update(GL_STREAM_DRAW, attribLocationPosition, attribLocationUv);
+		vboLineOld.update(GL_STREAM_DRAW, shaderMain.getAttributeLocation("position"), shaderMain.getAttributeLocation("uv"), shaderMain.getAttributeLocation("col"));
 
 		draw(vboLineOld, GL_LINES, 0, verts.size());
 	}
@@ -917,9 +877,9 @@ public:
 		draw(vbo, drawMode, first, total);
 	}
 
-	void drawPath(const vector<MurkaPoint> & verts) override {
+	void drawPath(const vector<MurkaPoint3D> & verts) override {
 		vboLineOld.setVertexData(verts.data(), verts.size());
-		vboLineOld.update(GL_STATIC_DRAW, attribLocationPosition, attribLocationUv);
+		vboLineOld.update(GL_STATIC_DRAW, shaderMain.getAttributeLocation("position"), shaderMain.getAttributeLocation("uv"), shaderMain.getAttributeLocation("col"));
 
 		draw(vboLineOld, GL_LINE_STRIP, 0, verts.size());
 	}

@@ -23,6 +23,7 @@
 #include <map>
 #include <chrono>
 #include <random>
+#include <map>
 
 using namespace std;
 
@@ -130,6 +131,22 @@ struct MurkaColor {
 #ifdef MURKA_OF
     operator ofColor() const { return ofColor(r * 255.0, g * 255.0, b * 255.0, a * 255.0); }
 #endif
+};
+
+struct MurkaPoint3D {
+	float x = 0, y = 0, z = 0;
+
+	MurkaPoint3D(float x_, float y_, float z_) {
+		x = x_;
+		y = y_;
+		z = z_;
+	}
+
+	MurkaPoint3D() {
+		x = 0;
+		y = 0;
+		z = 0;
+	}
 };
 
 struct MurkaPoint {
