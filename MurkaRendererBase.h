@@ -6,8 +6,13 @@
 #include "MurkaTypes.h"
 #include "MurkaAssets.h"
 
-
 namespace murka {
+
+enum MurBlendMode {
+	MUR_BLENDMODE_DISABLED = 0,
+	MUR_BLENDMODE_ALPHA = 1,
+	MUR_BLENDMODE_ADD = 2,
+};
 
 class MurkaRendererBase : public MurkaAssets {
 	float screenScale = 1.0;
@@ -62,6 +67,8 @@ public:
     virtual void disableAntiAliasing() = 0;
     virtual void enableAlphaBlending() = 0;
     virtual void disableAlphaBlending() = 0;
+	virtual void setBlendMode(MurBlendMode blendMode) = 0;
+
     virtual void pushStyle() = 0;
     virtual void popStyle() = 0;
     

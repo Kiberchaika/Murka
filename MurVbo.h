@@ -128,8 +128,8 @@ public:
 	}
 
 	void setColData(const MurkaColor* cols, int total) {
-		this->texCoords.resize(total);
-		memcpy(this->texCoords.data(), cols, total * sizeof(MurkaColor));
+		this->cols.resize(total);
+		memcpy(this->cols.data(), cols, total * sizeof(MurkaColor));
 	}
 
 	void update(int usage, int attribLocationPosition, int attribLocationUv, int attribLocationCol) {

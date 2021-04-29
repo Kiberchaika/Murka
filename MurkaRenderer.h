@@ -296,6 +296,9 @@ public:
 
 #elif defined(MURKA_JUCE)
 
+#define GL_FUNC_ADD 0x8006
+#define GL_FUNC_ADD 0x8006
+
 class MurkaRenderer : public MurkaRendererBase {
 
 	juce::OpenGLAppComponent* glAppComp = nullptr;
@@ -362,8 +365,11 @@ class MurkaRenderer : public MurkaRendererBase {
 	std::chrono::steady_clock::time_point begin;
 
 public:
+
+	MurkaRenderer() {
+	}
+
 	~MurkaRenderer() {
-		
 	}
 
 	void setAppComponent(juce::OpenGLAppComponent* comp) {
@@ -703,6 +709,38 @@ public:
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	};
+
+	void setBlendMode(MurBlendMode blendMode) override {
+		if (blendMode == MUR_BLENDMODE_DISABLED) {
+			glDisable(GL_BLEND);
+		}
+		else if (blendMode == MUR_BLENDMODE_ALPHA) {
+			glEnable(GL_BLEND);
+
+			typedef void(*glBlendEquation_type)(GLenum p1);
+			glBlendEquation_type pglBlendEquation;
+			pglBlendEquation = (glBlendEquation_type)juce::OpenGLHelpers::getExtensionFunction("glBlendEquation");
+
+			if (pglBlendEquation) {
+				pglBlendEquation(GL_FUNC_ADD);
+			}
+
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		}
+		else if (blendMode == MUR_BLENDMODE_ADD) {
+			glEnable(GL_BLEND);
+
+			typedef void(*glBlendEquation_type)(GLenum p1);
+			glBlendEquation_type pglBlendEquation;
+			pglBlendEquation = (glBlendEquation_type)juce::OpenGLHelpers::getExtensionFunction("glBlendEquation");
+
+			if (pglBlendEquation) {
+				pglBlendEquation(GL_FUNC_ADD);
+			}
+
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+		}
+	}
 
 	void disableAlphaBlending() override {
 		glDisable(GL_BLEND);
