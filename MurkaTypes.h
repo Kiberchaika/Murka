@@ -127,6 +127,69 @@ struct MurkaColor {
 	MurkaColor operator +(MurkaColor rightColor) const  {
         return MurkaColor(r + rightColor.r, g + rightColor.g, b + rightColor.b, a + rightColor.a);
     }
+    
+    float limit() {
+        return 255.;
+        return std::numeric_limits<float>::max();
+    }
+
+    
+    void setHsb(float hue, float saturation, float brightness, float alpha) {
+//        saturation = glm::clamp(saturation, 0.f, limit());
+//        brightness = glm::clamp(brightness, 0.f, limit());
+        if(brightness == 0) { // black
+            r = 0;
+            g = 0;
+            b = 0;
+        } else if(saturation == 0) { // grays
+            r = brightness;
+            g = brightness;
+            b = brightness;
+        } else {
+            float hueSix = hue * 6.f / limit();
+            float saturationNorm = saturation / limit();
+            int hueSixCategory = (int) floorf(hueSix);
+            float hueSixRemainder = hueSix - hueSixCategory;
+            float pv = (float) ((1.f - saturationNorm) * brightness);
+            float qv = (float) ((1.f - saturationNorm * hueSixRemainder) * brightness);
+            float tv = (float) ((1.f - saturationNorm * (1.f - hueSixRemainder)) * brightness);
+            switch(hueSixCategory) {
+                case 0: case 6: // r
+                    r = brightness / 255.;
+                    g = tv / 255.;
+                    b = pv / 255.;
+                    break;
+                case 1: // g
+                    r = qv / 255.;
+                    g = brightness / 255.;
+                    b = pv / 255.;
+                    break;
+                case 2:
+                    r = pv / 255.;
+                    g = brightness / 255.;
+                    b = tv / 255.;
+                    break;
+                case 3: // b
+                    r = pv / 255.;
+                    g = qv / 255.;
+                    b = brightness / 255.;
+                    break;
+                case 4:
+                    r = tv / 255.;
+                    g = pv / 255.;
+                    b = brightness / 255.;
+                    break;
+                case 5: // back to r
+                    r = brightness / 255.;
+                    g = pv / 255.;
+                    b = qv / 255.;
+                    break;
+            }
+        }
+        
+        // finally assign the alpha
+        a = alpha;
+    }
 
 #ifdef MURKA_OF
     operator ofColor() const { return ofColor(r * 255.0, g * 255.0, b * 255.0, a * 255.0); }
