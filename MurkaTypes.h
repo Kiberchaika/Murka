@@ -130,7 +130,6 @@ struct MurkaColor {
     
     float limit() {
         return 255.;
-        return std::numeric_limits<float>::max();
     }
 
     
