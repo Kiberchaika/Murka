@@ -235,15 +235,23 @@ struct MurkaPoint {
 		return *this;
 	}
 
-    MurkaPoint operator + (const MurkaPoint p2) const {
+    MurkaPoint operator + (const MurkaPoint & p2) const {
         return {x + p2.x, y + p2.y};
     }
     
-//    MurkaPoint operator - (MurkaPoint p2) {
+    MurkaPoint operator * (const MurkaPoint & p2) const {
+        return {x * p2.x, y * p2.y};
+    }
+
+    MurkaPoint operator / (const MurkaPoint & p2) const {
+        return {x / p2.x, y / p2.y};
+    }
+
+    //    MurkaPoint operator - (MurkaPoint p2) {
 //        return {x - p2.x, y - p2.y};
 //    }
 //
-    MurkaPoint operator - (const MurkaPoint p2) const {
+    MurkaPoint operator - (const MurkaPoint & p2) const {
         return {x - p2.x, y - p2.y};
     }
 
