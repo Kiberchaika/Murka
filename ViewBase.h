@@ -18,6 +18,13 @@ typename & setter(std::function<void(typename &)> callback) { \
     return *this; \
 }
 
+#define MURKA_CALLBACK_1ARGUMENT(typename, callbackVariable, setter, argument_type) \
+std::function<void(typename &, argument_type)> callbackVariable = [](typename&, argument_type) {}; \
+typename & setter(std::function<void(typename &, argument_type)> callback) { \
+    callbackVariable = callback; \
+    return *this; \
+}
+
 namespace murka {
 
 typedef std::tuple<int, std::string> imIdentifier_NEW;

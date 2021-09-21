@@ -18,6 +18,7 @@ public:
         
         if (c.mouseDownPressed[0]) {
             onClickCallback(*this);
+            onClickCallbackPosition(*this, {25, 11});
         }
         
         auto font = c.getCurrentFont();
@@ -46,6 +47,7 @@ public:
             //ofDrawLine(0, context.getSize().y, context.getSize().x, context.getSize().y);
     };
     
+    /*
     static Label & draw2(MurkaContext &c, MurkaShape shape) {
         int counter = c.getImCounter();
 
@@ -53,7 +55,7 @@ public:
         auto widgetObject = Label::getOrCreateImModeWidgetObject_NEW(counter, parentView, shape);
 
         return (Label&)widgetObject;
-    }
+    } */
     
     bool isHovered = false;
     
@@ -72,6 +74,11 @@ public:
     MURKA_CALLBACK(Label,
                    onClickCallback,
                    onClick)
+    
+    MURKA_CALLBACK_1ARGUMENT(Label, // class name
+                             onClickCallbackPosition, // callback variable name
+                             onClickPosition, // callback setter
+                             MurkaPoint) // callback argument type
     
     MURKA_PARAMETER(Label, // class name
                     TextAlignment, // parameter type
