@@ -182,11 +182,13 @@ public:
     // This uses Animator class because you can't include View from here
     std::function<void(ViewBase_NEW*)> pushContextInternal_NEW = [](ViewBase_NEW* v) {};
 //    std::function<void()> popContextInternal_NEW = []() {};
-    
+
+    double getRunningTime() const {return pointerToRenderer->getElapsedTime();}
 
 private:
     int imCounter = 0; // the counter that we use to distinguish new widgets from the ones we
     // want to reuse in IM mode.
+     
 };
 
 }

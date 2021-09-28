@@ -27,11 +27,11 @@ public:
             font->drawString(label, 5, 0);
         }
         if (alignment == TEXT_CENTER) {
-            float textX = 5 + (shape.size.x - 10) / 2 - font->getStringBoundingBox(label, 0, 0).getWidth()  / 2;
+            float textX = 5 + (shape.size.x - 10) / 2 - font->getStringBoundingBox(label, 0, 0).width / 2;
             font->drawString(label, textX, 0);
         }
         if (alignment == TEXT_RIGHT) {
-            float textX = (shape.size.x - 10) - font->getStringBoundingBox(label, 0, 0).getWidth();
+            float textX = (shape.size.x - 10) - font->getStringBoundingBox(label, 0, 0).width;
             font->drawString(label, textX, 0);
         }
         

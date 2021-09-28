@@ -3,10 +3,12 @@
 #include "MurkaTypes.h"
 #include <map>
 
-#define DEFAULT_LINE_HEIGHT 20
-
-
 namespace murka {
+
+
+// Global defines
+
+#define DEFAULT_LINE_HEIGHT 20
 
 class MurkaRendererBase;
 

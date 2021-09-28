@@ -176,8 +176,8 @@ public:
         } else return 0;
     }
     
-    inline double overlapAreaOfOneToAll(MurkaShape shape, std::vector<MurkaShape>& others) {
-        double sumOverlapArea = 0;
+    inline float overlapAreaOfOneToAll(MurkaShape shape, vector<MurkaShape>& others) {
+		float sumOverlapArea = 0;
         for (auto &j: others) {
             sumOverlapArea += overlapArea(shape, j);
         }
