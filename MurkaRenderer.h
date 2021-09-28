@@ -182,6 +182,10 @@ public:
         ofRenderer->setBlendMode(OF_BLENDMODE_DISABLED);
     };
     
+	void setBlendMode(MurBlendMode blendMode) override {
+		ofRenderer->setBlendMode((ofBlendMode)blendMode);
+	}
+
     void pushStyle() override{
         ofRenderer->pushStyle();
     };

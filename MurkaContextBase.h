@@ -1,5 +1,8 @@
-
 #pragma once
+
+#include "MurkaRenderer.h"
+#include "MurkaInputEventsRegister.h"
+#include "MurkaOverlayHolder.h"
 
 namespace murka {
 
@@ -47,4 +50,4 @@ public:
 
 };
 
-};
+}

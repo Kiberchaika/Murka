@@ -233,12 +233,10 @@ public:
         }
         
         // Doubleclick support
-        
-
-        if ((ofGetElapsedTimef() - lastLeftMousebuttonClicktime) < 0.2) {
+        if (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - lastLeftMousebuttonClicktime).count() / 1000.0 < 0.2) {
             eventState.doubleClick = true;
         } else eventState.doubleClick = false;
-        lastLeftMousebuttonClicktime = ofGetElapsedTimef();
+        lastLeftMousebuttonClicktime = std::chrono::steady_clock::now();
 
     }
     

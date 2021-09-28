@@ -2,7 +2,6 @@
 
 #ifdef MURKA_JUCE
 
-
 namespace murka {
 
 
@@ -242,7 +241,9 @@ public:
 	/** The 4x4 matrix values. These are stored in the standard OpenGL order. */
 	Type mat[16];
 };
+
+}
+
 #endif
 
 
-}

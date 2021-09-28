@@ -189,7 +189,7 @@ public:
             
             MurkaShape currentSymbolShape = {glyphXCoordinate, 0, currentGlyphLengths[i], context.getSize().y};
             
-            bool safeToUseMouseClickEventsCauseEnoughTimeSinceDoubleClickPassed = ((context.renderer->getElapsedTime() - lastLeftMousebuttonClicktime) > 0.2);
+            bool safeToUseMouseClickEventsCauseEnoughTimeSinceDoubleClickPassed = ((context.pointerToRenderer->getElapsedTime() - lastLeftMousebuttonClicktime) > 0.2);
             
             // Setting cursor position inside the string if pressed inside it
             if ((insideGlyph) && (context.mouseDownPressed[0])) {
