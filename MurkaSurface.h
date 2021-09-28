@@ -1,10 +1,12 @@
 #pragma once
+
 #include "Murka.h"
 #include "MurkaBasicWidgets.h"
 
-using namespace murka;
-
 #define DOUBLECLICK_TIME 0.2
+
+
+namespace murka {
 
 class MurkaSurface {
 public:
@@ -173,7 +175,7 @@ public:
         }
     }
     
-    MurkaContext latestContextDebug;
+   MurkaContext latestContextDebug;
 
     // Surface parameters
     
@@ -278,3 +280,5 @@ public:
     
     GestureContext draggingData;
 };
+
+}

@@ -8,7 +8,7 @@
 
 #include "LambdaPanel.h"
 
-using namespace murka;
+namespace murka {
 
 class Pane : public MurkaViewInterface<Pane> {
 public:
@@ -134,3 +134,5 @@ public:
 
 
 };
+
+}

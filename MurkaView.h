@@ -5,6 +5,7 @@
 #include "MurkaContext.h"
 #include "MurkaViewHandler.h"
 #include "Murka.h"
+#include "MurkaLinearLayoutGenerator.h"
 #include "MurkaAnimator.h"
 
 namespace murka {
@@ -16,7 +17,7 @@ typedef std::function<void (void* dataToControl,
                             MurkaContextBase & context,
                             void* resultObject)> viewDrawFunction;
 
-#define MURKA_VIEW_DRAW_FUNCTION void draw(void* dataToControl, void* parametersObject, void* thisWidgetObject, MurkaContext & context, void* resultObject)
+#define MURKA_VIEW_DRAW_FUNCTION void draw(void* dataToControl, void* parametersObject, void* thisWidgetObject, murka::MurkaContext & context, void* resultObject)
 
 template<typename T>
 class View_NEW: public ViewBase_NEW {

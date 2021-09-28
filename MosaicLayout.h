@@ -5,6 +5,7 @@
 #include "MurkaLinearLayoutGenerator.h"
 
 #ifndef MURKA_MOSAIC_LAYOUT_DEF
+namespace murka {
 
 #define MURKA_MOSAIC_LAYOUT_DEF
 class MosaicLayout {
@@ -294,7 +295,7 @@ public:
 //            return validOptions[0];
         } else {
             // What happened?
-            ofLog() << "  WARNING!";
+            std::cout << "  WARNING!";
             thisFrameShapes.push_back(input);
             return input;
         }
@@ -331,4 +332,5 @@ public:
 
 };
 
+}
 #endif

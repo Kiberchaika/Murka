@@ -1,6 +1,7 @@
 #pragma once
-#include "Murka.h"
 
+#include "Murka.h"
+#include "MurkaView.h"
 
 namespace murka {
 
@@ -42,7 +43,7 @@ public:
     struct Parameters {
         std::string label;
         
-        TextAlignment alignment = TEXT_LEFT;
+        TextAlignment alignment = TextAlignment::TEXT_LEFT;
         
         MurkaColor color = {0.98, 0.98, 0.98};
         
@@ -94,7 +95,7 @@ public:
         context.renderer->enableFill();
         if (bgColor.a != 0.0) {
             context.renderer->setColor(bgColor);
-            if (params->alignment == TEXT_LEFT) {
+            if (params->alignment == TextAlignment::TEXT_LEFT) {
                 context.renderer->drawRectangle(0, 0, font->getStringBoundingBox(params->label, 0, 0).width + 10, context.getSize().y);
             }
         }
@@ -124,12 +125,12 @@ public:
     // Here go parameters and any parameter convenience constructors. You need to define something called Parameters, even if it's NULL.
     struct Parameters {
         std::string label;
-        TextAlignment alignment = TEXT_LEFT;
+        TextAlignment alignment = TextAlignment::TEXT_LEFT;
         
         MurkaColor color = {0.98, 0.98, 0.98};
 		MurkaColor backgroundColor = {0., 0., 0., 0.};
         
-        FontObject* font;
+        FontObject* font = nullptr;
         
         bool customColor = false;
         bool customFont = false;
@@ -235,7 +236,7 @@ public:
 
 		MurkaColor fgColor = context.pointerToRenderer->getColor();
 
-        float pushed = 0.2 - (context.getRunningTime() - lastTimeClicked);
+        float pushed = 0.2 - (context.renderer->getElapsedTime() - lastTimeClicked);
         if (pushed < 0) pushed = 0;
         pushed /= 0.2;
 
@@ -257,7 +258,7 @@ public:
         
         if (inside && context.mouseDownPressed[0]) {
             *booleanToControl = !*booleanToControl;
-            lastTimeClicked = context.getRunningTime();
+            lastTimeClicked = context.renderer->getElapsedTime();
 			castedResults = booleanToControl;
 			*results = true;
 		}
@@ -343,7 +344,7 @@ public:
 
 		MurkaColor fgColor = context.pointerToRenderer->getColor();
 
-		float pushed = 0.2 - (context.getRunningTime() - lastTimeClicked);
+		float pushed = 0.2 - (context.renderer->getElapsedTime() - lastTimeClicked);
 		if (pushed < 0) pushed = 0;
 		pushed /= 0.2;
             
@@ -372,7 +373,7 @@ public:
 			if (rowHover * inside && context.mouseDownPressed[0]) {
 				*intToControl = i;
 				*results = true;
-				lastTimeClicked = context.getRunningTime();
+				lastTimeClicked = context.renderer->getElapsedTime();
 			}
 
 			context.pointerToRenderer->popStyle();
@@ -674,13 +675,13 @@ public:
 
          if ((context.mouseDownPressed[0]) && (context.isHovered())) {
             castedResults = true;
-            lastTimeClicked = context.getRunningTime();
+            lastTimeClicked = context.renderer->getElapsedTime();
          } else castedResults = false;
         
          auto font = context.getCurrentFont();
         
         
-             float pushed = 0.2 - (context.getRunningTime() - lastTimeClicked);
+             float pushed = 0.2 - (context.renderer->getElapsedTime() - lastTimeClicked);
              if (pushed < 0) pushed = 0;
              pushed /= 0.2;
          

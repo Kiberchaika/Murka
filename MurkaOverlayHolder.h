@@ -2,6 +2,9 @@
 
 #include "MurkaTypes.h"
 
+
+namespace murka {
+
 class MurkaOverlayHolder {
 public:
     struct OverlayData {
@@ -31,3 +34,5 @@ public:
         overlays.clear();
     }
 };
+
+}

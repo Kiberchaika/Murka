@@ -6,7 +6,15 @@
 #include "MurkaTypes.h"
 #include "MurkaAssets.h"
 
-class MurkaRendererBase : public murka::MurkaAssets {
+namespace murka {
+
+enum MurBlendMode {
+	MUR_BLENDMODE_DISABLED = 0,
+	MUR_BLENDMODE_ALPHA = 1,
+	MUR_BLENDMODE_ADD = 2,
+};
+
+class MurkaRendererBase : public MurkaAssets {
 	float screenScale = 1.0;
 
 public:
@@ -59,6 +67,8 @@ public:
     virtual void disableAntiAliasing() = 0;
     virtual void enableAlphaBlending() = 0;
     virtual void disableAlphaBlending() = 0;
+	virtual void setBlendMode(MurBlendMode blendMode) = 0;
+
     virtual void pushStyle() = 0;
     virtual void popStyle() = 0;
     
@@ -80,7 +90,7 @@ public:
 	virtual void drawCircle(float x, float y, float radius) = 0;
 	virtual void drawLine(float x1, float y1, float x2, float y2) = 0;
 	virtual void drawVbo(const MurVbo & vbo, GLuint drawMode, int first, int total) = 0;
-	virtual void drawPath(const vector<MurkaPoint> & verts) = 0;
+	virtual void drawPath(const vector<MurkaPoint3D> & verts) = 0;
 
 	virtual int getWindowWidth() = 0;
 	virtual int getWindowHeight() = 0;
@@ -92,3 +102,5 @@ public:
 	virtual uint64_t getFrameNum() = 0;
 	virtual float getElapsedTime() = 0;
 };
+
+}

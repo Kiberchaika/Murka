@@ -6,7 +6,7 @@
 #include "MurkaInputEventsRegister.h"
 #include "MurkaLinearLayoutGenerator.h"
 
-using namespace murka;
+namespace murka {
 
 class LambdaPanel : public MurkaViewInterface<LambdaPanel> {
 public:
@@ -41,3 +41,4 @@ public:
     };
 
 };
+}

@@ -27,9 +27,6 @@ private:
 public:
     
     MurkaContext() {
-#ifdef MURKA_OF
-        runningTime = ofGetElapsedTimef();
-#endif
     }
     
     std::pair<MurkaShape, MurkaPoint> getCroppedViewport(MurkaShape parent, MurkaShape view) const {
@@ -187,13 +184,9 @@ public:
 //    std::function<void()> popContextInternal_NEW = []() {};
     
 
-    double getRunningTime() const {return runningTime;}
-    
 private:
     int imCounter = 0; // the counter that we use to distinguish new widgets from the ones we
     // want to reuse in IM mode.
-
-    double runningTime;
 };
 
 }

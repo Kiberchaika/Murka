@@ -1,13 +1,10 @@
 #pragma once
 
-
 // Murka is a mixed mode data driven user interface library.
 
-
-#include <functional>
 #include "MurkaTypes.h"
-#include "MurkaContext.h"
 #include "MurkaView.h"
+#include "MurkaContext.h"
 #include "MurkaInputEventsRegister.h"
 #include "MurkaAssets.h"
 #include "MurkaLinearLayoutGenerator.h"
@@ -446,13 +443,6 @@ public:
 	}
 
     struct Parameters {};
-
-    void keyPressed(int key);
-	void keyReleased(int key);
-	void mouseMoved(int x, int y);
-	void mouseDragged(int x, int y, int button);
-	void mousePressed(int x, int y, int button);
-	void mouseReleased(int x, int y, int button);
 
     typedef bool Results;
 
