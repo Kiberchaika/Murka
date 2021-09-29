@@ -26,9 +26,8 @@ public:
 #elif defined(MURKA_JUCE)
 
 class MurShader {
-	MurkaRenderer* murkaRenderer = nullptr;
 	juce::OpenGLContext* openGLContext = nullptr;
-	std::unique_ptr<juce::OpenGLShaderProgram> shaderMain;
+	juce::OpenGLShaderProgram* shaderMain = nullptr;
 	std::map<std::string, juce::OpenGLShaderProgram::Uniform*> uniforms;
 	std::map<std::string, int> attributes;
 	
@@ -65,7 +64,7 @@ public:
 	}
 
 	bool load(std::string vert, std::string frag) {
-		shaderMain = std::make_unique<juce::OpenGLShaderProgram>(*openGLContext);
+		shaderMain = new juce::OpenGLShaderProgram(*openGLContext);
 
 		if (
 			shaderMain->addVertexShader(juce::OpenGLHelpers::translateVertexShaderToV3(vert)) &&

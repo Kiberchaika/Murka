@@ -24,10 +24,8 @@ private:
      */
     
 public:
-    
-    MurkaContext() {
-    }
-    
+
+   
     std::pair<MurkaShape, MurkaPoint> getCroppedViewport(MurkaShape parent, MurkaShape view) const {
         MurkaPoint pos = {(std::max)(parent.position.x + view.position.x, parent.position.x),
 						  (std::max)(parent.position.y + view.position.y, parent.position.y)};
@@ -182,7 +180,7 @@ public:
     std::function<void(ViewBase_NEW*)> pushContextInternal_NEW = [](ViewBase_NEW* v) {};
 //    std::function<void()> popContextInternal_NEW = []() {};
 
-    double getRunningTime() const {return pointerToRenderer->getElapsedTime();}
+    double getRunningTime()  {return pointerToRenderer->getElapsedTime();}
 
 private:
     int imCounter = 0; // the counter that we use to distinguish new widgets from the ones we
