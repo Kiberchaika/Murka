@@ -37,11 +37,11 @@ public:
     ViewBase_NEW() {
     }
     
-    MurkaShape childrenBounds = {std::numeric_limits<float>::max(), std::numeric_limits<float>::max(),
+    MurkaShape childrenBounds = {(std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)(),
                                  0, 0};
     
     void resetChildrenBounds() {
-        childrenBounds = {std::numeric_limits<float>::max(), std::numeric_limits<float>::max(),
+        childrenBounds = { (std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)(),
             0, 0};
     }
 

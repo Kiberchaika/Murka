@@ -384,6 +384,10 @@ public:
 		openGLContext = ctx;
 	}
 
+	MurShader* getMainShader() {
+		return &shaderMain;
+	}
+
 	void closeOpenGLContext() {
 	}
    

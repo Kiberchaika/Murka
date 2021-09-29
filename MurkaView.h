@@ -219,7 +219,7 @@ public:
             newHandler->widgetObjectInternal = newWidget;
             */
             
-            ofLog() << "creating a new object";
+            std::cout << "creating a new object";
             
             int z = parentWidget->imChildren_NEW.size();
             
