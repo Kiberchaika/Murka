@@ -101,6 +101,7 @@ public:
 		}
 		uniforms.clear();
 
+		delete shaderMain;
 		shaderMain = nullptr;
 
 		isLoaded = false;
