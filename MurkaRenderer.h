@@ -571,6 +571,8 @@ public:
 	
 	void draw(const MurVbo & vbo, GLuint drawMode, int first, int total) override {
 		MurMatrix<float> modelMatrix;
+		modelMatrix = modelMatrix.scaled(juce::Vector3D<float>(getScreenScale(), getScreenScale(), 1.0));
+
 		modelMatrix = modelMatrix * stackedMatrix * currentMatrix;
 
 		shaderMain.bind();
