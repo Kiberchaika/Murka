@@ -8,7 +8,7 @@ namespace murka {
 
 
 class MurVbo {
-    vector<MurkaPoint> verts;
+    vector<MurkaPoint3D> verts;
     vector<MurkaPoint> texCoords;
     int usage = 0;
 
@@ -24,9 +24,9 @@ public:
 	void setup() {
 	}
 	
-	void setVertexData(MurkaPoint* _verts, int total) {
+	void setVertexData(MurkaPoint3D* _verts, int total) {
         this->verts.resize(total);
-        memcpy(this->verts.data(), _verts, total * sizeof(MurkaPoint));
+        memcpy(this->verts.data(), _verts, total * sizeof(MurkaPoint3D));
 	}
 
     void setTexCoordData(MurkaPoint* texCoords, int total) {
@@ -36,13 +36,17 @@ public:
     
     void update(int usage) {
 		this->usage = usage;
-		internal.setVertexData(&this->verts[0].x, 2, this->verts.size(), this->usage, sizeof(MurkaPoint));
-        internal.setTexCoordData(&this->texCoords[0].x, this->texCoords.size(), this->usage, sizeof(MurkaPoint));
-    }
+		if (this->verts.size()) internal.setVertexData(&this->verts[0].x, 3, this->verts.size(), this->usage, sizeof(MurkaPoint3D));
+		if (this->texCoords.size()) internal.setTexCoordData(&this->texCoords[0].x, this->texCoords.size(), this->usage, sizeof(MurkaPoint));
+	}
     
     void clear() {
         internal.clear();
     }
+
+	void internalDraw(GLuint drawMode, int first, int total) const {
+		internal.draw(drawMode, first, total);
+	}
 };
 
 #elif defined(MURKA_JUCE)
