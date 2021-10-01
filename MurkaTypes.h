@@ -18,6 +18,11 @@ enum TextAlignment {TEXT_LEFT, TEXT_CENTER, TEXT_RIGHT};
 #define GL_TEXTURE0 juce::GL_TEXTURE0
 #endif
 
+#ifndef M_PI
+#define M_PI           3.14159265358979323846  /* pi */
+#endif
+
+
 #include <stdint.h>
 #include <filesystem>
 #include <limits>
@@ -199,22 +204,6 @@ struct MurkaColor {
 #endif
 };
 
-struct MurkaPoint3D {
-	float x = 0, y = 0, z = 0;
-
-	MurkaPoint3D(float x_, float y_, float z_) {
-		x = x_;
-		y = y_;
-		z = z_;
-	}
-
-	MurkaPoint3D() {
-		x = 0;
-		y = 0;
-		z = 0;
-	}
-};
-
 struct MurkaPoint {
 	float x = 0, y = 0;
 
@@ -280,11 +269,14 @@ struct MurkaPoint {
 		return ((x == right.x) && (y == right.y));
 	}
 	
-    friend std::ostream& operator<<(std::ostream& os, const MurkaPoint& p) {
-        os << p.x << '/' << p.y;
-        return os;
-    }
+	friend std::ostream& operator<<(std::ostream& os, const MurkaPoint& p) {
+		os << p.x << '/' << p.y;
+		return os;
+	}
 
+	friend MurkaPoint operator * (const float& f, const MurkaPoint& p) {
+		return p * f;
+	}
 
     MurkaPoint (float x_, float y_) {
         x = x_;
@@ -305,13 +297,42 @@ struct MurkaPoint {
     float length() const  {
         return sqrt(pow(x, 2) + pow(y, 2));
     }
-    
+
+	float lengthSquared() { 
+		return x * x + y * y; 
+	}
+
+	float distance(const MurkaPoint& p) {
+		return sqrt(pow(x - p.x, 2) + pow(y - p.y, 2));
+	}
+
 #ifdef MURKA_OF
     operator ofPoint() { return ofPoint(x, y); }
     operator ofVec2f() { return ofVec2f(x, y); }
 #endif
 };
 
+struct MurkaPoint3D {
+	float x = 0, y = 0, z = 0;
+
+	MurkaPoint3D(float x_, float y_, float z_) {
+		x = x_;
+		y = y_;
+		z = z_;
+	}
+
+	MurkaPoint3D(const MurkaPoint& p) {
+		x = p.x;
+		y = p.y;
+		z = 0;
+	}
+
+	MurkaPoint3D() {
+		x = 0;
+		y = 0;
+		z = 0;
+	}
+};
 
 struct MurkaShape {
 	MurkaPoint position = { 0, 0 };
