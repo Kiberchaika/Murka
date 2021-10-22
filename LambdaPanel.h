@@ -8,37 +8,25 @@
 
 namespace murka {
 
-class LambdaPanel : public MurkaViewInterface<LambdaPanel> {
+class LambdaPanel : public murka::View_NEW<LambdaPanel> {
 public:
 	
-    MURKA_VIEW_DRAW_FUNCTION  {
-        
-                auto params = (Parameters*)parametersObject;
-                auto &castedResults = *(castResults(resultObject));
-
-                params->lambda(context);
+    void internalDraw(const murka::MurkaContextBase & c) {
+                lambdaFunc(c);
     }
     
     bool wantsClicks() override {
         return false;
     }
     
-    // The results type, you also need to define it even if it's nothing.
-    typedef bool Results;
+    MURKA_PARAMETER(LambdaPanel, // class name
+                    function<void(const MurkaContextBase&)>, // parameter type
+                    lambdaFunc, // parameter variable name
+                    getLambda, // getter
+                    lambda, // setter
+                    [](const MurkaContextBase&){} // default
+    )
 
-    
-    Results* castResults(void* results) {
-        auto resultsPointer = (Results*)results;
-        return resultsPointer;
-    }
-
-
-    struct Parameters {
-        function<void(MurkaContext&)> lambda;
-
-        Parameters() {}
-        Parameters(function<void(MurkaContext&)> Lambda) { lambda = Lambda; } // a convenience initializer
-    };
 
 };
 }

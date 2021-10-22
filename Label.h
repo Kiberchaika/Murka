@@ -1,3 +1,4 @@
+#pragma once
 #include "Murka.h"
 
 namespace murka {
@@ -35,8 +36,8 @@ public:
             font->drawString(label, textX, 0);
         }
         
-        c.pointerToRenderer->setColor(200, 0, 0, 200);
-        c.pointerToRenderer->drawLine(0, 0, c.getSize().x, c.getSize().y);
+//        c.pointerToRenderer->setColor(200, 0, 0, 200);
+//        c.pointerToRenderer->drawLine(0, 0, c.getSize().x, c.getSize().y);
         
         // Testing vertical centering
             //context.renderer->setColor(255);

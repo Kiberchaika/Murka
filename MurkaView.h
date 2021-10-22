@@ -60,7 +60,7 @@ public:
     
     int hoverIndexCache = 0;
     
-    bool hasMouseFocus(MurkaContext & context) {
+    bool hasMouseFocus(const MurkaContextBase& context) {
         bool inside = context.isHovered() * !areInteractiveChildrenHovered(context);
         
         bool pass = false;
@@ -76,7 +76,7 @@ public:
     }
 
 
-    bool areInteractiveChildrenHovered(MurkaContext & c) {
+    bool areInteractiveChildrenHovered(const MurkaContextBase& c) {
         if (!c.isHovered()) {
             return false;
         }
@@ -93,12 +93,12 @@ public:
         */
         
         int index = 0;
-        typename std::map<imIdentifier, MurkaViewHandler<View_NEW>*>::iterator it;
-        for (it = imChildren_NEW.begin(); it != imChildren_NEW.end(); it++) {
-            auto shape = ((View_NEW*)it->second->widgetObjectInternal)->shape;
-            shape.position = ((View_NEW*)it->second->widgetObjectInternal)->shape.position;
+//        typename std::map<imIdentifier, MurkaViewHandler<View_NEW>*>::iterator it;
+        for (auto it = imChildren_NEW.begin(); it != imChildren_NEW.end(); it++) {
+            auto shape = ((View_NEW*)it->second)->shape;
+            shape.position = ((View_NEW*)it->second)->shape.position;
             
-            if ((shape.inside(c.mousePosition)) && (((View_NEW*)it->second->widgetObjectInternal)->wantsClicks())) {
+            if ((shape.inside(c.mousePosition)) && (((View_NEW*)it->second)->wantsClicks())) {
                 return true;
             }
         }
@@ -535,6 +535,7 @@ public:
 
 // New API
 
+/*
 template<typename T>
 T& drawWidget(MurkaContext &c, MurkaShape shape) {
 
@@ -558,15 +559,15 @@ T& drawWidget(MurkaContext &c, MurkaShape shape) {
         widgetObject->animationRestart();
         widgetObject->mosaicLayout.restart();
         
-        /*
+        
         //DEBUG - drawing the children frame that we had at the last frame end
-        ofSetColor(255, 100, 0);
-            ofNoFill();
-
-        ofDrawRectangle(((View*)c.murkaView)->childrenBounds.position.x, ((View*)c.murkaView)->childrenBounds.position.y, ((View*)c.murkaView)->childrenBounds.size.x, ((View*)c.murkaView)->childrenBounds.size.y);
-            ofFill();
+//        ofSetColor(255, 100, 0);
+//            ofNoFill();
+//
+//        ofDrawRectangle(((View*)c.murkaView)->childrenBounds.position.x, ((View*)c.murkaView)->childrenBounds.position.y, ((View*)c.murkaView)->childrenBounds.size.x, ((View*)c.murkaView)->childrenBounds.size.y);
+//            ofFill();
         //////
-         */
+         
 
         
         c.transformTheRenderBackFromThisContextShape();
@@ -578,8 +579,30 @@ T& drawWidget(MurkaContext &c, MurkaShape shape) {
 
     return *widgetObject;
 }
+*/
 
 // Immediate mode custom layout
+
+template<typename T>
+T & drawWidget_NEW(const MurkaContextBase *c, MurkaShape shape) {
+
+    auto casted = (MurkaContext*)c;
+    //        auto context = &(m.currentContext);
+    int counter = casted->getImCounter();
+
+    
+    ViewBase_NEW* parentView = casted->linkedView_NEW;
+    T* widgetObject = T::getOrCreateImModeWidgetObject_NEW(counter, parentView, shape);
+    // TODO: fill the renderer and/or some other helper variables in the new widget object
+    
+    casted->deferredView = widgetObject;
+    casted->defferedViewDrawFunc = std::bind(&T::internalDraw, (T*)widgetObject, std::placeholders::_1);
+    
+//    c.commitDeferredView();
+
+    return *((T*)widgetObject);
+}
+
 
 template<typename T>
 T & drawWidget_NEW(MurkaContext &c, MurkaShape shape) {
@@ -594,35 +617,36 @@ T & drawWidget_NEW(MurkaContext &c, MurkaShape shape) {
     
     c.deferredView = widgetObject;
     c.defferedViewDrawFunc = std::bind(&T::internalDraw, (T*)widgetObject, std::placeholders::_1);
-    c.commitDeferredView();
+//    c.commitDeferredView();
 
     return *((T*)widgetObject);
 }
 
+/*
 // Immediate mode custom layout
-    
+
 template<typename T>
 typename T::Results drawWidget(MurkaContext &c, typename T::Parameters parameters, MurkaShape shape) {
 
     //        auto context = &(m.currentContext);
     int counter = c.getImCounter();
 
-    
+
     auto parentView = (View*)c.linkedView;
     auto widgetHandler = T::getOrCreateImModeWidgetObject(counter, NULL, parentView, shape);
     auto widgetObject = (View*)widgetHandler->widgetObjectInternal;
-    
-    
+
+
     typename T::Results results = typename T::Results();
-    
+
     c.pushContext(widgetHandler);
     if (c.transformTheRenderIntoThisContextShape(c.overlayHolder->disableViewportCrop)) {
         widgetObject->linearLayout.restart(((View*)widgetHandler->widgetObjectInternal)->shape);
             widgetObject->draw(NULL, &parameters, widgetObject, c, &results);
         widgetObject->animationRestart();
         widgetObject->mosaicLayout.restart();
+
         
-        /*
         //DEBUG - drawing the children frame that we had at the last frame end
         ofSetColor(255, 100, 0);
             ofNoFill();
@@ -630,15 +654,15 @@ typename T::Results drawWidget(MurkaContext &c, typename T::Parameters parameter
         ofDrawRectangle(((View*)c.murkaView)->childrenBounds.position.x, ((View*)c.murkaView)->childrenBounds.position.y, ((View*)c.murkaView)->childrenBounds.size.x, ((View*)c.murkaView)->childrenBounds.size.y);
             ofFill();
         //////
-         */
+         
 
-        
+
         c.transformTheRenderBackFromThisContextShape();
     }
     c.popContext();
-        
+
     widgetObject->resetChildrenBounds();
-        
+
 
     return results;
 }
@@ -647,108 +671,107 @@ template<typename T, class B>
 typename T::Results drawWidget(MurkaContext &c, B* dataToControl, typename T::Parameters parameters, MurkaShape shape) {
 
     int counter = c.getImCounter();
-    
+
     auto mView = (View*)c.linkedView;
     auto widgetHandler = T::getOrCreateImModeWidgetObject(counter, NULL, (View*)c.linkedView, shape);
     auto widgetObject = (View*)widgetHandler->widgetObjectInternal;
-    
+
     widgetObject->dataTypeName = typeid(dataToControl).name();
-    
+
     typename T::Results results = typename T::Results();
-    
+
     c.pushContext(widgetHandler);
     if (c.transformTheRenderIntoThisContextShape(c.overlayHolder->disableViewportCrop)) {
-    
+
         widgetObject->linearLayout.restart(shape);
         widgetObject->animationRestart();
         widgetObject->mosaicLayout.restart();
         widgetObject->draw(dataToControl, &parameters, widgetObject, c, &results);
-        
+
         //DEBUG
-        /*
-        ofSetColor(255, 100, 0);
-            ofNoFill();
-        ofDrawRectangle(((View*)c.murkaView)->childrenBounds.position.x, ((View*)c.murkaView)->childrenBounds.position.y, ((View*)c.murkaView)->childrenBounds.size.x, ((View*)c.murkaView)->childrenBounds.size.y);
-            ofFill();
-         */
+//        ofSetColor(255, 100, 0);
+//            ofNoFill();
+//        ofDrawRectangle(((View*)c.murkaView)->childrenBounds.position.x, ((View*)c.murkaView)->childrenBounds.position.y, ((View*)c.murkaView)->childrenBounds.size.x, ((View*)c.murkaView)->childrenBounds.size.y);
+//            ofFill();
         //////
-        
+
         c.transformTheRenderBackFromThisContextShape();
     }
     c.popContext();
 
     widgetObject->resetChildrenBounds();
-    
+
 
     return results;
 
 }
-    
+
 // Immediate mode automatic layout
 
 template<typename T, class B>
 typename T::Results drawWidget(MurkaContext &c, B* dataToControl, typename T::Parameters parameters) {
-    
+
     int counter = c.getImCounter();
-    
+
     auto parentMView = (View*)c.linkedView;
-    
+
     auto shapeOffering = parentMView->linearLayout.getNextShapeOffering();
-    
+
     auto widgetHandler = T::getOrCreateImModeWidgetObject(counter, NULL, (View*)c.linkedView, shapeOffering);
     auto widgetObject = (View*)widgetHandler->widgetObjectInternal;
 
     widgetObject->dataTypeName = typeid(dataToControl).name();
 
     typename T::Results results;
-    
+
     c.pushContext(widgetHandler);
     if (c.transformTheRenderIntoThisContextShape(c.overlayHolder->disableViewportCrop)) {
-        
+
         widgetObject->linearLayout.restart(shapeOffering);
         widgetObject->animationRestart();
         widgetObject->mosaicLayout.restart();
         widgetObject->draw(dataToControl, &parameters, widgetObject, c, &results);
-        
+
         c.transformTheRenderBackFromThisContextShape();
     }
     c.popContext();
-    
+
     widgetObject->resetChildrenBounds();
-    
+
     return results;
 }
-    
+
 template<typename T>
 typename T::Results drawWidget(MurkaContext &c, typename T::Parameters parameters) {
-    
+
     int counter = c.getImCounter();
-    
+
     auto parentMView = (View*)c.linkedView;
-    
+
     auto shapeOffering = parentMView->linearLayout.getNextShapeOffering();
-    
+
     auto widgetHandler = T::getOrCreateImModeWidgetObject(counter, NULL, (View*)c.linkedView, shapeOffering);
     auto widgetObject = (View*)widgetHandler->widgetObjectInternal;
-    
+
     typename T::Results results;
-    
+
     c.pushContext(widgetHandler);
     if (c.transformTheRenderIntoThisContextShape(c.overlayHolder->disableViewportCrop)) {
-        
+
         widgetObject->linearLayout.restart(shapeOffering);
         widgetObject->animationRestart();
         widgetObject->mosaicLayout.restart();
         widgetObject->draw(NULL, &parameters, widgetObject, c, &results);
-        
+
         c.transformTheRenderBackFromThisContextShape();
     }
     c.popContext();
-    
+
     widgetObject->resetChildrenBounds();
-    
+
     return results;
 }
+ */
 
 // Get the latest drawn immediate mode widget
 

@@ -14,46 +14,46 @@
  
  // Custom widget template:
  
- #include "MurkaTypes.h"
- #include "MurkaContext.h"
- #include "MurkaView.h"
- #include "MurkaInputEventsRegister.h"
- #include "MurkaAssets.h"
- #include "MurkaLinearLayoutGenerator.h"
+ #pragma once
+ #include "Murka.h"
 
- class Widget : public MurkaViewInterface<Widget> {
+ namespace murka {
+
+ class Label : public View_NEW<Label> {
  public:
-     MURKA_VIEW_DRAW_FUNCTION  {
-                    auto params = (Parameters*)parametersObject;
-                    bool inside = context.isHovered() * !areChildrenHovered(context) * hasMouseFocus(context);
+     
+     void internalDraw(const MurkaContextBase & c)  {
+         
+         bool inside = c.isHovered() * !areChildrenHovered(c);
+     }
  
-                    // Your drawing and interaction code goes here.
-                    // Don't forget that all of this executes at each frame for each
-                    // widget that is drawn on screen.
-                };
- 
-     // Here go parameters and any parameter convenience constructors. You need to define something called Parameters, even if it's NULL.
-     struct Parameters {
-        float somevalue = 0.0;
- 
-        Parameters() {}
-        Parameters(float someval) { somevalue = someval; } // a convenience initializer
-     };
- 
-    // The results type, you also need to define it even if it's nothing.
-    typedef bool Results;
- 
-     // The size that this widget wants if the layout generator asks for it.
- 
- 
-     // The two functions needed for optional UI state saving. It's up to you
-     // to use those.
-     // std::vector<MurkaVar> saveInternalData(int indexX, int indexY) override { }
-     // void loadInternalData(std::vector<MurkaVar>) override {}
- 
- 
-     // Everything else in the class is for handling the internal state. It persist.
- };
+     MURKA_CALLBACK(Label, // class name
+                    onHoverChangeCallback, // callback variable name
+                    onHoverChange) // callback setter
+     
+     MURKA_CALLBACK(Label,
+                    onClickCallback,
+                    onClick)
+     
+     MURKA_CALLBACK_1ARGUMENT(Label, // class name
+                              onClickCallbackPosition, // callback variable name
+                              onClickPosition, // callback setter
+                              MurkaPoint) // callback argument type
+     
+     MURKA_PARAMETER(Label, // class name
+                     TextAlignment, // parameter type
+                     alignment, // parameter variable name
+                     getAlignment, // getter
+                     withAlignment, // setter
+                     TEXT_LEFT) // default
+     
+     MURKA_PARAMETER(Label, // class name
+                     std::string, // parameter type
+                     label, // parameter variable name
+                     getLabel, // getter
+                     text, // setter
+                     "") // default
+}
  
  */
 
@@ -113,6 +113,7 @@ public:
         currentContext.currentViewShape.position += containerPosition;
         currentContext.currentViewShape.size = viewSource->shape.size;
         currentContext.linkedView_NEW = viewSource;
+//        currentContext.deferredView = nullptr;
         
         currentContext.overlayHolder = this;
         
@@ -232,6 +233,8 @@ public:
         
         
 		currentContext = MurkaContext();
+        
+        currentContext.commitDeferredView_casted = [](const MurkaContextBase* cc) { ((MurkaContext*)cc)->commitDeferredView();};
 
         *((MurkaEventState*)&currentContext) = eventState; // copying eventState
 //        MurkaRenderer* pointerToRenderer = (MurkaRenderer*)&currentContext;
