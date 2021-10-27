@@ -9,7 +9,6 @@
 #include "MurkaAssets.h"
 #include "MurkaLinearLayoutGenerator.h"
 #include "MurkaRenderer.h"
-
 /*
  
  // Custom widget template:
@@ -64,6 +63,135 @@ public:
 	Murka() {
         setupEvents();
 	}
+    
+    //////////////////////////////////////////////////////////////////
+    // NEW API 1.0
+    
+    ViewBase_NEW* deferredView = nullptr;
+    std::function<void(Murka &)> defferedViewDrawFunc;
+    
+    MurkaShape getParentContextShape() {
+        return getParentContext().currentViewShape;
+    }
+    
+    MurkaShape getSize() {
+        return currentContext.currentViewShape;
+    }
+    
+    // Utility function to transform the render into the shape of this context.
+    // Helpful to draw the view innards.
+    // Returns false if the view is not visible
+    bool transformTheRenderIntoThisContextShape(bool noCrop = false)  {
+        MurkaShape relativeShape = getSize();
+        relativeShape.position.x -= getParentContextShape().position.x;
+        relativeShape.position.y -= getParentContextShape().position.y;
+        
+        auto croppedViewport = currentContext.getCroppedViewport(getParentContextShape(), relativeShape);
+        auto viewportShape = croppedViewport.first;
+        auto offset = croppedViewport.second;
+        
+        if (noCrop) {
+            viewportShape = relativeShape;
+            viewportShape.position.x += getParentContextShape().position.x;
+            viewportShape.position.y += getParentContextShape().position.y;
+        }
+        
+        if (viewportShape.size.y <= 0) {
+            return false;
+        }
+        
+        pushView();
+        viewport(viewportShape.position.x, viewportShape.position.y, viewportShape.size.x, viewportShape.size.y);
+        setupScreen();
+        pushMatrix();
+        translate(offset.x, offset.y, 0); // this is needed to crop the
+        // views that are only partly visible
+        
+        return true;
+    }
+    
+    void transformTheRenderBackFromThisContextShape() {
+        popMatrix();
+        popView();
+    }
+    
+    // Utility function to substitute the matrix for the viewport to occlude
+    // the drawing outside the widget
+    void startViewport() {
+        transformTheRenderBackFromThisContextShape();
+
+        pushView();
+        auto vport = getCurrentViewport();
+        viewport(MurkaShape(currentContext.currentViewShape.position.x,
+                            currentContext.currentViewShape.position.y,
+                            currentContext.currentViewShape.size.x,
+                            currentContext.currentViewShape.size.y));
+        scale(vport.size.x / currentContext.currentViewShape.size.x,
+            vport.size.y / currentContext.currentViewShape.size.y,
+            1);
+    }
+    
+    void endViewport()  {
+        popView();
+
+        transformTheRenderIntoThisContextShape();
+    }
+    
+    void commitDeferredView() {
+        if (deferredView == nullptr) return;
+        if (deferredView == NULL) return;
+        
+            pushContext_NEW(deferredView);
+            if (transformTheRenderIntoThisContextShape(currentContext.overlayHolder->disableViewportCrop)) {
+                deferredView->linearLayout.restart(deferredView->shape);
+                
+//                deferredView->draw(*this);
+                
+                defferedViewDrawFunc(*this);
+                
+                deferredView->animationRestart();
+                deferredView->mosaicLayout.restart();
+                
+                /*
+                //DEBUG - drawing the children frame that we had at the last frame end
+                setColor(255, 100, 0);
+                    disableFill();
+
+                drawRectangle(((View*)currentContext.murkaView)->childrenBounds.position.x, ((View*)currentContext.murkaView)->childrenBounds.position.y, ((View*)currentContext.murkaView)->childrenBounds.size.x, ((View*)currentContext.murkaView)->childrenBounds.size.y);
+                    enableFill();
+                //////
+                 */
+
+                
+                transformTheRenderBackFromThisContextShape();
+            }
+            popContext();
+                
+            deferredView->resetChildrenBounds();
+        
+        deferredView = nullptr;
+    }
+    
+    // Immediate mode custom layout
+
+    template<typename T>
+    T & drawWidget_NEW(MurkaShape shape) {
+
+        //        auto context = &(m.currentContext);
+        int counter = currentContext.getImCounter();
+
+        
+        ViewBase_NEW* parentView = currentContext.linkedView_NEW;
+        T* widgetObject = T::getOrCreateImModeWidgetObject_NEW(counter, parentView, shape);
+        // TODO: fill the renderer and/or some other helper variables in the new widget object
+        
+        deferredView = widgetObject;
+        defferedViewDrawFunc = std::bind(&T::internalDraw, (T*)widgetObject, std::placeholders::_1);
+    //    c.commitDeferredView();
+
+        return *((T*)widgetObject);
+    }
+    
 
 	void setScreenScale(float newScreenScale) override {
 		MurkaRenderer::setScreenScale(newScreenScale);
@@ -131,24 +259,24 @@ public:
     }
     
     bool transformRenderIntoCurrentContext() {
-        return currentContext.transformTheRenderIntoThisContextShape();
+        return transformTheRenderIntoThisContextShape();
     }
 
     void transformRenderBackFromLastContext() {
-        currentContext.transformTheRenderBackFromThisContextShape();
+        transformTheRenderBackFromThisContextShape();
     }
     
-    View* keyboardFocusHaver = nullptr;
+    View_NEW* keyboardFocusHaver = nullptr;
     
-    void setKeyboardFocusHaver(View* newOwner) {
+    void setKeyboardFocusHaver(View_NEW* newOwner) {
         keyboardFocusHaver = newOwner;
     }
     
-    bool allowedToUseKeyboard(View* asker) {
+    bool allowedToUseKeyboard(View_NEW* asker) {
         return ((keyboardFocusHaver == asker) || (keyboardFocusHaver == nullptr));
     }
     
-    void resetKeyboardFocus(View* asker) {
+    void resetKeyboardFocus(View_NEW* asker) {
         if (asker == keyboardFocusHaver) {
             keyboardFocusHaver = nullptr;
         }
@@ -192,7 +320,7 @@ public:
     
     template<typename T>
     T& draw(MurkaShape place) {
-        return drawWidget_NEW<T>(*this, place);
+        return drawWidget_NEW<T>(place);
     }
 
 
@@ -210,8 +338,6 @@ public:
         
 		currentContext = MurkaContext();
         
-        currentContext.commitDeferredView_casted = [](const MurkaContextBase* cc) { ((MurkaContext*)cc)->commitDeferredView();};
-
         *((MurkaEventState*)&currentContext) = eventState; // copying eventState
 //        MurkaRenderer* pointerToRenderer = (MurkaRenderer*)&currentContext;
 //        pointerToRenderer = this; // Switching this MurkaContext's Renderer base class for a pointer to this renderer
@@ -249,17 +375,17 @@ public:
         };
         
         currentContext.claimKeyboardFocus = [&](void* asker) {
-            setKeyboardFocusHaver((View*)asker);
+            setKeyboardFocusHaver((View_NEW*)asker);
             return;
         };
         
         currentContext.resetKeyboardFocus = [&](void* asker) {
-            resetKeyboardFocus((View*)asker);
+            resetKeyboardFocus((View_NEW*)asker);
             return;
         };
         
         currentContext.checkKeyboardFocus = [&](void* asker)->bool {
-            return allowedToUseKeyboard((View*)asker);
+            return allowedToUseKeyboard((View_NEW*)asker);
         };
         
 //        latestContext = currentContext;
@@ -275,12 +401,12 @@ public:
     
     MurkaContext latestChildContext;
 
-    MurkaContext getContextFromMurkaView(View* view) {
+    MurkaContext getContextFromMurkaView(View_NEW* view) {
 //        view->latestContext.resetImCounter();
         return view->latestContext;
     }
 
-    void beginDrawingInView(View* view) {
+    void beginDrawingInView(View_NEW* view) {
         currentContext = getContextFromMurkaView(view);
     }
     
@@ -288,8 +414,8 @@ public:
         currentContext = latestChildContext;
     }
     
-    View* getLatestView() {
-        return (View*)latestChildContext.linkedView;
+    View_NEW* getLatestView() {
+        return (View_NEW*)latestChildContext.linkedView;
     }
 
     ViewBase_NEW* getLatestView_NEW() {
@@ -297,7 +423,7 @@ public:
     }
 
     MurkaShape getLatestChildShape() {
-        return ((View*)latestChildContext.linkedView)->shape;
+        return ((View_NEW*)latestChildContext.linkedView)->shape;
     }
 
     MurkaShape getLatestChildShape_NEW() {
@@ -305,23 +431,23 @@ public:
     }
 
     void setCurrentLayoutStructure(std::initializer_list<MurkaLinearLayoutGenerator::ShapePartDescriptor> list) {
-       ((View*)currentContext.linkedView)->linearLayout.setLayoutStructure(list);
+       ((View_NEW*)currentContext.linkedView)->linearLayout.setLayoutStructure(list);
     }
     
     float getLayoutLineHeight() {
-        return ((View*)currentContext.linkedView)->linearLayout.getLayoutLineHeight();
+        return ((View_NEW*)currentContext.linkedView)->linearLayout.getLayoutLineHeight();
     }
     
     void setLayoutLinearOffset(float offset) {
-        ((View*)currentContext.linkedView)->linearLayout.setLinearOffset(offset);
+        ((View_NEW*)currentContext.linkedView)->linearLayout.setLinearOffset(offset);
     }
     
     void setLayoutLineHeight(float height) {
-        ((View*)currentContext.linkedView)->linearLayout.setLayoutLineHeight(height);
+        ((View_NEW*)currentContext.linkedView)->linearLayout.setLayoutLineHeight(height);
     }
     
     void addLayoutSpacing(float spacing) {
-        ((View*)currentContext.linkedView)->linearLayout.addSpacing(spacing);
+        ((View_NEW*)currentContext.linkedView)->linearLayout.addSpacing(spacing);
     }
 
     ////////
@@ -332,8 +458,8 @@ public:
     
     ///////////////////
     
-	View* getRootView() {
-		return (View*)this;
+    View_NEW* getRootView() {
+		return (View_NEW*)this;
 	}
 
     struct Parameters {};

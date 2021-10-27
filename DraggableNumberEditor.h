@@ -3,10 +3,12 @@
 #include "Murka.h"
 
 namespace murka {
-    
-// Custom widget template:
 
-class DraggableNumberEditor : public MurkaViewInterface<DraggableNumberEditor> {
+// PRE-1.0 made draggable number editor.
+// TO BE UPDATED TO 1.0
+
+
+class DraggableNumberEditor : public murka::View_NEW<DraggableNumberEditor> {
 public:
     MURKA_VIEW_DRAW_FUNCTION  {
         
@@ -132,6 +134,8 @@ public:
     int draggingNubmerIndex = 0;
     float changeScale = 1.0;
 };
+ 
+ 
 
 
 
