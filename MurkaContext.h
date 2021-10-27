@@ -158,26 +158,24 @@ public:
         imCounter = 0;
     }
     
-    void pushContext(MurkaViewHandlerInternal* viewSource) {
-        pushContextInternal(viewSource);
-    }
+//    void pushContext(MurkaViewHandlerInternal* viewSource) {
+//        pushContextInternal(viewSource);
+//    }
 
     void pushContext_NEW(ViewBase_NEW* viewSource) {
         pushContextInternal_NEW(viewSource);
     }
 
     void popContext() {
-        popContextInternal();
+        popContextInternal_NEW();
     }
     std::function<void(void*)> claimKeyboardFocus = [](void*) {return; };
     std::function<void(void*)> resetKeyboardFocus = [](void*) {return; };
     std::function<bool(void*)> checkKeyboardFocus = [](void*)->bool {return true; }; // aka "widget is allowed to use keyboard"
-    std::function<void(MurkaViewHandlerInternal*)> pushContextInternal = [](MurkaViewHandlerInternal* mvhi) {};
-    std::function<void()> popContextInternal = []() {};
 
     // This uses Animator class because you can't include View from here
     std::function<void(ViewBase_NEW*)> pushContextInternal_NEW = [](ViewBase_NEW* v) {};
-//    std::function<void()> popContextInternal_NEW = []() {};
+    std::function<void()> popContextInternal_NEW = []() {};
 
     double getRunningTime()  {return pointerToRenderer->getElapsedTime();}
 

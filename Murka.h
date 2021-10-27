@@ -79,7 +79,7 @@ public:
         }
         return contextStack[contextStack.size() - 1];
     }
-    
+    /*
     void pushContext(MurkaViewHandlerInternal* viewSource) {
         
         ((View*)currentContext.linkedView)->latestContext = currentContext;
@@ -99,6 +99,7 @@ public:
         
         latestChildContext = currentContext;
     }
+     */
     
     void pushContext_NEW(ViewBase_NEW* viewSource) {
         
@@ -174,11 +175,6 @@ public:
 
         hoverIndex = 0;
         
-        for (auto& i : children) {
-            pushContext(i);
-                drawCycleRecursive(i);
-            popContext();
-        }
     }
     
     void end() {
@@ -199,27 +195,7 @@ public:
         return drawWidget_NEW<T>(*this, place);
     }
 
-	// A recursive OOP draw cycle that starts with this widget
-	void drawCycleRecursive(MurkaViewHandlerInternal* widget) {
-        
-        currentContext.transformTheRenderIntoThisContextShape();
-        
-        ((MurkaViewHandler<View>*)widget)->widgetObject->draw(widget->dataToControl, widget->parametersInternal, widget->widgetObjectInternal, currentContext, widget->resultsInternal);
-        
-        // restarting layout generator
-    ((MurkaViewHandler<View>*)widget)->widgetObject->linearLayout.restart(((MurkaViewHandler<View>*)widget)->widgetObject->shape);
-        ((MurkaViewHandler<View>*)widget)->widgetObject->animationRestart();
-        ((MurkaViewHandler<View>*)widget)->widgetObject->mosaicLayout.restart();
-        
-        currentContext.transformTheRenderBackFromThisContextShape();
 
-        for (auto& i : ((View*)widget->widgetObjectInternal)->children) {
-            pushContext(i);
-                drawCycleRecursive(i);
-            popContext();
-        }
-        
-	}
 
 	// This function gets called in the beginning of the step. It clears everything and initialises context.
 	// it also packs the user input into the context and clears the user input buffer data.
@@ -252,22 +228,14 @@ public:
                                                   float(getWindowHeight())};
 //        currentContext.currentViewShape = currentContext.rootViewShape;
 
-		currentContext.pushContextInternal = [&](MurkaViewHandlerInternal* mvhi) {
-            pushContext(mvhi);
-        };
-
         currentContext.pushContextInternal_NEW = [&](ViewBase_NEW* v) {
             pushContext_NEW(v);
         };
 
-//        currentContext.popContextInternal_NEW = [&]() {
-//            popContext();
-//        };
-
-        currentContext.popContextInternal = [&]() {
+        currentContext.popContextInternal_NEW = [&]() {
             popContext();
         };
-        
+
         currentContext.getParentContextShapeInternal = [&]()->MurkaShape {
             return getParentContext().currentViewShape;
         };
@@ -360,84 +328,7 @@ public:
     //////// Object oriented view heirarchy management
     ////////
     
-    void clearChildren() {
-        for (auto &i: children) {
-            ((View*)i->widgetObjectInternal)->clearChildren();
-            delete i;
-        }
-        children.clear();
-    }
-    
-    template <typename Z, class B>
-    MurkaViewHandler<Z>* addChildToView(View* parent, MurkaViewInterface<Z>* child, B data, void* parameters, MurkaShape shapeInParentContainer)
-    {
-        
-        MurkaViewHandler<Z>* newHandler = new MurkaViewHandler<Z>();
-        
-        newHandler->tParams = newHandler->castParameters(new typename Z::Parameters());
-        if ((parameters != nullptr) && (newHandler->tParams != NULL)) {
-            newHandler->tParams = newHandler->castParameters(parameters);
-            newHandler->parametersInternal = newHandler->tParams;
-        }
 
-        newHandler->resultsInternal = child->returnNewResultsObject();
-        newHandler->manuallyControlled = true;
-        newHandler->widgetObject = (Z*)child->returnNewWidgetObject();
-        newHandler->widgetObjectInternal = newHandler->widgetObject;
-        newHandler->widgetObject->parametersInternal = (typename Z::Parameters*)newHandler->parametersInternal;
-        newHandler->widgetObject->resultsInternal = (typename Z::Results*)newHandler->resultsInternal;
-        newHandler->dataToControl = data;
-        
-        newHandler->widgetObject->dataTypeName = typeid(data).name();
-
-        shapeInParentContainer = shapeInParentContainer;
-        
-        newHandler->widgetObject->shape = shapeInParentContainer;
-        
-        
-        auto handlerPointer = newHandler;
-        parent->children.push_back((MurkaViewHandlerInternal*)handlerPointer);
-        
-        // Updating children bounds
-        if (parent->childrenBounds.position.x > shapeInParentContainer.position.x) {
-            parent->childrenBounds.position.x = shapeInParentContainer.position.x;
-        }
-        if (parent->childrenBounds.position.y > shapeInParentContainer.position.y) {
-            parent->childrenBounds.position.y = shapeInParentContainer.position.y;
-        }
-        if ((parent->childrenBounds.size.x + parent->childrenBounds.position.x) <= (shapeInParentContainer.position.x + shapeInParentContainer.size.x)) {
-            parent->childrenBounds.size.x = shapeInParentContainer.position.x + shapeInParentContainer.size.x - parent->childrenBounds.position.x;
-        }
-        if ((parent->childrenBounds.size.y + parent->childrenBounds.position.y) <= (shapeInParentContainer.position.y + shapeInParentContainer.size.y)) {
-            parent->childrenBounds.size.y = shapeInParentContainer.position.y + shapeInParentContainer.size.y - parent->childrenBounds.position.y;
-        }
-
-        return (MurkaViewHandler<Z>*)parent->children[parent->children.size() - 1];
-    }
-    
-    // A version that accepts a handler rather than the widget object as parent
-    template <typename Z, class B>
-    MurkaViewHandler<Z>* addChildToView(MurkaViewHandlerInternal* parent, MurkaViewInterface<Z>* child, B data, typename Z::Parameters parameters, MurkaShape shapeInParentContainer)
-    {
-        auto newParameters = new typename Z::Parameters();
-        *newParameters = parameters;
-
-        return addChildToView((View*)parent->widgetObjectInternal, child, data, newParameters,                           shapeInParentContainer);
-    }
-
-    // A version that accepts parameters reference rather a pointer
-    template <typename Z, class B>
-    MurkaViewHandler<Z>* addChildToView(MurkaViewInterface<Z>* child, B data, typename Z::Parameters parameters, MurkaShape shapeInParentContainer)
-    {
-        auto newParameters = new typename Z::Parameters();
-        *newParameters = parameters;
-        
-        return addChildToView(getRootView(), child, data, newParameters,                           shapeInParentContainer);
-    }
-
-    void draw(MurkaContextBase & c)  {
-        
-    }
     
     ///////////////////
     

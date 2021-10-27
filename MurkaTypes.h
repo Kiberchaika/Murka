@@ -8,7 +8,6 @@ enum TextAlignment {TEXT_LEFT, TEXT_CENTER, TEXT_RIGHT};
 #elif defined(MURKA_JUCE)
 
 #include <JuceHeader.h>
-#include <juce_opengl/juce_opengl.h>
 
 #if defined(MURKA_JUCE) && defined(WIN32)
 #define GL_STREAM_DRAW juce::GL_STREAM_DRAW
@@ -38,11 +37,17 @@ using namespace std;
 #endif
 
 // Here's the global typedefs for cross-render functionality
+
 #if defined(MURKA_OF)
 #include "ofMain.h"
 #include "ofxFontStash.h"
 typedef ofxFontStash FontObject; // It's important for this object to exist in a render for Murka to work
+
 #elif defined(MURKA_JUCE)
+
+#include <juce_opengl/juce_opengl.h>
+using namespace juce::gl;
+
 #include "juce_murka/juce_fontStash.h"
 typedef juceFontStash FontObject; // It's important for this object to exist in a render for Murka to work
 #endif
