@@ -78,8 +78,11 @@ public:
     }
     
     void draw(const MurVbo & vbo, GLuint drawMode, int first, int total) override{
-        ofRenderer->draw(vbo.internal, drawMode, first, total);
-    }
+		pushMatrix();
+		scale(1, 1, 1);
+		ofRenderer->draw(vbo.internal, drawMode, first, total);
+		popMatrix();
+	}
     
     // Textures binding
 	void bind(const MurImage & img, int location = 0) override {
@@ -295,6 +298,14 @@ public:
 		return ofGetElapsedTimef();
 	}
 
+	void beginCamera(MurCamera cam) {
+		cam.camera.begin();
+		ofScale(1 / getScreenScale()); // fix for scale ui
+	}
+
+	void endCamera(MurCamera cam) {
+		cam.camera.end();
+	}
 };
 
 
@@ -316,6 +327,17 @@ class MurkaRenderer : public MurkaRendererBase {
 
 	vector<MurkaShape> viewportStack;
 	MurkaShape currentViewport;
+	MurMatrix<float> stackedMatrix;
+	
+	// camera
+	vector<MurMatrix<float>> modelStack;
+	MurMatrix<float> currentModelMatrix;
+
+	vector<MurMatrix<float>> viewStack;
+	MurMatrix<float> currentViewMatrix;
+
+	vector<MurMatrix<float>> projectionStack;
+	MurMatrix<float> currentProjectionMatrix;
 
 	struct Style {
 		MurkaColor color = MurkaColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -327,10 +349,6 @@ class MurkaRenderer : public MurkaRendererBase {
 	float lineWidth = 1;
 	float circleResolution = 32;
 
-	MurMatrix<float> stackedMatrix;
-
-	MurMatrix<float> projMatrix;
-	MurMatrix<float> viewMatrix;
 
 	MurShader shaderMain;
 	
@@ -516,6 +534,16 @@ public:
 		viewportStack.clear();
         currentViewport = MurkaShape(0, 0, glAppComp->getWidth() * openGLContext->getRenderingScale(), glAppComp->getHeight() *  openGLContext->getRenderingScale());
 
+		// camera
+		modelStack.clear();
+		currentModelMatrix = MurMatrix<float>();
+
+		viewStack.clear();
+		currentViewMatrix = MurMatrix<float>();
+	
+		projectionStack.clear();
+		currentProjectionMatrix = MurMatrix<float>();
+
 		frameNum++;
 		enableAlphaBlending();
         
@@ -572,13 +600,12 @@ public:
 	void draw(const MurVbo & vbo, GLuint drawMode, int first, int total) override {
 		MurMatrix<float> modelMatrix;
 		modelMatrix = modelMatrix.scaled(juce::Vector3D<float>(getScreenScale(), getScreenScale(), 1.0));
-
 		modelMatrix = modelMatrix * stackedMatrix * currentMatrix;
 
 		shaderMain.bind();
-		shaderMain.setUniformMatrix4f("matrixModel", modelMatrix);
-		shaderMain.setUniformMatrix4f("matrixView", viewMatrix);
-		shaderMain.setUniformMatrix4f("matrixProj", projMatrix);
+		shaderMain.setUniformMatrix4f("matrixModel", modelMatrix * currentModelMatrix);
+		shaderMain.setUniformMatrix4f("matrixView", currentViewMatrix);
+		shaderMain.setUniformMatrix4f("matrixProj", currentProjectionMatrix);
 		
 		shaderMain.setUniform1i("useTexture", useTexture);
 		shaderMain.setUniform1i("vflip", vflip);
@@ -613,13 +640,28 @@ public:
 
 	void pushView() override {
 		viewportStack.push_back(currentViewport);
+
+		// camera
+		modelStack.push_back(currentModelMatrix);
+		viewStack.push_back(currentViewMatrix);
+		projectionStack.push_back(currentProjectionMatrix);
 	}
 
 	void popView() override {
 		MurkaShape v = viewportStack.back() / getScreenScale();
 		viewport(v);
-		setupScreen();
+		//setupScreen();
 		viewportStack.pop_back();
+
+		// camera
+		currentModelMatrix = modelStack.back();
+		modelStack.pop_back();
+
+		currentViewMatrix = viewStack.back();
+		viewStack.pop_back();
+
+		currentProjectionMatrix = projectionStack.back();
+		projectionStack.pop_back();
 	}
 
 	void pushMatrix() override {
@@ -675,8 +717,9 @@ public:
 		float nearDist = dist / 10.0f;
 		float farDist = dist * 10.0f;
 
-		projMatrix = MurMatrix<float>::fromPerspective(juce::degreesToRadians(fov), aspect, nearDist, farDist);
-		viewMatrix = MurMatrix<float>::fromLookAt(juce::Vector3D<float>(eyeX, eyeY, dist), juce::Vector3D<float>(eyeX, eyeY, 0), juce::Vector3D<float>(0, 1, 0));
+		currentProjectionMatrix = MurMatrix<float>::fromPerspective(juce::degreesToRadians(fov), aspect, nearDist, farDist);
+		currentViewMatrix = MurMatrix<float>::fromLookAt(juce::Vector3D<float>(eyeX, eyeY, dist), juce::Vector3D<float>(eyeX, eyeY, 0), juce::Vector3D<float>(0, 1, 0));
+		currentModelMatrix = MurMatrix<float>();
 	}
 
 	// rendering setup
@@ -819,17 +862,20 @@ public:
 	};
 
 	void drawRectangle(float x, float y, float w, float h) override {
+ 
 		if (currentStyle.fill) {
 			MurMatrix<float> modelMatrix;
-			modelMatrix = modelMatrix * MurMatrix<float>::translation(juce::Vector3D<float>(x * getScreenScale(), y * getScreenScale(), 0.0));
+			modelMatrix = modelMatrix * MurMatrix<float>::translation(juce::Vector3D<float>(x* getScreenScale(), y* getScreenScale(), 0.0));
 			modelMatrix = modelMatrix.scaled(juce::Vector3D<float>(w * getScreenScale(), h * getScreenScale(), 1.0));
+
 
 			modelMatrix = modelMatrix * stackedMatrix * currentMatrix;
 
 			shaderMain.bind();
-			shaderMain.setUniformMatrix4f("matrixModel", modelMatrix);
-			shaderMain.setUniformMatrix4f("matrixView", viewMatrix);
-			shaderMain.setUniformMatrix4f("matrixProj", projMatrix);
+			shaderMain.setUniformMatrix4f("matrixModel", modelMatrix * currentModelMatrix);
+			shaderMain.setUniformMatrix4f("matrixView", currentViewMatrix);
+			shaderMain.setUniformMatrix4f("matrixProj", currentProjectionMatrix);
+
 			shaderMain.setUniform1i("useTexture", useTexture);
 			shaderMain.setUniform1i("vflip", vflip);
 			shaderMain.setUniform4f("color", currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
@@ -839,7 +885,7 @@ public:
 		else {
 			pushMatrix();
 			translate(x, y, 0.0);
-			scale(w, h, 1.0);
+			scale(w* getScreenScale(), h* getScreenScale(), 1.0);
 			draw(vboRect, GL_LINE_LOOP, 0, 4);
 			popMatrix();
 		}
@@ -858,9 +904,10 @@ public:
 			modelMatrix = modelMatrix * stackedMatrix * currentMatrix;
 
 			shaderMain.bind();
-			shaderMain.setUniformMatrix4f("matrixModel", modelMatrix);
-			shaderMain.setUniformMatrix4f("matrixView", viewMatrix);
-			shaderMain.setUniformMatrix4f("matrixProj", projMatrix);
+			shaderMain.setUniformMatrix4f("matrixModel", modelMatrix * currentModelMatrix);
+			shaderMain.setUniformMatrix4f("matrixView", currentViewMatrix);
+			shaderMain.setUniformMatrix4f("matrixProj", currentProjectionMatrix);
+			
 			shaderMain.setUniform1i("useTexture", useTexture);
 			shaderMain.setUniform1i("vflip", vflip);
 			shaderMain.setUniform4f("color", currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
@@ -892,9 +939,10 @@ public:
 		modelMatrix = modelMatrix * MurMatrix<float>::translation(juce::Vector3D<float>(x1, y1, 0.0));
 
 		shaderMain.bind();
-		shaderMain.setUniformMatrix4f("matrixModel", modelMatrix);
-		shaderMain.setUniformMatrix4f("matrixView", viewMatrix);
-		shaderMain.setUniformMatrix4f("matrixProj", projMatrix);
+		shaderMain.setUniformMatrix4f("matrixModel", modelMatrix * currentModelMatrix);
+		shaderMain.setUniformMatrix4f("matrixView", currentViewMatrix);
+		shaderMain.setUniformMatrix4f("matrixProj", currentProjectionMatrix);
+
 		shaderMain.setUniform1i("useTexture", useTexture);
 		shaderMain.setUniform1i("vflip", vflip);
 		shaderMain.setUniform4f("color", currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
@@ -956,6 +1004,19 @@ public:
 
 	float getElapsedTime() override {
 		return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - begin).count() / 1000.0;
+	}
+
+	void beginCamera(MurCamera cam) {
+		pushView();
+
+		MurkaShape view = getCurrentViewport();
+		currentProjectionMatrix = cam.getProjectionMatrix(view.size.x / view.size.y);
+		currentViewMatrix = cam.getViewMatrix(); 
+		currentModelMatrix = MurMatrix<float>().scaled(juce::Vector3D<float>(1/ getScreenScale(), 1/ getScreenScale(), 1 / getScreenScale()));
+	}
+
+	void endCamera(MurCamera cam) {
+		popView();
 	}
 };
 

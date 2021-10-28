@@ -5,6 +5,7 @@
 #include "MurImage.h"
 #include "MurkaTypes.h"
 #include "MurkaAssets.h"
+#include "MurCamera.h"
 
 namespace murka {
 
@@ -101,6 +102,9 @@ public:
 
 	virtual uint64_t getFrameNum() = 0;
 	virtual float getElapsedTime() = 0;
+
+	virtual void beginCamera(MurCamera cam) = 0;
+	virtual void endCamera(MurCamera cam) = 0;
 };
 
 }

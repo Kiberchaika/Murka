@@ -19,7 +19,7 @@ enum TextAlignment {TEXT_LEFT, TEXT_CENTER, TEXT_RIGHT};
 #endif
 
 #ifndef M_PI
-#define M_PI           3.14159265358979323846  /* pi */
+#define M_PI           3.14159265358979323846264338327950288  /* pi */
 #endif
 
 
@@ -332,6 +332,56 @@ struct MurkaPoint3D {
 		y = 0;
 		z = 0;
 	}
+
+	MurkaPoint3D operator - (const MurkaPoint3D & p2) const {
+		return { x - p2.x, y - p2.y, z - p2.z };
+	}
+
+	float length() const {
+		return sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
+	}
+
+	
+
+};
+
+struct MurkaPoint4D {
+	float x = 0, y = 0, z = 0, w = 0;
+
+	MurkaPoint4D(float x_, float y_, float z_, float w_) {
+		x = x_;
+		y = y_;
+		z = z_;
+		w = w_;
+	}
+
+	MurkaPoint4D() {
+		x = 0;
+		y = 0;
+		z = 0;
+		w = 0;
+	}
+
+	MurkaPoint4D operator * (const MurkaPoint4D & p2) const {
+		return { x * p2.x, y * p2.y, z * p2.z, w * p2.w };
+	}
+
+	MurkaPoint4D operator * (float multiplier) const {
+		return { x * multiplier, y * multiplier , z * multiplier , w * multiplier };
+	}
+
+	friend MurkaPoint4D operator * (const float& f, const MurkaPoint4D& p) {
+		return p * f;
+	}
+
+	MurkaPoint4D operator - (const MurkaPoint4D & p2) const {
+		return { x - p2.x, y - p2.y, z - p2.z, w - p2.w };
+	}
+
+	MurkaPoint4D operator + (const MurkaPoint4D & p2) const {
+		return { x + p2.x, y + p2.y, z +  p2.z, w + p2.w };
+	}
+
 };
 
 struct MurkaShape {

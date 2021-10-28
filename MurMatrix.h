@@ -32,6 +32,12 @@ public:
 		memcpy(mat, other.mat, sizeof(mat));
 	}
 
+	/** Creates a copy of another matrix. */
+	MurMatrix(const juce::Matrix3D<Type>& other) noexcept
+	{
+		memcpy(mat, other.mat, sizeof(mat));
+	}
+
 	/** Copies another matrix. */
 	MurMatrix& operator= (const MurMatrix& other) noexcept
 	{
@@ -167,6 +173,106 @@ public:
 				 mat[8] * scalar.z, mat[9] * scalar.z, mat[10] * scalar.z, mat[11] * scalar.z,
 				 mat[12], mat[13], mat[14], mat[15] };
 	}
+	
+	Type getData(int i, int j) {
+		return mat[i * 4 + j];
+	}
+
+	void setData(int i, int j, Type v) {
+		mat[i * 4 + j] = v;
+	}
+
+
+	// TODO: 4x3 4x4 check and fix
+	MurMatrix inverted()
+	{
+		 
+		Type Coef00 = getData(2, 2) * getData(3, 3) - getData(3, 2) * getData(2, 3);
+		Type Coef02 = getData(1, 2) * getData(3, 3) - getData(3, 2) * getData(1, 3);
+		Type Coef03 = getData(1, 2) * getData(2, 3) - getData(2, 2) * getData(1, 3);
+
+		Type Coef04 = getData(2, 1) * getData(3, 3) - getData(3, 1) * getData(2, 3);
+		Type Coef06 = getData(1, 1) * getData(3, 3) - getData(3, 1) * getData(1, 3);
+		Type Coef07 = getData(1, 1) * getData(2, 3) - getData(2, 1) * getData(1, 3);
+
+		Type Coef08 = getData(2, 1) * getData(3, 2) - getData(3, 1) * getData(2, 2);
+		Type Coef10 = getData(1, 1) * getData(3, 2) - getData(3, 1) * getData(1, 2);
+		Type Coef11 = getData(1, 1) * getData(2, 2) - getData(2, 1) * getData(1, 2);
+
+		Type Coef12 = getData(2, 0) * getData(3, 3) - getData(3, 0) * getData(2, 3);
+		Type Coef14 = getData(1, 0) * getData(3, 3) - getData(3, 0) * getData(1, 3);
+		Type Coef15 = getData(1, 0) * getData(2, 3) - getData(2, 0) * getData(1, 3);
+
+		Type Coef16 = getData(2, 0) * getData(3, 2) - getData(3, 0) * getData(2, 2);
+		Type Coef18 = getData(1, 0) * getData(3, 2) - getData(3, 0) * getData(1, 2);
+		Type Coef19 = getData(1, 0) * getData(2, 2) - getData(2, 0) * getData(1, 2);
+
+		Type Coef20 = getData(2, 0) * getData(3, 1) - getData(3, 0) * getData(2, 1);
+		Type Coef22 = getData(1, 0) * getData(3, 1) - getData(3, 0) * getData(1, 1);
+		Type Coef23 = getData(1, 0) * getData(2, 1) - getData(2, 0) * getData(1, 1);
+
+		MurkaPoint4D Fac0(Coef00, Coef00, Coef02, Coef03);
+		MurkaPoint4D Fac1(Coef04, Coef04, Coef06, Coef07);
+		MurkaPoint4D Fac2(Coef08, Coef08, Coef10, Coef11);
+		MurkaPoint4D Fac3(Coef12, Coef12, Coef14, Coef15);
+		MurkaPoint4D Fac4(Coef16, Coef16, Coef18, Coef19);
+		MurkaPoint4D Fac5(Coef20, Coef20, Coef22, Coef23);
+
+		MurkaPoint4D Vec0(getData(1, 0), getData(0, 0), getData(0, 0), getData(0, 0));
+		MurkaPoint4D Vec1(getData(1, 1), getData(0, 1), getData(0, 1), getData(0, 1));
+		MurkaPoint4D Vec2(getData(1, 2), getData(0, 2), getData(0, 2), getData(0, 2));
+		MurkaPoint4D Vec3(getData(1, 3), getData(0, 3), getData(0, 3), getData(0, 3));
+
+		MurkaPoint4D Inv0(Vec1 * Fac0 - Vec2 * Fac1 + Vec3 * Fac2);
+		MurkaPoint4D Inv1(Vec0 * Fac0 - Vec2 * Fac3 + Vec3 * Fac4);
+		MurkaPoint4D Inv2(Vec0 * Fac1 - Vec1 * Fac3 + Vec3 * Fac5);
+		MurkaPoint4D Inv3(Vec0 * Fac2 - Vec1 * Fac4 + Vec2 * Fac5);
+
+		MurkaPoint4D SignA(+1, -1, +1, -1);
+		MurkaPoint4D SignB(-1, +1, -1, +1);
+
+		MurkaPoint4D col1 = Inv0 * SignA;
+		MurkaPoint4D col2 = Inv1 * SignB;
+		MurkaPoint4D col3 = Inv2 * SignA;
+		MurkaPoint4D col4 = Inv3 * SignB;
+
+		/*
+				MurMatrix<Type> Inverse(
+			col1.x, col2.x, col3.x, col4.x,
+			col1.y, col2.y, col3.y, col4.y,
+			col1.z, col2.z, col3.z, col4.z,
+			col1.w, col2.w, col3.w, col4.w
+		);
+		*/
+		MurMatrix<Type> Inverse(
+			col1.x, col1.y, col1.z, col1.w,
+			col2.x, col2.y, col2.z, col2.w,
+			col3.x, col3.y, col3.z, col3.w,
+			col4.x, col4.y, col4.z, col4.w
+		);
+
+		MurkaPoint4D Row0(
+			Inverse.getData(0, 0),
+			Inverse.getData(1, 0),
+			Inverse.getData(2, 0),
+			Inverse.getData(3, 0)
+		);
+
+		MurkaPoint4D Col0(
+			getData(0, 0),
+			getData(0, 1),
+			getData(0, 2),
+			getData(0, 3)
+		);
+
+		MurkaPoint4D Dot0(Col0 * Row0);
+		Type Dot1 = (Dot0.x + Dot0.y) + (Dot0.z + Dot0.w);
+
+		Type OneOverDeterminant = 1.0 / Dot1;
+
+		return Inverse * OneOverDeterminant;
+	}
+	
 
 	MurMatrix transposed() 
 	{
@@ -183,6 +289,35 @@ public:
 	void scale(juce::Vector3D<Type> scalar) noexcept
 	{
 		*this = scaled(scalar);
+	}
+
+	static MurMatrix fromQuaternion(juce::Quaternion<Type> q) noexcept 
+	{
+		MurMatrix Result;
+
+		float qxx(q.vector.x * q.vector.x);
+		float qyy(q.vector.y * q.vector.y);
+		float qzz(q.vector.z * q.vector.z);
+		float qxz(q.vector.x * q.vector.z);
+		float qxy(q.vector.x * q.vector.y);
+		float qyz(q.vector.y * q.vector.z);
+		float qwx(q.scalar * q.vector.x);
+		float qwy(q.scalar * q.vector.y);
+		float qwz(q.scalar * q.vector.z);
+
+		Result.setData(0, 0, 1.0 - 2.0 * (qyy + qzz));
+		Result.setData(0, 1, 2.0 * (qxy + qwz));
+		Result.setData(0, 2, 2.0 * (qxz - qwy));
+
+		Result.setData(1, 0, 2.0 * (qxy - qwz));
+		Result.setData(1, 1, 1.0 - 2.0 * (qxx + qzz));
+		Result.setData(1, 2, 2.0 * (qyz + qwx));
+
+		Result.setData(2, 0, 2.0 * (qxz + qwy));
+		Result.setData(2, 1, 2.0 * (qyz - qwx));
+		Result.setData(2, 2, 1.0 - 2.0 * (qxx + qyy));
+
+		return Result;
 	}
 
 	/** Returns a translation matrix. */
@@ -214,6 +349,18 @@ public:
 	{
 		return *this = *this * other;
 	}
+
+	/** Multiplies this matrix by another. */
+	MurMatrix operator * (Type multiplier) const {
+		MurMatrix<Type> m;
+
+		for (int i = 0; i < 16; i++) {
+			m.mat[i] = mat[i] * multiplier;
+		}
+
+		return m;
+	}
+
 
 	/** Multiplies this matrix by another, and returns the result. */
 	MurMatrix operator* (const MurMatrix& other) const noexcept
