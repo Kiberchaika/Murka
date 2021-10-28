@@ -51,6 +51,8 @@ public:
 
 #elif defined(MURKA_JUCE)
 
+
+
 class MurVbo {
 	struct UVCoord {
 		float u = 0;
@@ -82,8 +84,8 @@ class MurVbo {
 
 	vector<VboData> vboData;
 
-	GLuint VAO = 0;
-	GLuint VBO = 0;
+    GLuint VAO = 0;
+    GLuint VBO = 0;
 	juce::OpenGLContext* openGLContext = nullptr;
 	bool loaded = false;
     bool inited = false;

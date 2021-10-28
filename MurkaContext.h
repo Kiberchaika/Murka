@@ -44,64 +44,7 @@ public:
         return std::make_pair(MurkaShape(pos.x, pos.y, size.x, size.y), negativePosition);
     }
     
-    // Utility function to transform the render into the shape of this context.
-    // Helpful to draw the view innards.
-    // Returns false if the view is not visible
-    bool transformTheRenderIntoThisContextShape(bool noCrop = false) const {
-        MurkaShape relativeShape = currentViewShape;
-        relativeShape.position.x -= getParentContextShape().position.x;
-        relativeShape.position.y -= getParentContextShape().position.y;
-        
-        auto croppedViewport = getCroppedViewport(getParentContextShape(), relativeShape);
-        auto viewport = croppedViewport.first;
-        auto offset = croppedViewport.second;
-        
-        if (noCrop) {
-            viewport = relativeShape;
-            viewport.position.x += getParentContextShape().position.x;
-            viewport.position.y += getParentContextShape().position.y;
-        }
-        
-        if (viewport.size.y <= 0) {
-            return false;
-        }
-        
-		pointerToRenderer->pushView();
-		pointerToRenderer->viewport(viewport.position.x, viewport.position.y, viewport.size.x, viewport.size.y);
-		pointerToRenderer->setupScreen();
-		pointerToRenderer->pushMatrix();
-		pointerToRenderer->translate(offset.x, offset.y, 0); // this is needed to crop the
-        // views that are only partly visible
-        
-        return true;
-    }
-    
-    void transformTheRenderBackFromThisContextShape() const {
-		pointerToRenderer->popMatrix();
-		pointerToRenderer->popView();
-    }
-    
-    // Utility function to substitute the matrix for the viewport to occlude
-    // the drawing outside the widget
-    void startViewport() const {
-        transformTheRenderBackFromThisContextShape();
 
-        pointerToRenderer->pushView();
-        auto vport = pointerToRenderer->getCurrentViewport(); 
-        pointerToRenderer->viewport(MurkaShape(currentViewShape.position.x,
-                               currentViewShape.position.y,
-                               currentViewShape.size.x,
-                               currentViewShape.size.y));
-		pointerToRenderer->scale(vport.size.x / currentViewShape.size.x,
-			vport.size.y / currentViewShape.size.y, 
-			1);
-    }
-    
-    void endViewport() const {
-        pointerToRenderer->popView();
-
-        transformTheRenderIntoThisContextShape();
-    }
     
     
     // All shapes are absolute
@@ -111,43 +54,7 @@ public:
     
     ViewBase_NEW* linkedView_NEW = nullptr; // the MurkaView that this context last represented
     
-    ViewBase_NEW* deferredView = nullptr;
-    std::function<void(MurkaContextBase &)> defferedViewDrawFunc;
-    
-    void commitDeferredView() {
-        if (deferredView == nullptr) return;
-        if (deferredView == NULL) return;
-        
-            pushContext_NEW(deferredView);
-            if (transformTheRenderIntoThisContextShape(overlayHolder->disableViewportCrop)) {
-                deferredView->linearLayout.restart(deferredView->shape);
-                
-//                deferredView->draw(*this);
-                
-                defferedViewDrawFunc(*this);
-                
-                deferredView->animationRestart();
-                deferredView->mosaicLayout.restart();
-                
-                /*
-                //DEBUG - drawing the children frame that we had at the last frame end
-                ofSetColor(255, 100, 0);
-                    ofNoFill();
 
-                ofDrawRectangle(((View*)c.murkaView)->childrenBounds.position.x, ((View*)c.murkaView)->childrenBounds.position.y, ((View*)c.murkaView)->childrenBounds.size.x, ((View*)c.murkaView)->childrenBounds.size.y);
-                    ofFill();
-                //////
-                 */
-
-                
-                transformTheRenderBackFromThisContextShape();
-            }
-            popContext();
-                
-            deferredView->resetChildrenBounds();
-        
-        deferredView = nullptr;
-    }
 
     int getImCounter() {
         imCounter++;
@@ -158,26 +65,25 @@ public:
         imCounter = 0;
     }
     
-    void pushContext(MurkaViewHandlerInternal* viewSource) {
-        pushContextInternal(viewSource);
-    }
+//    void pushContext(MurkaViewHandlerInternal* viewSource) {
+//        pushContextInternal(viewSource);
+//    }
 
     void pushContext_NEW(ViewBase_NEW* viewSource) {
         pushContextInternal_NEW(viewSource);
     }
 
     void popContext() {
-        popContextInternal();
+        popContextInternal_NEW();
     }
+    
     std::function<void(void*)> claimKeyboardFocus = [](void*) {return; };
     std::function<void(void*)> resetKeyboardFocus = [](void*) {return; };
     std::function<bool(void*)> checkKeyboardFocus = [](void*)->bool {return true; }; // aka "widget is allowed to use keyboard"
-    std::function<void(MurkaViewHandlerInternal*)> pushContextInternal = [](MurkaViewHandlerInternal* mvhi) {};
-    std::function<void()> popContextInternal = []() {};
 
     // This uses Animator class because you can't include View from here
     std::function<void(ViewBase_NEW*)> pushContextInternal_NEW = [](ViewBase_NEW* v) {};
-//    std::function<void()> popContextInternal_NEW = []() {};
+    std::function<void()> popContextInternal_NEW = []() {};
 
     double getRunningTime()  {return pointerToRenderer->getElapsedTime();}
 

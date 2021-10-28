@@ -47,10 +47,7 @@ public:
 
     MurkaShape shape = {0, 0, 1, 2};
     
-//    virtual MURKA_VIEW_DRAW_FUNCTION_NEW {
-//        ofLog() << "Base drawing, not derived...";
-//    };
-    
+
     MurkaLinearLayoutGenerator linearLayout;
     MosaicLayout mosaicLayout;
 
