@@ -6,11 +6,10 @@
 #include "MurkaAnimator.h"
 #include "parallel_hashmap/phmap.h"
 
-#define MURKA_PARAMETER(typename, parameterType, parameterName, getterName, setterName, default) \
+#define MURKA_PARAMETER(typename, parameterType, parameterName, setterName, default) \
 parameterType parameterName = default; \
 typename & setterName(parameterType parameterName_) { \
-    parameterName = parameterName_; return *this; } \
-parameterType getterName() { return parameterName; }
+    parameterName = parameterName_; return *this; }
 
 #define MURKA_CALLBACK(typename, callbackVariable, setter) \
 std::function<void(typename &)> callbackVariable = [](typename&) {}; \

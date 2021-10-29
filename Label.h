@@ -84,14 +84,12 @@ public:
     MURKA_PARAMETER(Label, // class name
                     TextAlignment, // parameter type
                     alignment, // parameter variable name
-                    getAlignment, // getter
                     withAlignment, // setter
                     TEXT_LEFT) // default
     
     MURKA_PARAMETER(Label, // class name
                     std::string, // parameter type
                     label, // parameter variable name
-                    getLabel, // getter
                     text, // setter
                     "") // default
     
