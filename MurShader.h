@@ -146,7 +146,7 @@ public:
 		}
 	}
 
-	void setUniformMatrix4f(std::string name, MurMatrix<float>& m) {
+	void setUniformMatrix4f(std::string name, MurMatrix<float> m) {
 		juce::OpenGLShaderProgram::Uniform* uniform = getUniformByName(name);
 		if (uniform) {
 			uniform->setMatrix4((GLfloat*)&(m.mat[0]), 1, false);
