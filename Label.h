@@ -15,9 +15,11 @@ public:
             onHoverChangeCallback(*this);
         }
         
+        if (isHovered) onHoverCallback(*this);
+        
 //        if (c.mouseButtonsChanged[0] && c.mouseDown[0])
         
-        if (c.mouseDownPressed[0]) {
+        if (c.mouseDownPressed[0] && inside) {
             onClickCallback(*this);
             onClickCallbackPosition(*this, {25, 11});
         }
@@ -71,7 +73,11 @@ public:
     MURKA_CALLBACK(Label, // class name
                    onHoverChangeCallback, // callback variable name
                    onHoverChange) // callback setter
-    
+
+    MURKA_CALLBACK(Label, // class name
+                   onHoverCallback, // callback variable name
+                   onHover) // callback setter
+
     MURKA_CALLBACK(Label,
                    onClickCallback,
                    onClick)
