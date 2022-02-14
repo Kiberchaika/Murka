@@ -7,6 +7,7 @@
 #include "Murka.h"
 #include "MurkaLinearLayoutGenerator.h"
 #include "MurkaAnimator.h"
+#include "MurkaChildContextHolder.h"
 
 namespace murka {
     
@@ -58,19 +59,49 @@ public:
     
     int hoverIndexCache = 0;
     
-    bool hasMouseFocus(const MurkaContextBase& context) {
-        bool inside = context.isHovered() * !areInteractiveChildrenHovered(context);
+    bool hasMouseFocus(MurkaChildContextHolder& m) {
+        bool inside = m.latestChildContext.isHovered() * !areInteractiveChildrenHovered(m.latestChildContext);
         
         bool pass = false;
         if (inside && wantsClicks()) {
-            auto itr = context.iterateHoverIndex();
-            if (hoverIndexCache != context.getMaxHoverIndex()) pass = false;
+            auto itr = m.latestChildContext.iterateHoverIndex();
+            if (hoverIndexCache != m.latestChildContext.getMaxHoverIndex()) pass = false;
                 else pass = true;
                 
             hoverIndexCache = itr;
         }
         
         return pass;
+    }
+    
+    bool areInteractiveChildrenHovered(MurkaChildContextHolder& m) {
+        if (!m.latestChildContext.isHovered()) {
+            return false;
+        }
+        
+        /*
+        for (auto i: children) {
+            auto shape = ((View*)i->widgetObjectInternal)->shape;
+            shape.position = ((View*)i->widgetObjectInternal)->shape.position;
+            
+            if ((shape.inside(c.mousePosition)) && (((View*)i->widgetObjectInternal)->wantsClicks())) {
+                return true;
+            }
+        }
+        */
+        
+        int index = 0;
+//        typename std::map<imIdentifier, MurkaViewHandler<View_NEW>*>::iterator it;
+        for (auto it = imChildren_NEW.begin(); it != imChildren_NEW.end(); it++) {
+            auto shape = ((View_NEW*)it->second)->shape;
+            shape.position = ((View_NEW*)it->second)->shape.position;
+            
+            if ((shape.inside(m.latestChildContext.mousePosition)) && (((View_NEW*)it->second)->wantsClicks())) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 
 

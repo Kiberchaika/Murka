@@ -9,6 +9,7 @@
 #include "MurkaAssets.h"
 #include "MurkaLinearLayoutGenerator.h"
 #include "MurkaRenderer.h"
+#include "MurkaChildContextHolder.h"
 /*
  
  // Custom widget template:
@@ -56,7 +57,7 @@
 
 namespace murka {
 
-class Murka : public View_NEW<Murka>, public MurkaInputEventsRegister, public MurkaRenderer, public MurkaOverlayHolder {
+class Murka : public View_NEW<Murka>, public MurkaInputEventsRegister, public MurkaRenderer, public MurkaOverlayHolder, public MurkaChildContextHolder {
 public:
 	Murka() {
         setupEvents();
@@ -397,8 +398,6 @@ public:
     
     operator MurkaContext&() { return currentContext; }
     
-    MurkaContext latestChildContext;
-
     MurkaContext getContextFromMurkaView(View_NEW* view) {
 //        view->latestContext.resetImCounter();
         return view->latestContext;

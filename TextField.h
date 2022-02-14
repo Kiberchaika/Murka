@@ -5,7 +5,7 @@
 
 namespace murka {
 
-class TextField : public MurkaViewInterface<TextField> {
+class TextField : public murka::View_NEW<TextField> {
     
     class KeyStroke {
         vector<int> keys;
@@ -69,131 +69,132 @@ public:
 		selectAll = KeyStroke({ MURKA_KEY_COMMAND, 'a' });
 	}
     
-    MURKA_VIEW_DRAW_FUNCTION  {
+    void internalDraw(Murka & m) {
 
-        auto params = (Parameters*)parametersObject;
-        TextField* thisWidget = (TextField*)thisWidgetObject;
-        
-        bool inside = context.isHovered() * !areChildrenHovered(context);
-        
+        MurkaContext& ctx = m.currentContext;
+
+        bool inside = ctx.isHovered() *
+            !areInteractiveChildrenHovered(ctx) *
+            hasMouseFocus(m);
+
         std::string* stringData;
         float* floatData;
         double* doubleData;
         int* intData;
         
         // Handling "wants clicks"
-        if (!params->activateByDoubleClickOnly) {
+        if (!activateByDoubleClickOnly) {
             thisWantsClicks = true;
         } else {
             thisWantsClicks = activated;
         }
         
         if (!activated) { // while not activated
-            updateInternalRepresenation(dataToControl, params->precision, params->clampNumber, params->minNumber, params->maxNumber);
+            updateInternalRepresenation(dataToControl, precision, clampNumber, minNumber, maxNumber);
         }
 
-        params->useCustomFont ? font = params->customFont : font = context.getCurrentFont();
+        useCustomFont ? font = customFont : font = m.getCurrentFont();
         
         bool doubleClick = false;
         
-        if (params->shouldForceEditorToSelectAll) {
+        if (shouldForceEditorToSelectAll) {
             updateTextSelectionFirst(0);
             updateTextSelectionSecond(displayString.length());
-            lastLeftMousebuttonClicktime = context.pointerToRenderer->getElapsedTime();
+            lastLeftMousebuttonClicktime = m.getElapsedTime();
         }
         
         // activating if always selected
         
-        if (params->alwaysActivated) {
+        if (alwaysActivated) {
             activated = true;
-            updateExternalData(dataToControl, params->clampNumber);
-            context.claimKeyboardFocus(this);
+            updateExternalData(dataToControl, clampNumber);
+            ctx.claimKeyboardFocus(this);
         }
 
         // activation & deactivation & doubleclick
-        if (context.mouseDownPressed[0]) {
+        if (ctx.mouseDownPressed[0]) {
             if (inside && !activated) {
-                if (params->activateByDoubleClickOnly) {
-                    activated = context.doubleClick;
+                if (activateByDoubleClickOnly) {
+                    activated = ctx.doubleClick;
                 } else { // activate by any click
                     activated = true;
                 }
                 
-                if (activated) context.claimKeyboardFocus(this);
+                if (activated) ctx.claimKeyboardFocus(this);
                 
-                updateInternalRepresenation(dataToControl, params->precision, params->clampNumber, params->minNumber, params->maxNumber);
+                updateInternalRepresenation(dataToControl, precision, clampNumber, minNumber, maxNumber);
             }
             
-            if (((context.pointerToRenderer->getElapsedTime() - lastLeftMousebuttonClicktime) < 0.2) && (activated)) {
+            if (((m.getElapsedTime() - lastLeftMousebuttonClicktime) < 0.2) && (activated)) {
                 doubleClick = true;
             }
 
-            lastLeftMousebuttonClicktime = context.pointerToRenderer->getElapsedTime();
+            lastLeftMousebuttonClicktime = m.getElapsedTime();
         }
 
-        MurkaColor c = context.pointerToRenderer->getColor();
+        MurkaColor c = m.getColor();
         
-        if (params->drawBounds) {
-            context.pointerToRenderer->pushStyle();
-            context.pointerToRenderer->enableFill();
-            context.pointerToRenderer->setColor(params->widgetBgColor);
-            context.pointerToRenderer->drawRectangle(0, 0, context.getSize().x, context.getSize().y);
+        if (drawBounds) {
+            ctx.pointerToRenderer->pushStyle();
+            ctx.pointerToRenderer->enableFill();
+            ctx.pointerToRenderer->setColor(widgetBgColor);
+            ctx.pointerToRenderer->drawRectangle(0, 0, ctx.getSize().x, ctx.getSize().y);
             
-            context.pointerToRenderer->disableFill();
-            context.pointerToRenderer->setColor(inside ? params->widgetFgColor : params->widgetFgColor / 2);
-            if (activated) context.pointerToRenderer->setColor(params->widgetFgColor * 1.2);
-            context.pointerToRenderer->drawRectangle(1, 1, context.getSize().x-2, context.getSize().y-2);
-            context.pointerToRenderer->popStyle();
+            ctx.pointerToRenderer->disableFill();
+            ctx.pointerToRenderer->setColor(inside ? widgetFgColor : widgetFgColor / 2);
+            if (activated) ctx.pointerToRenderer->setColor(widgetFgColor * 1.2);
+            ctx.pointerToRenderer->drawRectangle(1, 1, ctx.getSize().x-2, ctx.getSize().y-2);
+            ctx.pointerToRenderer->popStyle();
         }
         
         if (isSelectingTextNow()) {
 
             auto selectionShape = returnSelectionVisualShape();
-            MurkaColor selectionColor = (context.pointerToRenderer->getColor() * 0.7 +
-                                         context.pointerToRenderer->getColor() * 0.7) * 255;
-            context.pointerToRenderer->setColor(100, 100, 100, 200);
-            context.pointerToRenderer->drawRectangle(10 - cameraPanInsideWidget + selectionShape.x(), 4, selectionShape.width(), context.getSize().y - 8);
+            MurkaColor selectionColor = (ctx.pointerToRenderer->getColor() * 0.7 +
+                                         ctx.pointerToRenderer->getColor() * 0.7) * 255;
+            ctx.pointerToRenderer->setColor(100, 100, 100, 200);
+            ctx.pointerToRenderer->drawRectangle(10 - cameraPanInsideWidget + selectionShape.x(), 4, selectionShape.width(), ctx.getSize().y - 8);
         }
         
-        recalcGlyphLengths(displayString, &context);
+        recalcGlyphLengths(displayString, &ctx);
         
         float glyphXCoordinate = 10;
-        context.pointerToRenderer->setColor(params->widgetFgColor);
-        font->drawString(displayString, 10 - cameraPanInsideWidget, context.getSize().y / 2 - font->getLineHeight());
+        ctx.pointerToRenderer->setColor(widgetFgColor);
+        font->drawString(displayString, 10 - cameraPanInsideWidget, ctx.getSize().y / 2 - font->getLineHeight());
         
         if (displayString.size() == 0) {
             // drawing hint
-            MurkaColor hintColor = context.pointerToRenderer->getColor() * 0.5 +
-                                   context.pointerToRenderer->getColor() * 0.5;
-            context.pointerToRenderer->setColor(hintColor * 255);
-            font->drawString(params->hint, 10, context.getSize().y / 2 - font->getLineHeight() / 2);
+            MurkaColor hintColor = ctx.pointerToRenderer->getColor() * 0.5 +
+                                   ctx.pointerToRenderer->getColor() * 0.5;
+            ctx.pointerToRenderer->setColor(hintColor * 255);
+            font->drawString(hint, 10, ctx.getSize().y / 2 - font->getLineHeight() / 2);
         }
         
-        textHeight = context.getSize().y; // this is cache for text selection rect retrieavl
+        textHeight = ctx.getSize().y; // this is cache for text selection rect retrieavl
         
         bool didSetCursorPosition = false;
         float cursorPositionInPixels = 0;
         float sumGlyphWidths;
         for (int i = 0; i < displayString.size(); i++) {
             
-            MurkaShape glyphShape = MurkaShape(glyphXCoordinate - cameraPanInsideWidget, 0, currentGlyphLengths[i], context.getSize().y);
+            MurkaShape glyphShape = MurkaShape(glyphXCoordinate - cameraPanInsideWidget, 0, currentGlyphLengths[i], ctx.getSize().y);
             
-            bool insideGlyph = glyphShape.inside(context.mousePosition);
+            bool insideGlyph = glyphShape.inside(ctx.mousePosition);
             
             /*
-			context.renderer->disableFill();
-			context.renderer->setColor(insideGlyph ? params->widgetFgColor / 2 : params->widgetFgColor / 4, 100);
-			context.renderer->drawRectangle(glyphXCoordinate - cameraPanInsideWidget, 0, currentGlyphLengths[i], 30);
-			context.renderer->enableFill();
+			ctx.renderer->disableFill();
+			ctx.renderer->setColor(insideGlyph ? params->widgetFgColor / 2 : params->widgetFgColor / 4, 100);
+			ctx.renderer->drawRectangle(glyphXCoordinate - cameraPanInsideWidget, 0, currentGlyphLengths[i], 30);
+			ctx.renderer->enableFill();
 			*/
             
-            MurkaShape currentSymbolShape = {glyphXCoordinate, 0, currentGlyphLengths[i], context.getSize().y};
+            MurkaShape currentSymbolShape = {glyphXCoordinate, 0, currentGlyphLengths[i], ctx.getSize().y};
             
-            bool safeToUseMouseClickEventsCauseEnoughTimeSinceDoubleClickPassed = ((context.pointerToRenderer->getElapsedTime() - lastLeftMousebuttonClicktime) > 0.2);
+            bool safeToUseMouseClickEventsCauseEnoughTimeSinceDoubleClickPassed = ((ctx.pointerToRenderer->getElapsedTime() - lastLeftMousebuttonClicktime) > 0.2);
             
             // Setting cursor position inside the string if pressed inside it
-            if ((insideGlyph) && (context.mouseDownPressed[0])) {
-                if (((context.mousePosition.x - glyphXCoordinate) / currentGlyphLengths[i]) < 0.5) {
+            if ((insideGlyph) && (ctx.mouseDownPressed[0])) {
+                if (((ctx.mousePosition.x - glyphXCoordinate) / currentGlyphLengths[i]) < 0.5) {
                     cursorPosition = i;
                     didSetCursorPosition = true;
                     updateTextSelectionFirst(i);
@@ -206,9 +207,9 @@ public:
             
             // Moving text selection if mouse was already pressed, and moving the cursror too
             
-            if ((insideGlyph) && (context.mouseDown[0]) && (!context.mouseDownPressed[0])
+            if ((insideGlyph) && (ctx.mouseDown[0]) && (!ctx.mouseDownPressed[0])
                 && (safeToUseMouseClickEventsCauseEnoughTimeSinceDoubleClickPassed)) {
-                if (((context.mousePosition.x - glyphXCoordinate) / currentGlyphLengths[i]) < 0.5) {
+                if (((ctx.mousePosition.x - glyphXCoordinate) / currentGlyphLengths[i]) < 0.5) {
                     cursorPosition = i;
                     didSetCursorPosition = true;
                     updateTextSelectionSecond(i);
@@ -232,7 +233,7 @@ public:
         
         
         // Setting cursor position to the end of the string if mouse pressed outside of it
-        if ((inside) && (context.mouseDownPressed[0]) && (!didSetCursorPosition)) {
+        if ((inside) && (ctx.mouseDownPressed[0]) && (!didSetCursorPosition)) {
             cursorPosition = displayString.size();
         }
         
@@ -246,17 +247,17 @@ public:
                 cameraPanInsideWidget = cursorPositionInPixels - 5;
             }
             
-            if (cursorPositionInPixels > (context.getSize().x + cameraPanInsideWidget)) {
-                cameraPanInsideWidget = cursorPositionInPixels - context.getSize().x + 5;
+            if (cursorPositionInPixels > (ctx.getSize().x + cameraPanInsideWidget)) {
+                cameraPanInsideWidget = cursorPositionInPixels - ctx.getSize().x + 5;
             }
         }
 
         // drawing cursor
         if (activated && !isSelectingTextNow()) {
-            float timeMod = context.getRunningTime() / 1.0 - int(context.getRunningTime() / 1.0);
-            context.pointerToRenderer->setColor(200);
+            float timeMod = ctx.getRunningTime() / 1.0 - int(ctx.getRunningTime() / 1.0);
+            ctx.pointerToRenderer->setColor(200);
             if (timeMod > 0.5)
-                context.pointerToRenderer->drawLine(cursorPositionInPixels - cameraPanInsideWidget, 3,
+                ctx.pointerToRenderer->drawLine(cursorPositionInPixels - cameraPanInsideWidget, 3,
                            cursorPositionInPixels - cameraPanInsideWidget, 30);
         }
         
@@ -275,22 +276,22 @@ public:
 
             // Keystrokes support
             
-            if ((copyText.isPressed(context)) && (activated) && (isSelectingTextNow())) {
+            if ((copyText.isPressed(ctx)) && (activated) && (isSelectingTextNow())) {
                 std::cout << "copytext!!";
                 
                 auto substr = displayString.substr(selectionSymbolsRange.first, selectionSymbolsRange.second - selectionSymbolsRange.first);
                 
-				context.pointerToRenderer->setClipboardString(substr);
+				ctx.pointerToRenderer->setClipboardString(substr);
 
                 copyText.fire();
             } else
-            if ((cutText.isPressed(context)) && (activated) && (isSelectingTextNow())) {
+            if ((cutText.isPressed(ctx)) && (activated) && (isSelectingTextNow())) {
                 std::cout << "cutText!!";
                 
                 if (isSelectingTextNow()) { // if we select now, backspace just deletes
                     auto substr = displayString.substr(selectionSymbolsRange.first, selectionSymbolsRange.second - selectionSymbolsRange.first);
                     
-					context.pointerToRenderer->setClipboardString(substr);
+					ctx.pointerToRenderer->setClipboardString(substr);
                     
                     displayString.replace(selectionSymbolsRange.first, selectionSymbolsRange.second - selectionSymbolsRange.first, "");
                     cursorPosition = selectionSymbolsRange.first;
@@ -300,7 +301,7 @@ public:
                 
                 cutText.fire();
             } else
-            if ((pasteText.isPressed(context)) && (activated)) {
+            if ((pasteText.isPressed(ctx)) && (activated)) {
                 std::cout << "pasteText!!";
                 
                 if (isSelectingTextNow()) { // if we select now, it also replaces the selected text
@@ -308,17 +309,17 @@ public:
                     cursorPosition = selectionSymbolsRange.first;
                 }
 				
-                displayString.insert(cursorPosition, context.pointerToRenderer->getClipboardString());
-                cursorPosition += context.pointerToRenderer->getClipboardString().length();
+                displayString.insert(cursorPosition, ctx.pointerToRenderer->getClipboardString());
+                cursorPosition += ctx.pointerToRenderer->getClipboardString().length();
                 
                 pasteText.fire();
             } else
-            if ((goLeft.isPressed(context)) && (activated)) {
+            if ((goLeft.isPressed(ctx)) && (activated)) {
                 std::cout << "goLeft!!";
                 
                 cursorPosition = 0;
                 
-                if (!shiftLeft.isPressed(context)) {
+                if (!shiftLeft.isPressed(ctx)) {
                     updateTextSelectionFirst(cursorPosition);
                     updateTextSelectionSecond(cursorPosition);
                 } else { // shift pressed, so we enlarge the selected text shape
@@ -336,12 +337,12 @@ public:
 
                 goLeft.fire();
             } else
-            if ((goRight.isPressed(context)) && (activated)) {
+            if ((goRight.isPressed(ctx)) && (activated)) {
                 std::cout << "goRight!!";
 
                 cursorPosition = displayString.size();
 
-                if (!shiftRight.isPressed(context)) {
+                if (!shiftRight.isPressed(ctx)) {
                     updateTextSelectionFirst(cursorPosition);
                     updateTextSelectionSecond(cursorPosition);
                 } else {
@@ -356,7 +357,7 @@ public:
                     
                 goRight.fire();
             } else
-            if ((selectAll.isPressed(context)) && (activated)) {
+            if ((selectAll.isPressed(ctx)) && (activated)) {
                 std::cout << "selectAll!!";
                 
                 updateTextSelectionFirst(0);
@@ -364,9 +365,9 @@ public:
                 
                 selectAll.fire();
             } else
-            if (context.keyPresses.size() != 0) {
+            if (ctx.keyPresses.size() != 0) {
            
-                for (auto key: context.keyPresses) {
+                for (auto key: ctx.keyPresses) {
 //                        std::cout << key;
                     
                     if (key == MURKA_KEY_RETURN) { // enter
@@ -411,7 +412,7 @@ public:
                                 cursorPosition --;
                             }
                             
-                            if (!shiftLeft.isPressed(context)) {
+                            if (!shiftLeft.isPressed(ctx)) {
                                 // pressing left collapses the text selection if shift isn't pressed
                                 updateTextSelectionFirst(cursorPosition);
                                 updateTextSelectionSecond(cursorPosition);
@@ -435,7 +436,7 @@ public:
                             }
 
                             
-                            if (!shiftRight.isPressed(context)) {
+                            if (!shiftRight.isPressed(ctx)) {
                                 // pressing left collapses the text selection if shift isn't pressed
                                 updateTextSelectionFirst(cursorPosition);
                                 updateTextSelectionSecond(cursorPosition);
@@ -462,7 +463,7 @@ public:
                         updateTextSelectionFirst(cursorPosition);
                         updateTextSelectionSecond(cursorPosition);
                     }
-					else if (!params->numbersOnly && key >= 32 && key <= 255) { // symbol keys
+					else if (!numbersOnly && key >= 32 && key <= 255) { // symbol keys
 
 						std::cout << "pressed symbol key " << key;
 						if (isSelectingTextNow()) {
@@ -486,20 +487,24 @@ public:
         
         // Deactivating the widget and updating the data
         
-        if ((activated) && (!params->alwaysActivated))
-        if ((enterPressed) || (context.mouseDownPressed[0] && !inside)) {
+        results = false;
+        
+        if ((activated) && (!alwaysActivated))
+        if ((enterPressed) || (ctx.mouseDownPressed[0] && !inside)) {
             activated = false;
             cameraPanInsideWidget = 0;
             
-            context.resetKeyboardFocus(this);
+            ctx.resetKeyboardFocus(this);
             
-            updateExternalData(dataToControl, params->clampNumber);
+            updateExternalData(dataToControl, clampNumber);
             
-            *(bool*)resultObject = true;
+            results = true;
         }
         
-//            drawWidget<Label>(context, {""});
+//            drawWidget<Label>(ctx, {""});
     };
+    
+    bool results = false;
     
     void updateExternalData(void* dataToControl, bool clamp = false) {
 //            std::cout << "datatype: " << dataTypeName;
@@ -591,39 +596,57 @@ public:
         }
     }
     
-    struct Parameters {
-        bool useCustomFont = false;
-        
-        FontObject* customFont;
-        
-        bool drawBounds = true;
-        
-        bool clampNumber = false;
-        double minNumber = 0, maxNumber = 0;
-        int precision = -1;
-        
-        bool activateByDoubleClickOnly = false;
-        bool alwaysActivated = false;
-        
-        std::string hint = "";
-        
-        MurkaColor widgetFgColor = {0.98, 0.98, 0.98};
-        MurkaColor widgetBgColor = {0.1, 0.1, 0.1};
+    void* dataToControl = nullptr;
+    
+//    struct Parameters {
+    bool useCustomFont = false;
+    
+    FontObject* customFont;
+    
+    bool drawBounds = true;
+    
+    bool clampNumber = false;
+    double minNumber = 0, maxNumber = 0;
+//    int precision = -1;
+    
+    bool activateByDoubleClickOnly = false;
+    bool alwaysActivated = false;
+    
+    std::string hint = "";
+    
+    MurkaColor widgetFgColor = {0.98, 0.98, 0.98};
+    MurkaColor widgetBgColor = {0.1, 0.1, 0.1};
 
-        bool numbersOnly = false;
+//    bool numbersOnly = false;
+    MURKA_PARAMETER(TextField, // class name
+                    bool, // parameter type
+                    numbersOnly, // parameter variable name
+                    onlyAllowNumbers, // setter
+                    false // default
+    )
+
+    
+    MURKA_PARAMETER(TextField, // class name
+                    int, // parameter type
+                    precision, // parameter variable name
+                    withPrecision, // setter
+                    -1 // default
+    )
+
+    MURKA_PARAMETER(TextField, // class name
+                    bool, // parameter type
+                    shouldForceEditorToSelectAll, // parameter variable name
+                    forcingEditorToSelectAll, // setter
+                    false // default
+    )
+
+//    bool shouldForceEditorToSelectAll = false;
         
-        bool shouldForceEditorToSelectAll = false;
-        
-        Parameters() {
-        }
-        
-        Parameters(int _precision, double _min, double _max) {
-            minNumber = _min;
-            maxNumber = _max;
-            clampNumber = true;
-            precision = _precision;
-        }
-    };
+    TextField & controlling(void* dataToControl_) {
+        dataToControl = dataToControl_;
+        return *this;
+    }
+    
     
     FontObject* font;
     
@@ -634,7 +657,7 @@ public:
     
     float cameraPanInsideWidget = 0;
 
-    void recalcGlyphLengths(std::string text, const MurkaContext* context) {
+    void recalcGlyphLengths(std::string text, const MurkaContext* ctx) {
         if (currentGlyphLengths.size() < text.size()) {
             currentGlyphLengths.resize(text.size());
         }
