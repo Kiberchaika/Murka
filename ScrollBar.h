@@ -9,7 +9,7 @@
 
 namespace murka {
 
-	class ScrollBar : public MurkaViewInterface<ScrollBar> {
+	class ScrollBar : public View_NEW<ScrollBar> {
 	public:
 		MURKA_VIEW_DRAW_FUNCTION  {
 
@@ -22,7 +22,7 @@ namespace murka {
 
 				   float scrollbarHeight = (context.getSize().y / (params->surfaceToControl->panLimits.size.y + context.getSize().y)) * context.getSize().y;
                 
-				   MurkaShape surfaceShape = ((View*)params->surfaceToControl)->shape;
+				   MurkaShape surfaceShape = ((View_NEW*)params->surfaceToControl)->shape;
                 
 				   MurkaShape handleShape = {0,
 											  (context.getSize().y - scrollbarHeight) *
@@ -58,7 +58,7 @@ namespace murka {
 
 				   float scrollbarWidth = (context.getSize().x / (params->surfaceToControl->panLimits.size.x + context.getSize().x)) * context.getSize().x;
                 
-				   MurkaShape surfaceShape = ((View*)params->surfaceToControl)->shape;
+				   MurkaShape surfaceShape = ((View_NEW*)params->surfaceToControl)->shape;
                 
 				   MurkaShape handleShape = {(context.getSize().x - scrollbarWidth) *
 												(params->surfaceToControl->panOffset.x / (params->surfaceToControl->panLimits.size.x)),

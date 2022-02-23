@@ -10,24 +10,25 @@
 
 namespace murka {
 
-class Pane : public murka::View_NEW<Pane> {
+class Pane : public View_NEW<Pane> {
     
     double paneSplitValue = 0.5;
     
 public:
-    void internalDraw(const murka::MurkaContextBase & c) {
+	void internalDraw(Murka & m) {
+		MurkaContext& c = m.currentContext;
 
         bool inside = c.isHovered() * !areInteractiveChildrenHovered(c) * hasMouseFocus(c);
         
         MurkaShape paneControlShape;
         
         if (paneKind == PaneKind::HORIZONTAL) {  // horizontal drawing
-            c.draw<LambdaPanel>({0, 0,
+            m.draw<LambdaPanel>({0, 0,
                                 c.getSize().x * paneSplitValue,
                                 c.getSize().y})
                 .lambda({[&](const MurkaContextBase& c) { firstPanelDraw(c); }});
             
-            c.draw<LambdaPanel>({c.getSize().x * paneSplitValue, 0,
+            m.draw<LambdaPanel>({c.getSize().x * paneSplitValue, 0,
                                     c.getSize().x * float(1.0 - paneSplitValue),
                                     c.getSize().y})
                 .lambda({[&](const MurkaContextBase& c) { secondPanelDraw(c); }});
@@ -45,12 +46,12 @@ public:
         
         if (paneKind == PaneKind::VERTICAL) { // vertical drawing
 
-            c.draw<LambdaPanel>({0, 0,
+            m.draw<LambdaPanel>({0, 0,
                                     c.getSize().x,
                                     c.getSize().y * paneSplitValue})
                 .lambda({[&](const MurkaContextBase& c) { firstPanelDraw(c); }});
             
-            c.draw<LambdaPanel>({0, c.getSize().y * paneSplitValue,
+            m.draw<LambdaPanel>({0, c.getSize().y * paneSplitValue,
                                     c.getSize().x,
                                     c.getSize().y * float(1.0 - paneSplitValue)})
                 .lambda({[&](const MurkaContextBase& c) { firstPanelDraw(c); }});
@@ -108,7 +109,6 @@ public:
     MURKA_PARAMETER(Pane, // class name
         std::function<void(const MurkaContextBase&)>, // parameter type
         firstPanelDraw, // parameter variable name
-        getFirstPanelDraw, // getter
         withFirstPanelCallback, // setter
         [](const MurkaContextBase&){} // default
     )
@@ -116,7 +116,6 @@ public:
     MURKA_PARAMETER(Pane, // class name
         std::function<void(const MurkaContextBase&)>, // parameter type
         secondPanelDraw, // parameter variable name
-        getSecondPanelDraw, // getter
         withSecondPanelCallback, // setter
         [](const MurkaContextBase&){} // default
     )
@@ -124,7 +123,6 @@ public:
     MURKA_PARAMETER(Pane, // class name
         double, // parameter type
         minValue, // parameter variable name
-        getMinValue, // getter
         withMinValue, // setter
         0 // default
     )
@@ -132,7 +130,6 @@ public:
     MURKA_PARAMETER(Pane, // class name
         double, // parameter type
         maxValue, // parameter variable name
-        getMaxValue, // getter
         withMaxValue, // setter
         0 // default
     )
@@ -140,7 +137,6 @@ public:
     MURKA_PARAMETER(Pane, // class name
         bool, // parameter type
         collapseable, // parameter variable name
-        getCollapseable, // getter
         setCollapseable, // setter
         true // default
     )
@@ -150,7 +146,6 @@ public:
     MURKA_PARAMETER(Pane, // class name
         PaneKind, // parameter type
         paneKind, // parameter variable name
-        getPaneKind, // getter
         withKind, // setter
         HORIZONTAL // default
     )
@@ -158,7 +153,6 @@ public:
     MURKA_PARAMETER(Pane, // class name
         double, // parameter type
         paneControlWidth, // parameter variable name
-        getPaneCopntrolWidth, // getter
         withPaneCopntrolWidth, // setter
         8 // default
     )

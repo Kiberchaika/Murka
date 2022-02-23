@@ -18,9 +18,54 @@ class MurkaRenderer;
 #if defined(MURKA_OF)
 
 class MurShader {
+	ofShader shader;
 public:
 	MurShader(){}
-    
+  
+	bool load(std::string vert, std::string frag) {
+		return shader.load(vert, frag);
+	}
+
+	int getAttributeLocation(std::string name) {
+		return shader.getAttributeLocation(name);
+	}
+
+	void unload() {
+		shader.unload();
+	}
+
+	void bind() {
+		shader.begin();
+	}
+
+	void unbind() {
+		shader.end();
+	}
+
+	void setUniform1i(std::string name, int v) {
+		shader.setUniform1i(name, v);
+	}
+
+	void setUniform1f(std::string name, float v) {
+		shader.setUniform1f(name, v);
+	}
+
+	void setUniform2f(std::string name, float v1, float v2) {
+		shader.setUniform2f(name, v1, v2);
+	}
+
+	void setUniform3f(std::string name, float v1, float v2, float v3) {
+		shader.setUniform3f(name, v1, v2, v3);
+	}
+
+	void setUniform4f(std::string name, float v1, float v2, float v3, float v4) {
+		shader.setUniform4f(name, v1, v2, v3, v4);
+	}
+
+	void setUniformMatrix4f(std::string name, ofMatrix4x4 m) {
+		shader.setUniformMatrix4f(name, m);
+	}
+
 };
 
 #elif defined(MURKA_JUCE)

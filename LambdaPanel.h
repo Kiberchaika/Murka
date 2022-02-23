@@ -8,7 +8,7 @@
 
 namespace murka {
 
-class LambdaPanel : public murka::View_NEW<LambdaPanel> {
+class LambdaPanel : public View_NEW<LambdaPanel> {
 public:
 	
     void internalDraw(const murka::MurkaContextBase & c) {
@@ -22,7 +22,6 @@ public:
     MURKA_PARAMETER(LambdaPanel, // class name
                     function<void(const MurkaContextBase&)>, // parameter type
                     lambdaFunc, // parameter variable name
-                    getLambda, // getter
                     lambda, // setter
                     [](const MurkaContextBase&){} // default
     )

@@ -6,7 +6,7 @@
 
 namespace murka {
 
-/*
+
 class Header : public MurkaViewInterface<Header> {
 public:
     Header() {
@@ -706,6 +706,6 @@ public:
     }
     
 };
-*/
+
 
 }
