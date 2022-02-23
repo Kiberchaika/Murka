@@ -72,7 +72,7 @@ public:
 
 class MurShader {
 	juce::OpenGLContext* openGLContext = nullptr;
-	juce::OpenGLShaderProgram* shaderMain = nullptr;
+	juce::OpenGLShaderProgram* shader = nullptr;
 	std::map<std::string, juce::OpenGLShaderProgram::Uniform*> uniforms;
 	std::map<std::string, int> attributes;
 	
@@ -84,8 +84,8 @@ class MurShader {
 				return uniforms[name];
 			}
 			else {
-				if (openGLContext->extensions.glGetUniformLocation(shaderMain->getProgramID(), name.c_str()) >= 0) {
-					juce::OpenGLShaderProgram::Uniform* uniform = new juce::OpenGLShaderProgram::Uniform(*shaderMain, name.c_str());
+				if (openGLContext->extensions.glGetUniformLocation(shader->getProgramID(), name.c_str()) >= 0) {
+					juce::OpenGLShaderProgram::Uniform* uniform = new juce::OpenGLShaderProgram::Uniform(*shader, name.c_str());
 					uniforms[name] = uniform;
 					return uniform;
 				}
@@ -109,17 +109,17 @@ public:
 	}
 
 	bool load(std::string vert, std::string frag) {
-		shaderMain = new juce::OpenGLShaderProgram(*openGLContext);
+		shader = new juce::OpenGLShaderProgram(*openGLContext);
 
 		if (
-			shaderMain->addVertexShader(juce::OpenGLHelpers::translateVertexShaderToV3(vert)) &&
-			shaderMain->addFragmentShader(juce::OpenGLHelpers::translateFragmentShaderToV3(frag)) &&
-			shaderMain->link()
+			shader->addVertexShader(juce::OpenGLHelpers::translateVertexShaderToV3(vert)) &&
+			shader->addFragmentShader(juce::OpenGLHelpers::translateFragmentShaderToV3(frag)) &&
+			shader->link()
 			) {
 			isLoaded = true;
 		}
 		else {
-			string err = shaderMain->getLastError().toStdString();
+			string err = shader->getLastError().toStdString();
 			isLoaded = false;
 		}
 	
@@ -132,7 +132,7 @@ public:
 				return attributes[name];
 			}
 			else {
-				int loc = openGLContext->extensions.glGetAttribLocation(shaderMain->getProgramID(), name.c_str());
+				int loc = openGLContext->extensions.glGetAttribLocation(shader->getProgramID(), name.c_str());
 				attributes[name] = loc;
 				return loc;
 			}
@@ -146,14 +146,14 @@ public:
 		}
 		uniforms.clear();
 
-		delete shaderMain;
-		shaderMain = nullptr;
+		delete shader;
+		shader = nullptr;
 
 		isLoaded = false;
 	}
 
-	void bind() {
-		shaderMain->use();
+	void use() {
+		shader->use();
 	}
 
 	void setUniform1i(std::string name, int v) {

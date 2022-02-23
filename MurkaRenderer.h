@@ -351,7 +351,8 @@ class MurkaRenderer : public MurkaRendererBase {
 
 
 	MurShader shaderMain;
-	
+	MurShader* currentShader = nullptr;
+
 	MurVbo vboRect;
 	MurVbo vboLine;
 	MurVbo vboLineOld;
@@ -409,8 +410,16 @@ public:
 	void closeOpenGLContext() {
 	}
    
-	void bindMainShader() {
-		shaderMain.bind();
+	void bindShader(MurShader* shader) {
+		shader->use();
+
+		currentShader = shader;
+	}
+
+	void unbindShader() {
+		shaderMain.use();
+
+		currentShader = &shaderMain;
 	}
 
 	juce::OpenGLContext* getOpenGLContext() {
@@ -547,6 +556,8 @@ public:
 		frameNum++;
 		enableAlphaBlending();
         
+		unbindShader();
+
         setupScreen();
 	}
 	
@@ -602,14 +613,13 @@ public:
 		modelMatrix = modelMatrix.scaled(juce::Vector3D<float>(getScreenScale(), getScreenScale(), 1.0));
 		modelMatrix = modelMatrix * stackedMatrix * currentMatrix;
 
-		shaderMain.bind();
-		shaderMain.setUniformMatrix4f("matrixModel", modelMatrix * currentModelMatrix);
-		shaderMain.setUniformMatrix4f("matrixView", currentViewMatrix);
-		shaderMain.setUniformMatrix4f("matrixProj", currentProjectionMatrix);
+		currentShader->setUniformMatrix4f("matrixModel", modelMatrix * currentModelMatrix);
+		currentShader->setUniformMatrix4f("matrixView", currentViewMatrix);
+		currentShader->setUniformMatrix4f("matrixProj", currentProjectionMatrix);
 		
-		shaderMain.setUniform1i("useTexture", useTexture);
-		shaderMain.setUniform1i("vflip", vflip);
-		shaderMain.setUniform4f("color", currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
+		currentShader->setUniform1i("useTexture", useTexture);
+		currentShader->setUniform1i("vflip", vflip);
+		currentShader->setUniform4f("color", currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
 		vbo.internalDraw(drawMode, first, total);
 	}
 
@@ -871,14 +881,13 @@ public:
 
 			modelMatrix = modelMatrix * stackedMatrix * currentMatrix;
 
-			shaderMain.bind();
-			shaderMain.setUniformMatrix4f("matrixModel", modelMatrix * currentModelMatrix);
-			shaderMain.setUniformMatrix4f("matrixView", currentViewMatrix);
-			shaderMain.setUniformMatrix4f("matrixProj", currentProjectionMatrix);
+			currentShader->setUniformMatrix4f("matrixModel", modelMatrix * currentModelMatrix);
+			currentShader->setUniformMatrix4f("matrixView", currentViewMatrix);
+			currentShader->setUniformMatrix4f("matrixProj", currentProjectionMatrix);
 
-			shaderMain.setUniform1i("useTexture", useTexture);
-			shaderMain.setUniform1i("vflip", vflip);
-			shaderMain.setUniform4f("color", currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
+			currentShader->setUniform1i("useTexture", useTexture);
+			currentShader->setUniform1i("vflip", vflip);
+			currentShader->setUniform4f("color", currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
 			vboRect.update(GL_STATIC_DRAW, shaderMain.getAttributeLocation("position"), shaderMain.getAttributeLocation("uv"), shaderMain.getAttributeLocation("col"));
 			vboRect.internalDraw(GL_TRIANGLE_FAN, 0, 4);
 		}
@@ -903,14 +912,13 @@ public:
 
 			modelMatrix = modelMatrix * stackedMatrix * currentMatrix;
 
-			shaderMain.bind();
-			shaderMain.setUniformMatrix4f("matrixModel", modelMatrix * currentModelMatrix);
-			shaderMain.setUniformMatrix4f("matrixView", currentViewMatrix);
-			shaderMain.setUniformMatrix4f("matrixProj", currentProjectionMatrix);
+			currentShader->setUniformMatrix4f("matrixModel", modelMatrix * currentModelMatrix);
+			currentShader->setUniformMatrix4f("matrixView", currentViewMatrix);
+			currentShader->setUniformMatrix4f("matrixProj", currentProjectionMatrix);
 			
-			shaderMain.setUniform1i("useTexture", useTexture);
-			shaderMain.setUniform1i("vflip", vflip);
-			shaderMain.setUniform4f("color", currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
+			currentShader->setUniform1i("useTexture", useTexture);
+			currentShader->setUniform1i("vflip", vflip);
+			currentShader->setUniform4f("color", currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
 
 			vboCircle.internalDraw(GL_TRIANGLE_FAN, 0, circleResolution);
 		}
@@ -938,14 +946,13 @@ public:
 		modelMatrix = modelMatrix * MurMatrix<float>().rotated(juce::Vector3D<float>(0.0, 0.0, a));
 		modelMatrix = modelMatrix * MurMatrix<float>::translation(juce::Vector3D<float>(x1, y1, 0.0));
 
-		shaderMain.bind();
-		shaderMain.setUniformMatrix4f("matrixModel", modelMatrix * currentModelMatrix);
-		shaderMain.setUniformMatrix4f("matrixView", currentViewMatrix);
-		shaderMain.setUniformMatrix4f("matrixProj", currentProjectionMatrix);
+		currentShader->setUniformMatrix4f("matrixModel", modelMatrix * currentModelMatrix);
+		currentShader->setUniformMatrix4f("matrixView", currentViewMatrix);
+		currentShader->setUniformMatrix4f("matrixProj", currentProjectionMatrix);
 
-		shaderMain.setUniform1i("useTexture", useTexture);
-		shaderMain.setUniform1i("vflip", vflip);
-		shaderMain.setUniform4f("color", currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
+		currentShader->setUniform1i("useTexture", useTexture);
+		currentShader->setUniform1i("vflip", vflip);
+		currentShader->setUniform4f("color", currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
 
 		vboLine.internalDraw(GL_TRIANGLE_FAN, 0, 4);
 	}
