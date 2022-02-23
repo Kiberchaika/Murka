@@ -18,7 +18,7 @@ public:
 	void internalDraw(Murka & m) {
 		MurkaContext& c = m.currentContext;
 
-        bool inside = c.isHovered() * !areInteractiveChildrenHovered(c) * hasMouseFocus(c);
+        bool inside = c.isHovered() * !areInteractiveChildrenHovered(c) * hasMouseFocus(m);
         
         MurkaShape paneControlShape;
         
