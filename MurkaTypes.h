@@ -9,7 +9,7 @@ enum TextAlignment {TEXT_LEFT, TEXT_CENTER, TEXT_RIGHT};
 
 #include <JuceHeader.h>
 
-#if defined(MURKA_JUCE) && defined(WIN32)
+#if defined(MURKA_JUCE) && defined(WIN32) && JUCE_MINOR_VERSION == 1 && JUCE_MAJOR_VERSION < 6
 #define GL_STREAM_DRAW juce::GL_STREAM_DRAW
 #define GL_ARRAY_BUFFER juce::GL_ARRAY_BUFFER
 #define GL_RGBA32F juce::GL_RGBA32F
