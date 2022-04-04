@@ -967,7 +967,7 @@ public:
 		x2 = x2 * getScreenScale();
 		y2 = y2 * getScreenScale();
 
-		vector<MurkaPoint3D> verts;
+		std::vector<MurkaPoint3D> verts;
 		verts.push_back(MurkaPoint3D(x1, y1, 0));
 		verts.push_back(MurkaPoint3D(x2, y2, 0));
 		vboLineOld.setVertexData(verts.data(), verts.size());
@@ -980,7 +980,7 @@ public:
 		draw(vbo, drawMode, first, total);
 	}
 
-	void drawPath(const vector<MurkaPoint3D> & verts) override {
+	void drawPath(const std::vector<MurkaPoint3D> & verts) override {
 		vboLineOld.setVertexData(verts.data(), verts.size());
 		vboLineOld.update(GL_STATIC_DRAW, shaderMain.getAttributeLocation("position"), shaderMain.getAttributeLocation("uv"), shaderMain.getAttributeLocation("col"));
 
