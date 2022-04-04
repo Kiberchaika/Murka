@@ -119,7 +119,7 @@ public:
 			isLoaded = true;
 		}
 		else {
-			string err = shader->getLastError().toStdString();
+			std::string err = shader->getLastError().toStdString();
 			isLoaded = false;
 		}
 	

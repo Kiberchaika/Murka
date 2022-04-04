@@ -176,7 +176,7 @@ public:
         } else return 0;
     }
     
-    inline float overlapAreaOfOneToAll(MurkaShape shape, vector<MurkaShape>& others) {
+    inline float overlapAreaOfOneToAll(MurkaShape shape, std::vector<MurkaShape>& others) {
 		float sumOverlapArea = 0;
         for (auto &j: others) {
             sumOverlapArea += overlapArea(shape, j);
@@ -210,7 +210,7 @@ public:
     
 #define ATTEMPTS_AT_EACH_STAGE 5
     
-    vector<MurkaShape> compactnessShapes;
+    std::vector<MurkaShape> compactnessShapes;
 
 	float noise(int x, int y) {
 		int n;

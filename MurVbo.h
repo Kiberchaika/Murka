@@ -72,9 +72,9 @@ class MurVbo {
 		float a = 1;
 	};
 
-	vector<MurkaPoint3D> verts;
-	vector<MurkaPoint> texCoords;
-	vector<MurkaColor> cols;
+	std::vector<MurkaPoint3D> verts;
+	std::vector<MurkaPoint> texCoords;
+	std::vector<MurkaColor> cols;
 
 	struct VboData {
         VertexCoord vert;
@@ -82,7 +82,7 @@ class MurVbo {
 		Col col;
 	};
 
-	vector<VboData> vboData;
+	std::vector<VboData> vboData;
 
     GLuint VAO = 0;
     GLuint VBO = 0;

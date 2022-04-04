@@ -32,8 +32,6 @@ enum TextAlignment {TEXT_LEFT, TEXT_CENTER, TEXT_RIGHT};
 #include <random>
 #include <map>
 
-using namespace std;
-
 #endif
 
 // Here's the global typedefs for cross-render functionality

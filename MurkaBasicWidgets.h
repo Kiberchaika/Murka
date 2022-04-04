@@ -291,7 +291,7 @@ public:
 	) // default
 
 		
-	vector<string> options = {};
+    std::vector<std::string> options = {};
 	int selectedOption = 0;
 
 	bool results;
@@ -509,7 +509,7 @@ public:
         
 
         m.currentContext.pointerToRenderer->setColor(inside ? fgColor : fgColor / 2);
-        auto resultString = label + ": " + to_string(*((float*)dataToControl));
+        auto resultString = label + ": " + std::to_string(*((float*)dataToControl));
         
         
         float offset = font->stringWidth(resultString) / 2;

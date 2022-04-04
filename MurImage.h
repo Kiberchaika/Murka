@@ -79,7 +79,7 @@ class MurImage {
 	juce::OpenGLContext* openGLContext = nullptr;
 	bool bAllocated = false;
 
-	vector<float> data;
+	std::vector<float> data;
 	bool arb = false;
 	int gltype = 0;
 

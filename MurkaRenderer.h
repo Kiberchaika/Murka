@@ -322,28 +322,28 @@ class MurkaRenderer : public MurkaRendererBase {
 	std::function<std::string(void)> getClipboardCallback = nullptr;
 	std::function<void(std::string)> setClipboardCallback = nullptr;
 
-	vector<MurMatrix<float>> matrixStack;
+	std::vector<MurMatrix<float>> matrixStack;
 	MurMatrix<float> currentMatrix;
 
-	vector<MurkaShape> viewportStack;
+	std::vector<MurkaShape> viewportStack;
 	MurkaShape currentViewport;
 	MurMatrix<float> stackedMatrix;
 	
 	// camera
-	vector<MurMatrix<float>> modelStack;
+	std::vector<MurMatrix<float>> modelStack;
 	MurMatrix<float> currentModelMatrix;
 
-	vector<MurMatrix<float>> viewStack;
+	std::vector<MurMatrix<float>> viewStack;
 	MurMatrix<float> currentViewMatrix;
 
-	vector<MurMatrix<float>> projectionStack;
+	std::vector<MurMatrix<float>> projectionStack;
 	MurMatrix<float> currentProjectionMatrix;
 
 	struct Style {
 		MurkaColor color = MurkaColor(1.0f, 1.0f, 1.0f, 1.0f);
 		bool fill = true;
 	};
-	vector<Style> styleStack;
+	std::vector<Style> styleStack;
 	Style currentStyle;
 
 	float lineWidth = 1;
@@ -359,7 +359,7 @@ class MurkaRenderer : public MurkaRendererBase {
 	MurVbo vboCircle;
 
 	void recreateCircleVbo() {
-		vector<MurkaPoint3D> verts;
+		std::vector<MurkaPoint3D> verts;
 		for (int i = 0; i < circleResolution; i++)
 		{
 			float theta = 2.0f * juce::MathConstants<float>::pi * float(i) / float(circleResolution);
@@ -429,7 +429,7 @@ public:
 	void setup() {
         // create main shader
         {
-            string vertexShader =
+			std::string vertexShader =
 				"varying vec2 vUv;\n"
 				"varying vec4 vCol;\n"
 				"uniform mat4 matrixModel;\n"
@@ -449,7 +449,7 @@ public:
                 "    gl_Position = vflip ? vec4(pos.x, 1 - pos.y, pos.z, pos.w) : vec4(position, 1.0); \n"
                 "}\n";
 
-            string fragmentShader =
+			std::string fragmentShader =
                 "varying vec2 vUv;\n"
 				"varying vec4 vCol;\n"
 				"uniform sampler2D mainTexture;\n"
@@ -467,13 +467,13 @@ public:
 
         // vbo for primitives
 		{
-			vector<MurkaPoint3D> verts;
+			std::vector<MurkaPoint3D> verts;
 			verts.push_back(MurkaPoint3D(0.0f, 0.0f, 0.0f));
 			verts.push_back(MurkaPoint3D(0.0f, 1.0f, 0.0f));
 			verts.push_back(MurkaPoint3D(1.0f, 1.0f, 0.0f));
 			verts.push_back(MurkaPoint3D(1.0f, 0.0f, 0.0f));
 
-			vector<MurkaPoint> texCoords;
+			std::vector<MurkaPoint> texCoords;
 			texCoords.push_back(MurkaPoint(0.0f, 0.0f));
 			texCoords.push_back(MurkaPoint(0.0f, 1.0f));
             texCoords.push_back(MurkaPoint(1.0f, 1.0f));
@@ -487,13 +487,13 @@ public:
 		}
 
 		{
-			vector<MurkaPoint3D> verts;
+			std::vector<MurkaPoint3D> verts;
 			verts.push_back(MurkaPoint3D(0.0f, -0.5f, 0.0f));
 			verts.push_back(MurkaPoint3D(0.0f, 0.5f, 0.0f));
 			verts.push_back(MurkaPoint3D(1.0f, 0.5f, 0.0f));
 			verts.push_back(MurkaPoint3D(1.0f, -0.5f, 0.0f));
 
-            vector<MurkaPoint> texCoords;
+			std::vector<MurkaPoint> texCoords;
             texCoords.push_back(MurkaPoint(0.0f, 0.0f));
             texCoords.push_back(MurkaPoint(0.0f, 1.0f));
             texCoords.push_back(MurkaPoint(1.0f, 1.0f));
@@ -507,11 +507,11 @@ public:
 		}
 
 		{
-			vector<MurkaPoint3D> verts;
+			std::vector<MurkaPoint3D> verts;
 			verts.push_back(MurkaPoint3D(0.0f, 0.0f, 0.0f));
 			verts.push_back(MurkaPoint3D(0.0f, 0.0f, 0.0f));
 
-            vector<MurkaPoint> texCoords;
+			std::vector<MurkaPoint> texCoords;
             texCoords.push_back(MurkaPoint(0.0f, 0.0f));
             texCoords.push_back(MurkaPoint(1.0f, 1.0f));
 
@@ -583,7 +583,7 @@ public:
 		MurkaAssets::setFont(name, size * getScreenScale(), this);
 	}
 
-	void drawString(const string & s, float x, float y) {
+	void drawString(const std::string & s, float x, float y) {
 		MurkaAssets::getCurrentFont()->drawString(s, x, y);// *getScreenScale(), y * getScreenScale()); FIX THIS
 	}
 
