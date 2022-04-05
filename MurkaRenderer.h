@@ -61,23 +61,23 @@ public:
 	} 
 
 	// Object drawing
-	void draw(const MurImage & image, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) override {
+	void drawImage(const MurImage & image, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) override {
 		ofRenderer->draw(image.internal, x * getScreenScale(), y * getScreenScale(), z * getScreenScale(), w * getScreenScale(), h * getScreenScale(), sx * getScreenScale(), sy * getScreenScale(), sw * getScreenScale(), sh * getScreenScale());
 	}
 
-	void draw(const MurImage & image, float x, float y, float z, float w, float h) override {
+	void drawImage(const MurImage & image, float x, float y, float z, float w, float h) override {
 		ofRenderer->draw(image.internal, x * getScreenScale(), y * getScreenScale(), z * getScreenScale(), w * getScreenScale(), h * getScreenScale(), 0, 0, image.internal.getWidth(), image.internal.getHeight());
 	}
 
-	void draw(const MurImage & image, float x, float y) override {
+	void drawImage(const MurImage & image, float x, float y) override {
 		ofRenderer->draw(image.internal, x * getScreenScale(), y * getScreenScale(), 0, image.internal.getWidth() * getScreenScale(), image.internal.getHeight() * getScreenScale(), 0, 0, image.internal.getWidth() * getScreenScale(), image.internal.getHeight() * getScreenScale());
 	}
 
-	void draw(const MurTexture & texture, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) override {
+	void drawImage(const MurTexture & texture, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) override {
         ofRenderer->draw(texture.internal, x * getScreenScale(), y * getScreenScale(), z * getScreenScale(), w * getScreenScale(), h * getScreenScale(), sx * getScreenScale(), sy * getScreenScale(), sw * getScreenScale(), sh * getScreenScale());
     }
     
-    void draw(const MurVbo & vbo, GLuint drawMode, int first, int total) override{
+    void drawVbo(const MurVbo & vbo, GLuint drawMode, int first, int total) override{
 		pushMatrix();
 		scale(1, 1, 1);
 		ofRenderer->draw(vbo.internal, drawMode, first, total);
@@ -436,18 +436,17 @@ public:
                 "uniform mat4 matrixView;\n"
                 "uniform mat4 matrixProj;\n"
                 "uniform vec4 color;\n"
-                "uniform bool vflip;\n"
-                "attribute vec3 position;\n"
+				"attribute vec3 position;\n"
 				"attribute vec2 uv;\n"
 				"attribute vec4 col;\n"
 				"\n"
-                "void main()\n"
-                "{\n"
+				"void main()\n"
+				"{\n"
 				"    vUv = uv;"
 				"    vCol = col;"
 				"    vec4 pos = matrixProj * matrixView * matrixModel * vec4(position, 1.0) ; \n"
-                "    gl_Position = vflip ? vec4(pos.x, 1 - pos.y, pos.z, pos.w) : vec4(position, 1.0); \n"
-                "}\n";
+				"    gl_Position = pos; \n"
+				"}\n";
 
 			std::string fragmentShader =
                 "varying vec2 vUv;\n"
@@ -588,34 +587,39 @@ public:
 	}
 
 	// Object drawing
-	void draw(const MurImage & image, float x, float y, float z, float w, float h) override {
+	void drawImage(const MurImage & image, float x, float y, float z, float w, float h) override {
 		bind(image, 0);
 		drawRectangle(x, y, w, h);
 		unbind(image, 0);
 	}
 	
-	void draw(const MurImage & image, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) override {
+	void drawImage(const MurImage & image, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) override {
 		std::cout << "TODO" << std::endl;
 	}
 
-	void draw(const MurImage & image, float x, float y) override {
+	void drawImage(const MurImage & image, float x, float y) override {
 		bind(image, 0);
 		drawRectangle(x, y, image.getWidth(), image.getHeight());
 		unbind(image, 0);
 	}
 
-	void draw(const MurTexture & texture, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) override {
+	void drawTexture(const MurTexture & texture, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) override {
 		std::cout << "TODO" << std::endl;
 	}
 	
-	void draw(const MurVbo & vbo, GLuint drawMode, int first, int total) override {
+	void drawVbo(const MurVbo & vbo, GLuint drawMode, int first, int total) override {
 		MurMatrix<float> modelMatrix;
 		modelMatrix = modelMatrix.scaled(juce::Vector3D<float>(getScreenScale(), getScreenScale(), 1.0));
 		modelMatrix = modelMatrix * stackedMatrix * currentMatrix;
 
+		MurMatrix<float> vflipMatrix;
+		if (vflip) {
+			vflipMatrix.scale(juce::Vector3D<float>(1, -1, 1));
+		}
+
 		currentShader->setUniformMatrix4f("matrixModel", modelMatrix * currentModelMatrix);
 		currentShader->setUniformMatrix4f("matrixView", currentViewMatrix);
-		currentShader->setUniformMatrix4f("matrixProj", currentProjectionMatrix);
+		currentShader->setUniformMatrix4f("matrixProj", vflipMatrix * currentProjectionMatrix);
 		
 		currentShader->setUniform1i("useTexture", useTexture);
 		currentShader->setUniform1i("vflip", vflip);
@@ -881,9 +885,14 @@ public:
 
 			modelMatrix = modelMatrix * stackedMatrix * currentMatrix;
 
-			currentShader->setUniformMatrix4f("matrixModel", modelMatrix * currentModelMatrix);
+			MurMatrix<float> vflipMatrix;
+			if (vflip) {
+				vflipMatrix.scale(juce::Vector3D<float>(1, -1, 1));
+			}
+
+			currentShader->setUniformMatrix4f("matrixModel", modelMatrix  * currentModelMatrix);
 			currentShader->setUniformMatrix4f("matrixView", currentViewMatrix);
-			currentShader->setUniformMatrix4f("matrixProj", currentProjectionMatrix);
+			currentShader->setUniformMatrix4f("matrixProj", vflipMatrix * currentProjectionMatrix);
 
 			currentShader->setUniform1i("useTexture", useTexture);
 			currentShader->setUniform1i("vflip", vflip);
@@ -895,7 +904,7 @@ public:
 			pushMatrix();
 			translate(x, y, 0.0);
 			scale(w* getScreenScale(), h* getScreenScale(), 1.0);
-			draw(vboRect, GL_LINE_LOOP, 0, 4);
+			drawVbo(vboRect, GL_LINE_LOOP, 0, 4);
 			popMatrix();
 		}
 	}
@@ -912,9 +921,14 @@ public:
 
 			modelMatrix = modelMatrix * stackedMatrix * currentMatrix;
 
+			MurMatrix<float> vflipMatrix;
+			if (vflip) {
+				vflipMatrix.scale(juce::Vector3D<float>(1, -1, 1));
+			}
+
 			currentShader->setUniformMatrix4f("matrixModel", modelMatrix * currentModelMatrix);
 			currentShader->setUniformMatrix4f("matrixView", currentViewMatrix);
-			currentShader->setUniformMatrix4f("matrixProj", currentProjectionMatrix);
+			currentShader->setUniformMatrix4f("matrixProj", vflipMatrix * currentProjectionMatrix);
 			
 			currentShader->setUniform1i("useTexture", useTexture);
 			currentShader->setUniform1i("vflip", vflip);
@@ -926,7 +940,7 @@ public:
 			pushMatrix();
 			translate(x, y, 0.0);
 			scale(radius, radius, 1);
-			draw(vboCircle, GL_LINE_LOOP, 0, circleResolution);
+			drawVbo(vboCircle, GL_LINE_LOOP, 0, circleResolution);
 			popMatrix();
 		}
 	}
@@ -946,9 +960,14 @@ public:
 		modelMatrix = modelMatrix * MurMatrix<float>().rotated(juce::Vector3D<float>(0.0, 0.0, a));
 		modelMatrix = modelMatrix * MurMatrix<float>::translation(juce::Vector3D<float>(x1, y1, 0.0));
 
+		MurMatrix<float> vflipMatrix;
+		if (vflip) {
+			vflipMatrix.scale(juce::Vector3D<float>(1, -1, 1));
+		}
+
 		currentShader->setUniformMatrix4f("matrixModel", modelMatrix * currentModelMatrix);
 		currentShader->setUniformMatrix4f("matrixView", currentViewMatrix);
-		currentShader->setUniformMatrix4f("matrixProj", currentProjectionMatrix);
+		currentShader->setUniformMatrix4f("matrixProj", vflipMatrix * currentProjectionMatrix);
 
 		currentShader->setUniform1i("useTexture", useTexture);
 		currentShader->setUniform1i("vflip", vflip);
@@ -973,18 +992,14 @@ public:
 		vboLineOld.setVertexData(verts.data(), verts.size());
 		vboLineOld.update(GL_STREAM_DRAW, shaderMain.getAttributeLocation("position"), shaderMain.getAttributeLocation("uv"), shaderMain.getAttributeLocation("col"));
 
-		draw(vboLineOld, GL_LINES, 0, verts.size());
-	}
-
-	void drawVbo(const MurVbo & vbo, GLuint drawMode, int first, int total) override {
-		draw(vbo, drawMode, first, total);
+		drawVbo(vboLineOld, GL_LINES, 0, verts.size());
 	}
 
 	void drawPath(const std::vector<MurkaPoint3D> & verts) override {
 		vboLineOld.setVertexData(verts.data(), verts.size());
 		vboLineOld.update(GL_STATIC_DRAW, shaderMain.getAttributeLocation("position"), shaderMain.getAttributeLocation("uv"), shaderMain.getAttributeLocation("col"));
 
-		draw(vboLineOld, GL_LINE_STRIP, 0, verts.size());
+		drawVbo(vboLineOld, GL_LINE_STRIP, 0, verts.size());
 	}
 
 	int getWindowWidth() override {
