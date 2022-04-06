@@ -61,12 +61,8 @@ public:
 	} 
 
 	// Object drawing
-	void drawImage(const MurImage & image, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) override {
-		ofRenderer->draw(image.internal, x * getScreenScale(), y * getScreenScale(), z * getScreenScale(), w * getScreenScale(), h * getScreenScale(), sx * getScreenScale(), sy * getScreenScale(), sw * getScreenScale(), sh * getScreenScale());
-	}
-
-	void drawImage(const MurImage & image, float x, float y, float z, float w, float h) override {
-		ofRenderer->draw(image.internal, x * getScreenScale(), y * getScreenScale(), z * getScreenScale(), w * getScreenScale(), h * getScreenScale(), 0, 0, image.internal.getWidth(), image.internal.getHeight());
+	void drawImage(const MurImage & image, float x, float y, float w, float h) override {
+		ofRenderer->draw(image.internal, x * getScreenScale(), y * getScreenScale(), 0, w * getScreenScale(), h * getScreenScale(), 0, 0, image.internal.getWidth(), image.internal.getHeight());
 	}
 
 	void drawImage(const MurImage & image, float x, float y) override {
@@ -582,26 +578,37 @@ public:
 		MurkaAssets::setFont(name, size * getScreenScale(), this);
 	}
 
+	void setFont(std::string name, const char *data, int dataSize, int size) {
+		MurkaAssets::setFont(name, data, dataSize, size * getScreenScale(), this);
+	}
+
 	void drawString(const std::string & s, float x, float y) {
 		MurkaAssets::getCurrentFont()->drawString(s, x, y);// *getScreenScale(), y * getScreenScale()); FIX THIS
 	}
 
 	// Object drawing
-	void drawImage(const MurImage & image, float x, float y, float z, float w, float h) override {
-		bind(image, 0);
-		drawRectangle(x, y, w, h);
-		unbind(image, 0);
-	}
-	
-	void drawImage(const MurImage & image, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) override {
-		std::cout << "TODO" << std::endl;
-	}
-
-	void drawImage(const MurImage & image, float x, float y) override {
+	void drawImage(const MurImage& image, float x, float y) override {
 		bind(image, 0);
 		drawRectangle(x, y, image.getWidth(), image.getHeight());
 		unbind(image, 0);
 	}
+
+	void drawImage(const MurImage& image, float x, float y, float w, float h) override {
+		bind(image, 0);
+		drawRectangle(x, y, w, h);
+		unbind(image, 0);
+	}
+
+	void drawImage(const MurImage& image, float x, float y, float z, float w, float h) override {
+		bind(image, 0);
+		drawRectangle(x, y, w, h);
+		unbind(image, 0);
+	}
+
+	void drawImage(const MurImage& image, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) override {
+		std::cout << "TODO" << std::endl;
+	}
+
 
 	void drawTexture(const MurTexture & texture, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) override {
 		std::cout << "TODO" << std::endl;

@@ -74,7 +74,7 @@ namespace murka {
 class MurImage {
 
 	GLuint textureID;
-	int width, height;
+	int width = 0, height = 0;
 
 	juce::OpenGLContext* openGLContext = nullptr;
 	bool bAllocated = false;
@@ -83,7 +83,31 @@ class MurImage {
 	bool arb = false;
 	int gltype = 0;
 
+	void loadInternal(juce::Image& image) {
+		clearTexture();
+		allocate(image.getWidth(), image.getHeight());
+
+		juce::Image::BitmapData srcData(image, juce::Image::BitmapData::readOnly);
+		juce::Image::PixelFormat fmt = srcData.pixelFormat;
+
+		data.resize(width * height * 4);
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				juce::Colour col = srcData.getPixelColour(x, y);
+				int idx = y * width * 4 + x * 4;
+
+				data[idx + 0] = col.getFloatRed();
+				data[idx + 1] = col.getFloatGreen();
+				data[idx + 2] = col.getFloatBlue();
+				data[idx + 3] = col.getFloatAlpha();
+			}
+		}
+
+		update();
+	}
+
 public:
+
 	MurImage() {
 
 	};
@@ -126,31 +150,20 @@ public:
 		bAllocated = true;
 	}
 
+	bool load(const char* data, int dataSize) {
+		juce::Image image = juce::ImageFileFormat::loadFrom(data, dataSize);
+
+		loadInternal(image);
+
+		return true;
+	}
+
 	bool load(const std::string& fileName) {
         if(!juce::File(fileName).exists()) return false;
         
 		juce::Image image = juce::ImageFileFormat::loadFrom(juce::File(fileName));
 
-		clearTexture();
-		allocate(image.getWidth(), image.getHeight());
-
-		juce::Image::BitmapData srcData(image, juce::Image::BitmapData::readOnly);
-		juce::Image::PixelFormat fmt = srcData.pixelFormat;
-
-		data.resize(width * height * 4);
-		for (int y = 0; y < height; y++) {
-			for (int x = 0; x < width; x++) {
-				juce::Colour col = srcData.getPixelColour(x, y);
-				int idx = y * width * 4 + x * 4;
-
-				data[idx + 0] = col.getFloatRed();
-				data[idx + 1] = col.getFloatGreen();
-				data[idx + 2] = col.getFloatBlue();
-				data[idx + 3] = col.getFloatAlpha();
-			}
-		}
-
-		update();
+		loadInternal(image);
 
 		return true;
 	}
@@ -171,6 +184,10 @@ public:
 		data[idx + 3] = col.a;
 	}
 
+	void setData(float *data) {
+		memcpy(this->data.data(), data, width * height * 4);
+	}
+
 	bool isUsingTexture() const {
 		return true;
 	}
@@ -183,6 +200,15 @@ public:
 		glBindTexture(gltype, textureID);
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		glTexImage2D(gltype, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, data.data());
+		//glTexSubImage2D(gltype, 0, 0, 0, width, height, GL_RGBA, GL_FLOAT, image.getPixelData());
+		glBindTexture(gltype, 0);
+	}
+
+	void loadData( juce::uint8* data, int glFormat) {
+		glBindTexture(gltype, textureID);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+		glTexImage2D(gltype, 0, GL_RGBA32F, width, height, 0, glFormat, GL_UNSIGNED_BYTE, data);
 		//glTexSubImage2D(gltype, 0, 0, 0, width, height, GL_RGBA, GL_FLOAT, image.getPixelData());
 		glBindTexture(gltype, 0);
 	}

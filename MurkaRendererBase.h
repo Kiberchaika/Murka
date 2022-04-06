@@ -29,7 +29,8 @@ public:
 
     // Object drawing
     virtual void drawImage(const MurImage & image, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) = 0;
-	virtual void drawImage(const MurImage & image, float x, float y, float z, float w, float h) = 0;
+	virtual void drawImage(const MurImage& image, float x, float y, float z, float w, float h) = 0;
+	virtual void drawImage(const MurImage& image, float x, float y, float w, float h) = 0;
 	virtual void drawImage(const MurImage & image, float x, float y) = 0;
 
     virtual void drawTexture(const MurTexture & texture, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) = 0;
