@@ -62,7 +62,7 @@ class MurCamera {
 		}
 
 		transformMatrix = MurMatrix<float>();
-		transformMatrix = transformMatrix.scaled(juce::Vector3D<float>(1, -1, 1));
+		transformMatrix = transformMatrix.scaled(juce::Vector3D<float>(1, 1, 1));
 		transformMatrix = transformMatrix * m;
 		transformMatrix = transformMatrix * MurMatrix<float>::translation(juce::Vector3D<float>(position.x, position.y, position.z));
 	}
