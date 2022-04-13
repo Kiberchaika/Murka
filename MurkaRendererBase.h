@@ -70,6 +70,8 @@ public:
     virtual void disableAlphaBlending() = 0;
 	virtual void setBlendMode(MurBlendMode blendMode) = 0;
 
+	virtual void updateVbo(MurVbo& vbo) = 0;
+
     virtual void pushStyle() = 0;
     virtual void popStyle() = 0;
     

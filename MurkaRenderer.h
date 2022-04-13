@@ -478,7 +478,7 @@ public:
 			vboRect.setup();
 			vboRect.setVertexData(verts.data(), verts.size());
 			vboRect.setTexCoordData(texCoords.data(), texCoords.size());
-			vboRect.update(GL_STATIC_DRAW, shaderMain.getAttributeLocation("position"), shaderMain.getAttributeLocation("uv"), shaderMain.getAttributeLocation("col"));
+			updateVbo(vboRect);
 		}
 
 		{
@@ -498,7 +498,7 @@ public:
 			vboLine.setup();
 			vboLine.setVertexData(verts.data(), verts.size());
             vboLine.setTexCoordData(texCoords.data(), texCoords.size());
-            vboLine.update(GL_STREAM_DRAW, shaderMain.getAttributeLocation("position"), shaderMain.getAttributeLocation("uv"), shaderMain.getAttributeLocation("col"));
+			updateVbo(vboLine);
 		}
 
 		{
@@ -514,7 +514,7 @@ public:
 			vboLineOld.setup();
 			vboLineOld.setVertexData(verts.data(), verts.size());
             vboLineOld.setTexCoordData(texCoords.data(), texCoords.size());
-            vboLineOld.update(GL_STREAM_DRAW, shaderMain.getAttributeLocation("position"), shaderMain.getAttributeLocation("uv"), shaderMain.getAttributeLocation("col"));
+			updateVbo(vboLineOld);
 		}
 
 		{
@@ -816,6 +816,10 @@ public:
 		}
 	}
 
+	void updateVbo(MurVbo& vbo) override {
+		vbo.update(GL_STATIC_DRAW, shaderMain.getAttributeLocation("position"), shaderMain.getAttributeLocation("uv"), shaderMain.getAttributeLocation("col"));
+	}
+
 	void disableAlphaBlending() override {
 		glDisable(GL_BLEND);
 	};
@@ -904,7 +908,7 @@ public:
 			currentShader->setUniform1i("useTexture", useTexture);
 			currentShader->setUniform1i("vflip", vflip);
 			currentShader->setUniform4f("color", currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
-			vboRect.update(GL_STATIC_DRAW, shaderMain.getAttributeLocation("position"), shaderMain.getAttributeLocation("uv"), shaderMain.getAttributeLocation("col"));
+			updateVbo(vboRect);
 			vboRect.internalDraw(GL_TRIANGLE_FAN, 0, 4);
 		}
 		else {
@@ -997,15 +1001,15 @@ public:
 		verts.push_back(MurkaPoint3D(x1, y1, 0));
 		verts.push_back(MurkaPoint3D(x2, y2, 0));
 		vboLineOld.setVertexData(verts.data(), verts.size());
-		vboLineOld.update(GL_STREAM_DRAW, shaderMain.getAttributeLocation("position"), shaderMain.getAttributeLocation("uv"), shaderMain.getAttributeLocation("col"));
 
+		updateVbo(vboLineOld);
 		drawVbo(vboLineOld, GL_LINES, 0, verts.size());
 	}
 
 	void drawPath(const std::vector<MurkaPoint3D> & verts) override {
 		vboLineOld.setVertexData(verts.data(), verts.size());
-		vboLineOld.update(GL_STATIC_DRAW, shaderMain.getAttributeLocation("position"), shaderMain.getAttributeLocation("uv"), shaderMain.getAttributeLocation("col"));
 
+		updateVbo(vboLineOld);
 		drawVbo(vboLineOld, GL_LINE_STRIP, 0, verts.size());
 	}
 
@@ -1038,9 +1042,14 @@ public:
 	void beginCamera(MurCamera cam) {
 		pushView();
 
+		MurMatrix<float> vflipMatrix;
+		if (vflip) {
+			vflipMatrix.scale(juce::Vector3D<float>(1, -1, 1));
+		}
+
 		MurkaShape view = getCurrentViewport();
-		currentProjectionMatrix = cam.getProjectionMatrix(view.size.x / view.size.y);
-		currentViewMatrix = cam.getViewMatrix(); 
+		currentProjectionMatrix = vflipMatrix * cam.getProjectionMatrix(view.size.x / view.size.y);
+		currentViewMatrix = cam.getViewMatrix();
 		currentModelMatrix = MurMatrix<float>().scaled(juce::Vector3D<float>(1/ getScreenScale(), 1/ getScreenScale(), 1 / getScreenScale()));
 	}
 
