@@ -3,29 +3,27 @@
 #include "Murka.h"
 
 namespace murka {
-    
-// Custom widget template:
 
-class DraggableNumberEditor : public MurkaViewInterface<DraggableNumberEditor> {
+// PRE-1.0 made draggable number editor.
+// TO BE UPDATED TO 1.0
+
+class DraggableNumberEditor : public View_NEW<DraggableNumberEditor> {
 public:
-    MURKA_VIEW_DRAW_FUNCTION  {
+	void internalDraw(Murka & m) {
+	    MurkaContext& c = m.currentContext;
+
+		bool inside = c.isHovered() * !areChildrenHovered(c);
         
-        auto params = (Parameters*)parametersObject;
-        DraggableNumberEditor* thisWidget = (DraggableNumberEditor*)thisWidgetObject;
+        double* numberData = dataToControl;
         
-        bool inside = context.isHovered() * !areChildrenHovered(context);
+		m.startViewport();
         
-        
-        double* numberData = ((double*)dataToControl);
-        
-        context.startViewport();
-        
-        auto font = context.getCurrentFont();
+        auto font = c.getCurrentFont();
         float monospaceSymbolWidth = float(font->stringWidth("x"));
-        int highlightedNumber = (context.mousePosition.x - float(10)) / monospaceSymbolWidth;
+        int highlightedNumber = (c.mousePosition.x - float(10)) / monospaceSymbolWidth;
 
 
-        std::string numberString = to_string_with_precision(*numberData, params->floatPrecision);
+        std::string numberString = to_string_with_precision(*numberData, floatPrecision);
         int dotIndex = numberString.size();
         for (int i = 0; i < numberString.size(); i++) {
             if (numberString[i] == '.') {
@@ -37,46 +35,46 @@ public:
         if (highlightedNumber >= numberString.size()) highlightedNumber = numberString.size() - 1;
         
 
-        MurkaColor c = context.renderer->getColor();
-		MurkaColor bgColor = context.renderer->getColor();
-		MurkaColor fgColor = context.renderer->getColor();
+        MurkaColor col = c.pointerToRenderer->getColor();
+		MurkaColor bgColor = c.pointerToRenderer->getColor();
+		MurkaColor fgColor = c.pointerToRenderer->getColor();
         
-		context.renderer->pushStyle();
-		context.renderer->enableFill();
-		context.renderer->setColor(bgColor);
-		context.renderer->drawRectangle(0, 0, context.getSize().x, context.getSize().y);
-		context.renderer->disableFill();
-		context.renderer->setColor(inside ? fgColor : fgColor / 2);
-        if (activated) context.renderer->setColor(fgColor * 1.2);
-		context.renderer->drawRectangle(1, 1, context.getSize().x-2, context.getSize().y-2);
+		m.pushStyle();
+		m.enableFill();
+		m.setColor(bgColor);
+		m.drawRectangle(0, 0, shape.size.x, shape.size.y);
+		m.disableFill();
+		m.setColor(inside ? fgColor : fgColor / 2);
+        if (activated) c.pointerToRenderer->setColor(fgColor * 1.2);
+		m.drawRectangle(1, 1, shape.size.x-2, shape.size.y-2);
 
-        font->drawString(to_string_with_precision(*numberData, params->floatPrecision), 10, 22);
+        font->drawString(to_string_with_precision(*numberData, floatPrecision), 10, 22);
 
-		context.renderer->disableFill();
+		c.pointerToRenderer->disableFill();
         if ((inside || dragging) && (highlightedNumber != -1)) {
             if (!dragging) {
-				context.renderer->drawLine(10 + highlightedNumber * monospaceSymbolWidth, 28,
+				c.pointerToRenderer->drawLine(10 + highlightedNumber * monospaceSymbolWidth, 28,
                            10 + highlightedNumber * monospaceSymbolWidth + monospaceSymbolWidth, 28);
             } else {
-				context.renderer->drawLine(10 + draggingNubmerIndex * monospaceSymbolWidth, 28,
+				c.pointerToRenderer->drawLine(10 + draggingNubmerIndex * monospaceSymbolWidth, 28,
                            10 + draggingNubmerIndex * monospaceSymbolWidth + monospaceSymbolWidth, 28);
             }
         }
-		context.renderer->enableFill();
-		context.renderer->popStyle();
+		c.pointerToRenderer->enableFill();
+		c.pointerToRenderer->popStyle();
 
 
         // text editing logic
         
-        if (context.mouseDownPressed[0]) {
+        if (c.mouseDownPressed[0]) {
             if (inside) {
                 activated = true;
             } else activated = false;
         }
 
-        if (inside && context.mouseDownPressed[0] && (!thisWidget->dragging)) {
+        if (inside && c.mouseDownPressed[0] && (!dragging)) {
             draggingNubmerIndex = highlightedNumber;
-            std::string numberString = to_string_with_precision(*numberData, params->floatPrecision);
+            std::string numberString = to_string_with_precision(*numberData, floatPrecision);
             if (draggingNubmerIndex < dotIndex) {
                 changeScale = 1. / powf(0.1, dotIndex - draggingNubmerIndex - 1);
             } else {
@@ -85,43 +83,35 @@ public:
             dragging = true;
         }
             
-        if (thisWidget->dragging  && !context.mouseDown[0]) {
-            thisWidget->dragging = false;
+        if (dragging  && !c.mouseDown[0]) {
+            dragging = false;
         }
 
-        if (thisWidget->dragging) {
-            float delta = (context.mouseDelta.y) / 10;
+        if (dragging) {
+            float delta = (c.mouseDelta.y) / 10;
             float change = changeScale * delta;
             *numberData += change;
-            if (*numberData < params->minValue) {
-                *numberData = params->minValue;
+            if (*numberData < minValue) {
+                *numberData = minValue;
             }
-            if (*numberData > params->maxValue) {
-                *numberData = params->maxValue;
+            if (*numberData > maxValue) {
+                *numberData = maxValue;
             }
         }
 
-        context.endViewport();
+		m.endViewport();
     };
     
     // Here go parameters and any parameter convenience constructors. You need to define something called Parameters, even if it's NULL.
-    struct Parameters {
-        double minValue = 0.0, maxValue = 1.0;
-        int floatPrecision = 3;
-        
-        Parameters() {}
-        Parameters(float min, float max) { minValue = min; maxValue = max; } // a convenience initializer
-        Parameters(int floatingPointPrecision, float min, float max) {
-            floatPrecision = floatingPointPrecision;
-            minValue = min;
-            maxValue = max; }
-        Parameters(int floatingPointPrecision) {
-            floatPrecision = floatingPointPrecision;
-        }
-    };
-    
-    // The results type, you also need to define it even if it's nothing.
-    typedef bool Results;
+
+    double minValue = 0.0, maxValue = 1.0;
+    int floatPrecision = 3;
+
+	double* dataToControl = nullptr;
+           
+	DraggableNumberEditor& controlling(double* value) {
+		dataToControl = value;
+	}
     
     // Everything else in the class is for handling the internal state. It persist.
     
@@ -132,6 +122,8 @@ public:
     int draggingNubmerIndex = 0;
     float changeScale = 1.0;
 };
+ 
+ 
 
 
 

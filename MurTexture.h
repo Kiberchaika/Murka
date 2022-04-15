@@ -17,7 +17,7 @@ public:
 
 class MurTexture : public MurImage {
 public:
-	MurTexture(){};
+    MurTexture(){};
 };
 
 #else // Default version

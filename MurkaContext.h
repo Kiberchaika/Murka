@@ -1,14 +1,14 @@
 #pragma once
 
-#include <functional>
 #include "MurkaTypes.h"
 #include "MurkaInputEventsRegister.h"
 #include "MurkaViewHandler.h"
 #include "MurkaTypes.h"
 #include "MurkaOverlayHolder.h"
 #include "MurkaRenderer.h"
-
-// Here's the global typedefs for cross-render functionality
+#include "MurkaAnimator.h"
+#include "ViewBase.h"
+#include "MurkaContextBase.h"
 
 #ifdef MURKA_OF
 #include "ofMain.h"
@@ -16,7 +16,7 @@
 
 namespace murka {
 
-class MurkaContext: public MurkaEventState {
+class MurkaContext: public MurkaContextBase {
     /*
 private:
     MurkaContext(const MurkaContext&) {}
@@ -24,45 +24,8 @@ private:
      */
     
 public:
-    
-    MurkaContext() {
-    }
-    
-    // Assets access functions
-    
-    FontObject* getCurrentFont() const {
-        return ((MurkaAssets*)renderer)->getCurrentFont();
-    }
 
-    //
-    
-    MurkaPoint getPosition() const {
-        return {currentViewShape.position.x + getParentContextShape().position.x,
-                currentViewShape.position.y + getParentContextShape().position.y};
-    }
-    
-    MurkaPoint getSize() const {
-        return currentViewShape.size;
-    }
-    
-    bool isHovered() const {
-        return currentViewShape.transformedInside(mousePosition /* / renderer->getScreenScale() */); // using absolute coordinates to calc that
-    }
-    
-    MurkaOverlayHolder* overlayHolder;
-    MurkaRenderer* renderer;
-    
-    MurkaShape getParentContextShape() const {
-        return getParentContextShapeInternal();
-    }
-    
-    MurkaShape currentViewShape;
-    
-    // to add an overlay, give a lambda with the overlays call and an object that asked for it
-    void addOverlay(std::function<void()> func, void* object) {
-        overlayHolder->addOverlay(func, object);
-    }
-    
+   
     std::pair<MurkaShape, MurkaPoint> getCroppedViewport(MurkaShape parent, MurkaShape view) const {
         MurkaPoint pos = {(std::max)(parent.position.x + view.position.x, parent.position.x),
 						  (std::max)(parent.position.y + view.position.y, parent.position.y)};
@@ -81,70 +44,17 @@ public:
         return std::make_pair(MurkaShape(pos.x, pos.y, size.x, size.y), negativePosition);
     }
     
-    // Utility function to transform the render into the shape of this context.
-    // Helpful to draw the view innards.
-    // Returns false if the view is not visible
-    bool transformTheRenderIntoThisContextShape(bool noCrop = false) const {
-        MurkaShape relativeShape = currentViewShape;
-        relativeShape.position.x -= getParentContextShape().position.x;
-        relativeShape.position.y -= getParentContextShape().position.y;
-        
-        auto croppedViewport = getCroppedViewport(getParentContextShape(), relativeShape);
-        auto viewport = croppedViewport.first;
-        auto offset = croppedViewport.second;
-        
-        if (noCrop) {
-            viewport = relativeShape;
-            viewport.position.x += getParentContextShape().position.x;
-            viewport.position.y += getParentContextShape().position.y;
-        }
-        
-        if (viewport.size.y <= 0) {
-            return false;
-        }
-        
-		renderer->pushView();
-		renderer->viewport(viewport.position.x, viewport.position.y, viewport.size.x, viewport.size.y);
-		renderer->setupScreen();
-		renderer->pushMatrix();
-		renderer->translate(offset.x, offset.y, 0); // this is needed to crop the
-        // views that are only partly visible
-        
-        return true;
-    }
-    
-    void transformTheRenderBackFromThisContextShape() const {
-		renderer->popMatrix();
-		renderer->popView();
-    }
-    
-    // Utility function to substitute the matrix for the viewport to occlude
-    // the drawing outside the widget
-    void startViewport() const {
-        transformTheRenderBackFromThisContextShape();
 
-        renderer->pushView();
-        auto vport = renderer->getCurrentViewport(); 
-        renderer->viewport(MurkaShape(currentViewShape.position.x,
-                               currentViewShape.position.y,
-                               currentViewShape.size.x,
-                               currentViewShape.size.y));
-		renderer->scale(vport.size.x / currentViewShape.size.x,
-			vport.size.y / currentViewShape.size.y, 
-			1);
-    }
-    
-    void endViewport() const {
-        renderer->popView();
-
-        transformTheRenderIntoThisContextShape();
-    }
     
     
     // All shapes are absolute
     MurkaShape* currentWidgetShapeSource; // this shape pointer points to a shape of the current
-    // view that you could use inside the widget to use or reshape it if needed
-    void* murkaView; // the MurkaView that this context once represented
+    // view that you could use inside the widget to reshape it if needed // TODO: get rid of this (v2)
+    void* linkedView = nullptr; // the MurkaView that this context once represented
+    
+    ViewBase_NEW* linkedView_NEW = nullptr; // the MurkaView that this context last represented
+    
+
 
     int getImCounter() {
         imCounter++;
@@ -155,28 +65,32 @@ public:
         imCounter = 0;
     }
     
-    void pushContext(MurkaViewHandlerInternal* viewSource) {
-        pushContextInternal(viewSource);
+//    void pushContext(MurkaViewHandlerInternal* viewSource) {
+//        pushContextInternal(viewSource);
+//    }
+
+    void pushContext_NEW(ViewBase_NEW* viewSource) {
+        pushContextInternal_NEW(viewSource);
     }
 
     void popContext() {
-        popContextInternal();
+        popContextInternal_NEW();
     }
+    
     std::function<void(void*)> claimKeyboardFocus = [](void*) {return; };
     std::function<void(void*)> resetKeyboardFocus = [](void*) {return; };
     std::function<bool(void*)> checkKeyboardFocus = [](void*)->bool {return true; }; // aka "widget is allowed to use keyboard"
-    std::function<int()> getMaxHoverIndex = []()->int {return 0;};
-    std::function<int()> iterateHoverIndex = []()->int {return 0;};
-    std::function<void(MurkaViewHandlerInternal*)> pushContextInternal = [](MurkaViewHandlerInternal* mvhi) {};
-    std::function<void()> popContextInternal = []() {};
-    
-    std::function<MurkaShape()> getParentContextShapeInternal = []()->MurkaShape {
-        return MurkaShape();
-    };
+
+    // This uses Animator class because you can't include View from here
+    std::function<void(ViewBase_NEW*)> pushContextInternal_NEW = [](ViewBase_NEW* v) {};
+    std::function<void()> popContextInternal_NEW = []() {};
+
+    double getRunningTime()  {return pointerToRenderer->getElapsedTime();}
 
 private:
     int imCounter = 0; // the counter that we use to distinguish new widgets from the ones we
     // want to reuse in IM mode.
+     
 };
 
 }

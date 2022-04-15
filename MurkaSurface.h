@@ -36,7 +36,7 @@ public:
             performingMultitouchZoomNow = true;
         }
         
-        float currentTime = c.renderer->getElapsedTime(); // time in seconds
+        float currentTime = c.pointerToRenderer->getElapsedTime(); // time in seconds
         
         if (c.mouseScroll.length() != 0.0) {
             lastMouseScrollTime = currentTime;
@@ -53,7 +53,7 @@ public:
         if (c.mouseDownPressed[0] && inside) {
             surface.pointerDownCallback(0, transformedCursorPosition);
             
-            float time = c.renderer->getElapsedTime();
+            float time = c.pointerToRenderer->getElapsedTime();
             float timeSinceLastClick = time - lastClickTime;
             lastClickTime = time;
             
@@ -222,27 +222,27 @@ public:
     }
     
     void drawDebugGrid() {
-			latestContextDebug.renderer->setColor(MurkaColor(80/255.));
-			latestContextDebug.renderer->setLineWidth(4);
-			latestContextDebug.renderer->drawLine(-10000, 0 - panOffset.y, 10000, 0 - panOffset.y);
-			latestContextDebug.renderer->drawLine(0 - panOffset.x, -10000, 0 - panOffset.x, 10000);
+			latestContextDebug.pointerToRenderer->setColor(MurkaColor(80/255.));
+			latestContextDebug.pointerToRenderer->setLineWidth(4);
+			latestContextDebug.pointerToRenderer->drawLine(-10000, 0 - panOffset.y, 10000, 0 - panOffset.y);
+			latestContextDebug.pointerToRenderer->drawLine(0 - panOffset.x, -10000, 0 - panOffset.x, 10000);
             
-			latestContextDebug.renderer->setLineWidth(1);
+			latestContextDebug.pointerToRenderer->setLineWidth(1);
             
             for (int i = 0; i < 300; i++) {
-				latestContextDebug.renderer->drawLine(((i - 150) * 50) * scale - panOffset.x, -10000,
+				latestContextDebug.pointerToRenderer->drawLine(((i - 150) * 50) * scale - panOffset.x, -10000,
                            ((i - 150) * 50) * scale - panOffset.x, 10000);
-				latestContextDebug.renderer->drawLine( -10000, ((i - 150) * 50) * scale - panOffset.y,
+				latestContextDebug.pointerToRenderer->drawLine( -10000, ((i - 150) * 50) * scale - panOffset.y,
                            10000, ((i - 150) * 50) * scale - panOffset.y);
             }
             
-			latestContextDebug.renderer->setColor(MurkaColor(1, 0, 0));
-			latestContextDebug.renderer->pushMatrix();
-			latestContextDebug.renderer->translate(-panOffset.x, -panOffset.y, 0);
-			latestContextDebug.renderer->scale(scale, scale, scale);
+			latestContextDebug.pointerToRenderer->setColor(MurkaColor(1, 0, 0));
+			latestContextDebug.pointerToRenderer->pushMatrix();
+			latestContextDebug.pointerToRenderer->translate(-panOffset.x, -panOffset.y, 0);
+			latestContextDebug.pointerToRenderer->scale(scale, scale, scale);
 
                 // this is what you do to test that you could draw the 0 properly
-			latestContextDebug.renderer->drawCircle(0, 0, 25);
+			latestContextDebug.pointerToRenderer->drawCircle(0, 0, 25);
             /*
                 bool hover = MurkaShape(100 * scale, 100 * scale,
                                         100 * scale, 100 * scale).
@@ -252,15 +252,15 @@ public:
                 ofDrawRectangle(100 , 100 , 100 , 100);
              */
             
-			latestContextDebug.renderer->drawCircle(latestContextDebug.mousePosition.x / scale + panOffset.x / scale,
+			latestContextDebug.pointerToRenderer->drawCircle(latestContextDebug.mousePosition.x / scale + panOffset.x / scale,
                              latestContextDebug.mousePosition.y / scale + panOffset.y / scale, 5);
                 // this is the mouse coordinate in the virtual space, including the scale.
                 // somehow this is different to the hover code above, hmm...
             
-			latestContextDebug.renderer->popMatrix();
+			latestContextDebug.pointerToRenderer->popMatrix();
             
             
-			latestContextDebug.renderer->setColor(MurkaColor(0 / 255., 200 / 255., 60 / 255., 155 / 255.));
+			latestContextDebug.pointerToRenderer->setColor(MurkaColor(0 / 255., 200 / 255., 60 / 255., 155 / 255.));
             auto font = latestContextDebug.getCurrentFont();
             font->drawString("scale: " + std::to_string(scale), 50, 50);
             font->drawString("panOffset: " + std::to_string(panOffset.x) + " : " + std::to_string(panOffset.y), 0, 90);

@@ -1,19 +1,26 @@
 #pragma once
 
+enum TextAlignment {TEXT_LEFT, TEXT_CENTER, TEXT_RIGHT};
+
+
 #if defined(MURKA_OF)
 #include "ofMain.h"
 #elif defined(MURKA_JUCE)
 
 #include <JuceHeader.h>
-#include <juce_opengl/juce_opengl.h>
 
-#if defined(MURKA_JUCE) && defined(WIN32)
+#if defined(MURKA_JUCE) && defined(WIN32) && JUCE_MINOR_VERSION == 1 && JUCE_MAJOR_VERSION < 6
 #define GL_STREAM_DRAW juce::GL_STREAM_DRAW
 #define GL_ARRAY_BUFFER juce::GL_ARRAY_BUFFER
 #define GL_RGBA32F juce::GL_RGBA32F
 #define GL_STATIC_DRAW juce::GL_STATIC_DRAW
 #define GL_TEXTURE0 juce::GL_TEXTURE0
 #endif
+
+#ifndef M_PI
+#define M_PI           3.14159265358979323846264338327950288  /* pi */
+#endif
+
 
 #include <stdint.h>
 #include <filesystem>
@@ -25,21 +32,26 @@
 #include <random>
 #include <map>
 
-using namespace std;
-
 #endif
 
 // Here's the global typedefs for cross-render functionality
+
 #if defined(MURKA_OF)
 #include "ofMain.h"
 #include "ofxFontStash.h"
 typedef ofxFontStash FontObject; // It's important for this object to exist in a render for Murka to work
+
 #elif defined(MURKA_JUCE)
+
+#include <juce_opengl/juce_opengl.h>
+using namespace juce::gl;
+
 #include "juce_murka/juce_fontStash.h"
 typedef juceFontStash FontObject; // It's important for this object to exist in a render for Murka to work
 #endif
 
 #include <iostream>
+#include <sstream>
 #include <cmath>
 
 template <typename T>
@@ -195,22 +207,6 @@ struct MurkaColor {
 #endif
 };
 
-struct MurkaPoint3D {
-	float x = 0, y = 0, z = 0;
-
-	MurkaPoint3D(float x_, float y_, float z_) {
-		x = x_;
-		y = y_;
-		z = z_;
-	}
-
-	MurkaPoint3D() {
-		x = 0;
-		y = 0;
-		z = 0;
-	}
-};
-
 struct MurkaPoint {
 	float x = 0, y = 0;
 
@@ -276,11 +272,14 @@ struct MurkaPoint {
 		return ((x == right.x) && (y == right.y));
 	}
 	
-    friend std::ostream& operator<<(std::ostream& os, const MurkaPoint& p) {
-        os << p.x << '/' << p.y;
-        return os;
-    }
+	friend std::ostream& operator<<(std::ostream& os, const MurkaPoint& p) {
+		os << p.x << '/' << p.y;
+		return os;
+	}
 
+	friend MurkaPoint operator * (const float& f, const MurkaPoint& p) {
+		return p * f;
+	}
 
     MurkaPoint (float x_, float y_) {
         x = x_;
@@ -301,13 +300,92 @@ struct MurkaPoint {
     float length() const  {
         return sqrt(pow(x, 2) + pow(y, 2));
     }
-    
+
+	float lengthSquared() { 
+		return x * x + y * y; 
+	}
+
+	float distance(const MurkaPoint& p) {
+		return sqrt(pow(x - p.x, 2) + pow(y - p.y, 2));
+	}
+
 #ifdef MURKA_OF
     operator ofPoint() { return ofPoint(x, y); }
     operator ofVec2f() { return ofVec2f(x, y); }
 #endif
 };
 
+struct MurkaPoint3D {
+	float x = 0, y = 0, z = 0;
+
+	MurkaPoint3D(float x_, float y_, float z_) {
+		x = x_;
+		y = y_;
+		z = z_;
+	}
+
+	MurkaPoint3D(const MurkaPoint& p) {
+		x = p.x;
+		y = p.y;
+		z = 0;
+	}
+
+	MurkaPoint3D() {
+		x = 0;
+		y = 0;
+		z = 0;
+	}
+
+	MurkaPoint3D operator - (const MurkaPoint3D & p2) const {
+		return { x - p2.x, y - p2.y, z - p2.z };
+	}
+
+	float length() const {
+		return sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
+	}
+
+	
+
+};
+
+struct MurkaPoint4D {
+	float x = 0, y = 0, z = 0, w = 0;
+
+	MurkaPoint4D(float x_, float y_, float z_, float w_) {
+		x = x_;
+		y = y_;
+		z = z_;
+		w = w_;
+	}
+
+	MurkaPoint4D() {
+		x = 0;
+		y = 0;
+		z = 0;
+		w = 0;
+	}
+
+	MurkaPoint4D operator * (const MurkaPoint4D & p2) const {
+		return { x * p2.x, y * p2.y, z * p2.z, w * p2.w };
+	}
+
+	MurkaPoint4D operator * (float multiplier) const {
+		return { x * multiplier, y * multiplier , z * multiplier , w * multiplier };
+	}
+
+	friend MurkaPoint4D operator * (const float& f, const MurkaPoint4D& p) {
+		return p * f;
+	}
+
+	MurkaPoint4D operator - (const MurkaPoint4D & p2) const {
+		return { x - p2.x, y - p2.y, z - p2.z, w - p2.w };
+	}
+
+	MurkaPoint4D operator + (const MurkaPoint4D & p2) const {
+		return { x + p2.x, y + p2.y, z +  p2.z, w + p2.w };
+	}
+
+};
 
 struct MurkaShape {
 	MurkaPoint position = { 0, 0 };

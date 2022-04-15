@@ -10,128 +10,152 @@
 
 namespace murka {
 
-class Pane : public MurkaViewInterface<Pane> {
+class Pane : public View_NEW<Pane> {
+    
+    double paneSplitValue = 0.5;
+    
 public:
-    MURKA_VIEW_DRAW_FUNCTION  {
+	void internalDraw(Murka & m) {
+		MurkaContext& c = m.currentContext;
 
-        auto params = (Parameters*)parametersObject;
-        auto results = (Results*)resultObject;
-        bool inside = context.isHovered() * !areInteractiveChildrenHovered(context) * hasMouseFocus(context);
-        
-        double* paneSplitValue = (double*)dataToControl;
+        bool inside = c.isHovered() * !areInteractiveChildrenHovered(c) * hasMouseFocus(m);
         
         MurkaShape paneControlShape;
         
-        if (params->kind == 1) {  // horizontal drawing
-            drawWidget<LambdaPanel>(context,
-                                    {[&](MurkaContext& c) { params->firstPanelDraw(c); }},
-                                    {0, 0,
-                                    context.getSize().x * float(*paneSplitValue),
-                                    context.getSize().y});
-            drawWidget<LambdaPanel>(context,
-                                    {[&](MurkaContext& c) { params->secondPanelDraw(c); }},
-                                    {context.getSize().x * float(*paneSplitValue), 0,
-                                    context.getSize().x * float(1.0 - *paneSplitValue),
-                                    context.getSize().y});
-            paneControlShape = MurkaShape(context.getSize().x *
-                                                     float(*paneSplitValue) - params->paneControlWidth / 2, 0,
-                                                     params->paneControlWidth, context.getSize().y);
-            params->drawPaneControl(context, paneControlShape,
-                                    paneControlShape.inside(context.mousePosition, 5), draggingNow);
+        if (paneKind == PaneKind::HORIZONTAL) {  // horizontal drawing
+            m.draw<LambdaPanel>({0, 0,
+                                c.getSize().x * paneSplitValue,
+                                c.getSize().y})
+                .lambda({[&](const MurkaContextBase& c) { firstPanelDraw(c); }});
+            
+            m.draw<LambdaPanel>({c.getSize().x * paneSplitValue, 0,
+                                    c.getSize().x * float(1.0 - paneSplitValue),
+                                    c.getSize().y})
+                .lambda({[&](const MurkaContextBase& c) { secondPanelDraw(c); }});
+            paneControlShape = MurkaShape(c.getSize().x *
+                                                     paneSplitValue - paneControlWidth / 2, 0,
+                                                     paneControlWidth, c.getSize().y);
+            
+            
+            
+//            params->drawPaneControl(c, paneControlShape,
+//                                    paneControlShape.inside(c.mousePosition, 5), draggingNow);
+             
         }
         
-        if (params->kind == 2) { // vertical drawing
+        
+        if (paneKind == PaneKind::VERTICAL) { // vertical drawing
 
-            drawWidget<LambdaPanel>(context,
-                                    {[params](MurkaContext& c) { params->firstPanelDraw(c); }},
-                                    {0, 0,
-                                    context.getSize().x,
-                                    context.getSize().y * float(*paneSplitValue)});
-            drawWidget<LambdaPanel>(context,
-                                    {[params](MurkaContext& c) { params->secondPanelDraw(c); }},
-                                    {0, context.getSize().y * float(*paneSplitValue),
-                                    context.getSize().x,
-                                    context.getSize().y * float(1.0 - *paneSplitValue)});
+            m.draw<LambdaPanel>({0, 0,
+                                    c.getSize().x,
+                                    c.getSize().y * paneSplitValue})
+                .lambda({[&](const MurkaContextBase& c) { firstPanelDraw(c); }});
+            
+            m.draw<LambdaPanel>({0, c.getSize().y * paneSplitValue,
+                                    c.getSize().x,
+                                    c.getSize().y * float(1.0 - paneSplitValue)})
+                .lambda({[&](const MurkaContextBase& c) { firstPanelDraw(c); }});
+            
             paneControlShape = MurkaShape(0,
-                                          context.getSize().y *
-                                                     float(*paneSplitValue) - params->paneControlWidth / 2,
-                                          context.getSize().x,
-                                                     params->paneControlWidth);
-            params->drawPaneControl(context, paneControlShape,
-                                    paneControlShape.inside(context.mousePosition, 5), draggingNow);
+                                          c.getSize().y *
+                                                     paneSplitValue - paneControlWidth / 2,
+                                          c.getSize().x,
+                                                     paneControlWidth);
+            
+//            params->drawPaneControl(c, paneControlShape,
+//                                    paneControlShape.inside(c.mousePosition, 5), draggingNow);
 
 
         }
         
-        if ((!draggingNow) && (!areInteractiveChildrenHovered(context)) && (paneControlShape.inside(context.mousePosition, 5)) && (context.mouseDownPressed[0])) {
+        if ((!draggingNow) && (!areInteractiveChildrenHovered(c)) && (paneControlShape.inside(c.mousePosition, 5)) && (c.mouseDownPressed[0])) {
             draggingNow = true;
         }
         
-        if ((draggingNow) && (!context.mouseDown[0])) {
+        if ((draggingNow) && (!c.mouseDown[0])) {
             draggingNow = false;
         }
         
         if (draggingNow) {
-            if (params->kind == 1) { // horizontal dragging
-                *paneSplitValue = context.mousePosition.x / context.getSize().x;
+            if (paneKind == PaneKind::HORIZONTAL) { // horizontal dragging
+                paneSplitValue = c.mousePosition.x / c.getSize().x;
             }
             
-            if (params->kind == 2) { // vertical dragging
-                *paneSplitValue = context.mousePosition.y / context.getSize().y;
+            if (paneKind == PaneKind::VERTICAL) { // vertical dragging
+                paneSplitValue = c.mousePosition.y / c.getSize().y;
             }
 
-            if (*paneSplitValue < params->minValue) {
-                if (params->collapseable) {
-                    *paneSplitValue = 0;
+            if (paneSplitValue < minValue) {
+                if (collapseable) {
+                    paneSplitValue = 0;
                 } else {
-                    *paneSplitValue = params->minValue;
+                    paneSplitValue = minValue;
                 }
             }
-            if (*paneSplitValue > params->maxValue) {
-                if (params->collapseable) {
-                    *paneSplitValue = 1.0;
+            if (paneSplitValue > maxValue) {
+                if (collapseable) {
+                    paneSplitValue = 1.0;
                 } else {
-                    *paneSplitValue = params->maxValue;
+                    paneSplitValue = maxValue;
                 }
             }
         }
+         
+         
     };
     
     bool draggingNow = false;
-
-    struct Parameters {
-        std::function<void(MurkaContext&)> firstPanelDraw, secondPanelDraw;
-        double minValue = 0.1, maxValue = 0.9;
-        bool collapseable = true;
-        double paneControlWidth = 8;
-        int kind = 1; // 0 = nothing
-                      // 1 = horizontal
-                      // 2 = vertical
-        
-        std::function<void(MurkaContext &, MurkaShape, bool, bool)> drawPaneControl =
-            [](MurkaContext & c, MurkaShape shape, bool hover, bool draggingNow) {
-                
-                c.renderer->setColor((80 + (hover || draggingNow) * 40 + draggingNow * 80));
-                
-                c.renderer->drawRectangle(shape);
-                
-                c.renderer->setColor((75 + hover * 100));
-                c.renderer->drawCircle(shape.x() + shape.width() / 2, shape.y() + shape.height() / 2, 4);
-            };
     
-        Parameters() {};
-        
-        Parameters(std::function<void(MurkaContext&)> first,
-                   std::function<void(MurkaContext&)> second, int Kind) {
-            firstPanelDraw = first;
-            secondPanelDraw = second;
-            kind = Kind;
-        }
-    };
+    MURKA_PARAMETER(Pane, // class name
+        std::function<void(const MurkaContextBase&)>, // parameter type
+        firstPanelDraw, // parameter variable name
+        withFirstPanelCallback, // setter
+        [](const MurkaContextBase&){} // default
+    )
 
-    // The results type, you also need to define it even if it's nothing.
-    typedef bool Results;
+    MURKA_PARAMETER(Pane, // class name
+        std::function<void(const MurkaContextBase&)>, // parameter type
+        secondPanelDraw, // parameter variable name
+        withSecondPanelCallback, // setter
+        [](const MurkaContextBase&){} // default
+    )
+    
+    MURKA_PARAMETER(Pane, // class name
+        double, // parameter type
+        minValue, // parameter variable name
+        withMinValue, // setter
+        0 // default
+    )
 
+    MURKA_PARAMETER(Pane, // class name
+        double, // parameter type
+        maxValue, // parameter variable name
+        withMaxValue, // setter
+        0 // default
+    )
+    
+    MURKA_PARAMETER(Pane, // class name
+        bool, // parameter type
+        collapseable, // parameter variable name
+        setCollapseable, // setter
+        true // default
+    )
+    
+    enum PaneKind { HORIZONTAL, VERTICAL };
+
+    MURKA_PARAMETER(Pane, // class name
+        PaneKind, // parameter type
+        paneKind, // parameter variable name
+        withKind, // setter
+        HORIZONTAL // default
+    )
+    
+    MURKA_PARAMETER(Pane, // class name
+        double, // parameter type
+        paneControlWidth, // parameter variable name
+        withPaneCopntrolWidth, // setter
+        8 // default
+    )
 
 };
 

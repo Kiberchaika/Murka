@@ -5,6 +5,7 @@
 #include "MurImage.h"
 #include "MurkaTypes.h"
 #include "MurkaAssets.h"
+#include "MurCamera.h"
 
 namespace murka {
 
@@ -27,12 +28,12 @@ public:
 	}
 
     // Object drawing
-    virtual void draw(const MurImage & image, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) = 0;
-	virtual void draw(const MurImage & image, float x, float y, float z, float w, float h) = 0;
-	virtual void draw(const MurImage & image, float x, float y) = 0;
+    virtual void drawImage(const MurImage & image, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) = 0;
+	virtual void drawImage(const MurImage& image, float x, float y, float z, float w, float h) = 0;
+	virtual void drawImage(const MurImage& image, float x, float y, float w, float h) = 0;
+	virtual void drawImage(const MurImage & image, float x, float y) = 0;
 
-    virtual void draw(const MurTexture & texture, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) = 0;
-    virtual void draw(const MurVbo & vbo, GLuint drawMode, int first, int total) = 0;
+    virtual void drawTexture(const MurTexture & texture, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) = 0;
     
     // Textures binding
 	virtual void bind(const MurImage & img, int location = 0) = 0;
@@ -69,6 +70,8 @@ public:
     virtual void disableAlphaBlending() = 0;
 	virtual void setBlendMode(MurBlendMode blendMode) = 0;
 
+	virtual void updateVbo(MurVbo& vbo) = 0;
+
     virtual void pushStyle() = 0;
     virtual void popStyle() = 0;
     
@@ -89,8 +92,8 @@ public:
 	virtual void drawRectangle(float x, float y, float w, float h) = 0;
 	virtual void drawCircle(float x, float y, float radius) = 0;
 	virtual void drawLine(float x1, float y1, float x2, float y2) = 0;
-	virtual void drawVbo(const MurVbo & vbo, GLuint drawMode, int first, int total) = 0;
-	virtual void drawPath(const vector<MurkaPoint3D> & verts) = 0;
+	virtual void drawPath(const std::vector<MurkaPoint3D> & verts) = 0;
+	virtual void drawVbo(const MurVbo& vbo, GLuint drawMode, int first, int total) = 0;
 
 	virtual int getWindowWidth() = 0;
 	virtual int getWindowHeight() = 0;
@@ -101,6 +104,9 @@ public:
 
 	virtual uint64_t getFrameNum() = 0;
 	virtual float getElapsedTime() = 0;
+
+	virtual void beginCamera(MurCamera cam) = 0;
+	virtual void endCamera(MurCamera cam) = 0;
 };
 
 }
