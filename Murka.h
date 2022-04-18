@@ -268,6 +268,7 @@ public:
     }
 
     void begin() { // this version is without arguments cause it creates the context
+        startFrame();
         
         restartContext();
         

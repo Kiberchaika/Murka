@@ -11,15 +11,6 @@
 
 namespace murka {
     
-// Data, parameters and the context are what you put inside. Optional return is put into void*.
-typedef std::function<void (void* dataToControl,
-                            void* parametersObject,
-                            void* thisWidgetObject,
-                            MurkaContextBase & context,
-                            void* resultObject)> viewDrawFunction;
-
-#define MURKA_VIEW_DRAW_FUNCTION void draw(void* dataToControl, void* parametersObject, void* thisWidgetObject, murka::MurkaContext & context, void* resultObject)
-
 template<typename T>
 class View: public ViewBase {
 public:
