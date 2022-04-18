@@ -579,15 +579,15 @@ public:
 	// TODO: figure a better way to make setFont() accessible like this.
 
 	void setFont(std::string name, int size) {
-		MurkaAssets::setFont(name, size * getScreenScale(), this);
+		MurkaAssets::setFont(name, size, this);
 	}
 
 	void setFont(std::string name, const char *data, int dataSize, int size) {
-		MurkaAssets::setFont(name, data, dataSize, size * getScreenScale(), this);
+		MurkaAssets::setFont(name, data, dataSize, size, this);
 	}
 
 	void drawString(const std::string & s, float x, float y) {
-		MurkaAssets::getCurrentFont()->drawString(s, x, y);// *getScreenScale(), y * getScreenScale()); FIX THIS
+		MurkaAssets::getCurrentFont()->drawString(s, x, y);
 	}
 
 	// Object drawing
@@ -919,7 +919,7 @@ public:
 		else {
 			pushMatrix();
 			translate(x, y, 0.0);
-			scale(w* getScreenScale(), h* getScreenScale(), 1.0);
+			scale(w, h, 1.0);
 			drawVbo(vboRect, GL_LINE_LOOP, 0, 4);
 			popMatrix();
 		}
@@ -997,11 +997,6 @@ public:
 	}
 
 	void drawLine(float x1, float y1, float x2, float y2) override {
-		x1 = x1 * getScreenScale();
-		y1 = y1 * getScreenScale();
-		x2 = x2 * getScreenScale();
-		y2 = y2 * getScreenScale();
-
 		std::vector<MurkaPoint3D> verts;
 		verts.push_back(MurkaPoint3D(x1, y1, 0));
 		verts.push_back(MurkaPoint3D(x2, y2, 0));

@@ -705,8 +705,8 @@ public:
     }
     
     void updateTextSelectionRange() {
-        selectionSymbolsRange = {std::min(selectionSymbol1Index, selectionSymbol2Index),
-                                 std::max(selectionSymbol1Index, selectionSymbol2Index)};
+        selectionSymbolsRange = {(std::min)(selectionSymbol1Index, selectionSymbol2Index),
+                                 (std::max)(selectionSymbol1Index, selectionSymbol2Index)};
         
     }
     

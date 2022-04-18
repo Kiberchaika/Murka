@@ -38,7 +38,7 @@ public:
     }
     
     bool isHovered() const {
-        return currentViewShape.transformedInside(mousePosition /* / renderer->getScreenScale() */); // using absolute coordinates to calc that
+        return currentViewShape.transformedInside(mousePosition); // using absolute coordinates to calc that
     }
     
     MurkaShape currentViewShape;
