@@ -5,19 +5,19 @@
 
 namespace murka {
 
-class TextField : public murka::View_NEW<TextField> {
+class TextField : public murka::View<TextField> {
     
     class KeyStroke {
-        vector<int> keys;
+        std::vector<int> keys;
         
         bool fired = false;
         
 		std::chrono::steady_clock::time_point timeItFired;
     public:
         
-        operator vector<int>() { return keys; };
+        operator std::vector<int>() { return keys; };
         
-        KeyStroke(const initializer_list<int> &il) {
+        KeyStroke(const std::initializer_list<int> &il) {
             for (auto x: il) { keys.push_back(x); }
         }
         
@@ -705,8 +705,8 @@ public:
     }
     
     void updateTextSelectionRange() {
-        selectionSymbolsRange = {min(selectionSymbol1Index, selectionSymbol2Index),
-                                 max(selectionSymbol1Index, selectionSymbol2Index)};
+        selectionSymbolsRange = {std::min(selectionSymbol1Index, selectionSymbol2Index),
+                                 std::max(selectionSymbol1Index, selectionSymbol2Index)};
         
     }
     
@@ -758,7 +758,7 @@ public:
     }
     
     int selectionSymbol1Index = 0, selectionSymbol2Index = 0; // 2 selection symbols, the first is where selection was started, the second is where it is "now"
-    pair<int, int> selectionSymbolsRange = {0, 0}; // Range of symbols is calculated from symbols 1 & 2, the lesser of those becomes the beginning of the range, the bigger becomes the end
+    std::pair<int, int> selectionSymbolsRange = {0, 0}; // Range of symbols is calculated from symbols 1 & 2, the lesser of those becomes the beginning of the range, the bigger becomes the end
     
     std::string displayString;
     

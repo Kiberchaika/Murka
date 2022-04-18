@@ -3,9 +3,9 @@
 
 namespace murka {
 
-class Label : public View_NEW<Label> {
+
+class Label : public View<Label> {
 public:
-    
 	void internalDraw(Murka & m) {
 		MurkaContext& c = m.currentContext;
 

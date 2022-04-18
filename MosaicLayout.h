@@ -166,10 +166,10 @@ public:
     
     inline float overlapArea(MurkaShape s1, MurkaShape s2) {
      
-        float left = max(s1.position.x, s2.position.x);
-		float right = min(s1.position.x + s1.size.x, s2.position.x + s2.size.x);
-		float bottom = min(s1.position.y + s1.size.y, s2.position.y + s2.size.y);
-		float top = max(s1.position.y, s2.position.y);
+        float left = fmax(s1.position.x, s2.position.x);
+		float right = fmin(s1.position.x + s1.size.x, s2.position.x + s2.size.x);
+		float bottom = fmin(s1.position.y + s1.size.y, s2.position.y + s2.size.y);
+		float top = fmax(s1.position.y, s2.position.y);
 
         if ((left < right) && (top < bottom)) {
             return (right - left) * (bottom - top);

@@ -7,7 +7,7 @@
 namespace murka {
 
 
-class Header : public View_NEW<Header> {
+class Header : public View<Header> {
 public:
     Header() {
 
@@ -49,7 +49,7 @@ public:
 };
 
 
-class Checkbox : public View_NEW<Checkbox> {
+class Checkbox : public View<Checkbox> {
 public:
     void internalDraw(Murka & m) {
         
@@ -119,7 +119,7 @@ public:
 };
 
 
-class Radiobutton : public View_NEW<Radiobutton> {
+class Radiobutton : public View<Radiobutton> {
 public:
 	void internalDraw(Murka & m) {
 		results = false;
@@ -182,7 +182,7 @@ public:
 
 
 
-class DropdownElementButton : public View_NEW<DropdownElementButton> {
+class DropdownElementButton : public View<DropdownElementButton> {
 public:
 	void internalDraw(Murka & m) {
 
@@ -230,7 +230,7 @@ public:
 };
 
 
-class DropdownButton : public View_NEW<DropdownButton> {
+class DropdownButton : public View<DropdownButton> {
 public:
 	void internalDraw(Murka & m) {
 
@@ -264,7 +264,7 @@ public:
 					std::string buttonLabel = options[i];
 					auto el = m.draw<DropdownElementButton>({ contextPosition.x, contextPosition.y + 30 * i, 150, 30 });
 					el.label = buttonLabel;
-					m.commitDeferredView();
+                    el.commit();
 					if (el.pressed) {
 						std::cout << i << " pressed";
 						showingTheDropdown = false;
@@ -306,7 +306,7 @@ public:
 };
 
 
-class BlankPanel : public View_NEW<BlankPanel> {
+class BlankPanel : public View<BlankPanel> {
 public:
     void internalDraw(Murka & m) {
         
@@ -393,7 +393,7 @@ public:
 };
 
 
-class Button : public View_NEW<Button> {
+class Button : public View<Button> {
 public:
     void internalDraw(Murka & m) {
          
@@ -454,7 +454,7 @@ public:
 };
 
 
-class SliderFloat : public View_NEW<SliderFloat> {
+class SliderFloat : public View<SliderFloat> {
 public:
     void internalDraw(Murka & m) {
         results = false;

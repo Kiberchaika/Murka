@@ -8,7 +8,7 @@
 
 namespace murka {
 
-class LambdaPanel : public View_NEW<LambdaPanel> {
+class LambdaPanel : public View<LambdaPanel> {
 public:
 	
     void internalDraw(const murka::MurkaContextBase & c) {
