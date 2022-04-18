@@ -69,6 +69,11 @@ public:
 		selectAll = KeyStroke({ MURKA_KEY_COMMAND, 'a' });
 	}
     
+    TextField& commit() {
+        defferedViewDrawFunc();
+        return *this;
+    }
+    
     void internalDraw(Murka & m) {
 
         MurkaContext& ctx = m.currentContext;

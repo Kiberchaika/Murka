@@ -66,8 +66,13 @@ public:
     //////////////////////////////////////////////////////////////////
     // NEW API 1.0
     
-    ViewBase_NEW* deferredView = nullptr;
-    std::function<void(Murka &)> defferedViewDrawFunc;
+    
+    std::function<void(Murka &)>* castDeferredViewDrawFunction(void* function) {
+        // We need this to use the draw functions for widgets that are anonymously stored inside
+        // other widgets.
+        
+        return (std::function<void(Murka &)>*)function;
+    }
     
     MurkaShape getParentContextShape() {
         return getParentContext().currentViewShape;
@@ -136,30 +141,36 @@ public:
         transformTheRenderIntoThisContextShape();
     }
     
-    void commitDeferredView() {
-        if (deferredView == nullptr) return;
-        if (deferredView == NULL) return;
+//    void commitDeferredView() {
+        /*
+            assert(deferredView != NULL);
+            assert(deferredView != nullptr);
+
+            auto parentViewDrawFunction = currentContext.linkedView_NEW->defferedViewDrawFunc;
+            auto parentView = currentContext.linkedView_NEW;
         
-            pushContext_NEW(deferredView);
+            pushContext_NEW(parentView);
             if (transformTheRenderIntoThisContextShape(currentContext.overlayHolder->disableViewportCrop)) {
+                
                 deferredView->linearLayout.restart(deferredView->shape);
                 
 //                deferredView->draw(*this);
                 
-                defferedViewDrawFunc(*this);
+                (*castDeferredViewDrawFunction(parentViewDrawFunction))(*this);
+                
+                assert(deferredView != NULL);
+                assert(deferredView != nullptr);
                 
                 deferredView->animationRestart();
                 deferredView->mosaicLayout.restart();
                 
-                /*
-                //DEBUG - drawing the children frame that we had at the last frame end
-                setColor(255, 100, 0);
-                    disableFill();
-
-                drawRectangle(((View*)currentContext.murkaView)->childrenBounds.position.x, ((View*)currentContext.murkaView)->childrenBounds.position.y, ((View*)currentContext.murkaView)->childrenBounds.size.x, ((View*)currentContext.murkaView)->childrenBounds.size.y);
-                    enableFill();
-                //////
-                 */
+//                //DEBUG - drawing the children frame that we had at the last frame end
+//                setColor(255, 100, 0);
+//                    disableFill();
+//
+//                drawRectangle(((View*)currentContext.murkaView)->childrenBounds.position.x, ((View*)currentContext.murkaView)->childrenBounds.position.y, ((View*)currentContext.murkaView)->childrenBounds.size.x, ((View*)currentContext.murkaView)->childrenBounds.size.y);
+//                    enableFill();
+//                //////
 
                 
                 transformTheRenderBackFromThisContextShape();
@@ -168,8 +179,10 @@ public:
                 
             deferredView->resetChildrenBounds();
         
+        cout << "nullified deferredview";
         deferredView = nullptr;
-    }
+         */
+//    }
     
     // Immediate mode custom layout
 
@@ -184,8 +197,40 @@ public:
         T* widgetObject = T::getOrCreateImModeWidgetObject_NEW(counter, parentView, shape);
         // TODO: fill the renderer and/or some other helper variables in the new widget object
         
-        deferredView = widgetObject;
-        defferedViewDrawFunc = std::bind(&T::internalDraw, (T*)widgetObject, std::placeholders::_1);
+//        parentView->deferredView = widgetObject;
+        widgetObject->defferedViewDrawFunc = [&, widgetObject, parentView]() {
+            
+            auto parentViewCopy = parentView;
+            auto widgetObjectCopy = widgetObject;
+            pushContext_NEW(widgetObjectCopy);
+            if (transformTheRenderIntoThisContextShape(currentContext.overlayHolder->disableViewportCrop)) {
+                
+                widgetObjectCopy->linearLayout.restart(widgetObjectCopy->shape);
+                
+                widgetObjectCopy->animationRestart();
+                widgetObjectCopy->mosaicLayout.restart();
+                
+                widgetObjectCopy->internalDraw(*this);
+
+                
+//                //DEBUG - drawing the children frame that we had at the last frame end
+//                setColor(255, 100, 0);
+//                    disableFill();
+//
+//                drawRectangle(((View*)currentContext.murkaView)->childrenBounds.position.x, ((View*)currentContext.murkaView)->childrenBounds.position.y, ((View*)currentContext.murkaView)->childrenBounds.size.x, ((View*)currentContext.murkaView)->childrenBounds.size.y);
+//                    enableFill();
+//                //////
+
+                
+                transformTheRenderBackFromThisContextShape();
+            }
+            popContext();
+                
+            widgetObjectCopy->resetChildrenBounds();
+
+            
+        };
+//        *(std::function<void(Murka &)>*)(parentView->defferedViewDrawFunc) = std::bind(&T::internalDraw, (T*)widgetObject, std::placeholders::_1);
     //    c.commitDeferredView();
 
         return *((T*)widgetObject);

@@ -24,8 +24,7 @@ private:
      */
     
 public:
-
-   
+    
     std::pair<MurkaShape, MurkaPoint> getCroppedViewport(MurkaShape parent, MurkaShape view) const {
         MurkaPoint pos = {(std::max)(parent.position.x + view.position.x, parent.position.x),
 						  (std::max)(parent.position.y + view.position.y, parent.position.y)};

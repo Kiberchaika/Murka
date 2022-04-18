@@ -49,6 +49,9 @@ public:
 
     MurkaLinearLayoutGenerator linearLayout;
     MosaicLayout mosaicLayout;
+    
+    std::function<void()> defferedViewDrawFunc;
+
 
 };
 

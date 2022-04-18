@@ -34,10 +34,19 @@ public:
     View_NEW() {
     }
     
+    // Copy constructor to warn against copying views
+    View_NEW(const View_NEW &p1) {
+        /// WARNING!!
+        /// Views SHOULD NOT be copied! If you acquire a View from a draw function,
+        /// make sure you use an lvalue reference:
+        /// auto & view = m.draw<WidgetType>({0, 0, 100, 100});
+        throw;
+    }
+
+    
     ~View_NEW() {
         // TODO: delete children
     }
-    
     
     // This children list contains all the children objects and their respective data
     std::vector<MurkaViewHandlerInternal*> children;

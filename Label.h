@@ -5,7 +5,11 @@ namespace murka {
 
 class Label : public View_NEW<Label> {
 public:
-    
+    Label& commit() {
+        defferedViewDrawFunc();
+        return *this;
+    }
+
     void internalDraw(const MurkaContextBase & c)  {
         
         bool inside = c.isHovered() * !areChildrenHovered(c);
