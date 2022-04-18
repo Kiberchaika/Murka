@@ -379,7 +379,8 @@ class MurkaRenderer : public MurkaRendererBase {
 
 	bool vflip = true;
 	bool useTexture = false;
-	
+	bool useCamera = false;
+
 	uint64_t frameNum = 0;
 	std::chrono::steady_clock::time_point begin;
 
@@ -448,12 +449,15 @@ public:
                 "varying vec2 vUv;\n"
 				"varying vec4 vCol;\n"
 				"uniform sampler2D mainTexture;\n"
-                "uniform vec4 color;\n"
-                "uniform bool useTexture;\n"
+				"uniform vec4 color;\n"
+				"uniform bool vflip;\n"
+				"uniform bool useTexture;\n"
                 "\n"
                 "void main()\n"
                 "{\n"
-				"    gl_FragColor = color * vCol * (useTexture ? texture(mainTexture, vUv) : vec4 (1.0, 1.0, 1.0, 1.0));\n"
+				"    vec2 uv = vUv;"
+				"    if(vflip) uv.y = 1 - uv.y;"
+				"    gl_FragColor = color * vCol * (useTexture ? texture(mainTexture, uv) : vec4 (1.0, 1.0, 1.0, 1.0));\n"
                 "}\n";
 
 			shaderMain.setOpenGLContext(openGLContext);
@@ -629,7 +633,6 @@ public:
 		currentShader->setUniformMatrix4f("matrixProj", vflipMatrix * currentProjectionMatrix);
 		
 		currentShader->setUniform1i("useTexture", useTexture);
-		currentShader->setUniform1i("vflip", vflip);
 		currentShader->setUniform4f("color", currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
 		vbo.internalDraw(drawMode, first, total);
 	}
@@ -741,6 +744,8 @@ public:
 		currentProjectionMatrix = MurMatrix<float>::fromPerspective(juce::degreesToRadians(fov), aspect, nearDist, farDist);
 		currentViewMatrix = MurMatrix<float>::fromLookAt(juce::Vector3D<float>(eyeX, eyeY, dist), juce::Vector3D<float>(eyeX, eyeY, 0), juce::Vector3D<float>(0, 1, 0));
 		currentModelMatrix = MurMatrix<float>();
+
+		useCamera = false;
 	}
 
 	// rendering setup
@@ -906,7 +911,7 @@ public:
 			currentShader->setUniformMatrix4f("matrixProj", vflipMatrix * currentProjectionMatrix);
 
 			currentShader->setUniform1i("useTexture", useTexture);
-			currentShader->setUniform1i("vflip", vflip);
+			currentShader->setUniform1i("vflip", useCamera);
 			currentShader->setUniform4f("color", currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
 			updateVbo(vboRect);
 			vboRect.internalDraw(GL_TRIANGLE_FAN, 0, 4);
@@ -942,7 +947,7 @@ public:
 			currentShader->setUniformMatrix4f("matrixProj", vflipMatrix * currentProjectionMatrix);
 			
 			currentShader->setUniform1i("useTexture", useTexture);
-			currentShader->setUniform1i("vflip", vflip);
+			currentShader->setUniform1i("vflip", useCamera);
 			currentShader->setUniform4f("color", currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
 
 			vboCircle.internalDraw(GL_TRIANGLE_FAN, 0, circleResolution);
@@ -981,7 +986,7 @@ public:
 		currentShader->setUniformMatrix4f("matrixProj", vflipMatrix * currentProjectionMatrix);
 
 		currentShader->setUniform1i("useTexture", useTexture);
-		currentShader->setUniform1i("vflip", vflip);
+		currentShader->setUniform1i("vflip", useCamera);
 		currentShader->setUniform4f("color", currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
 
 		vboLine.internalDraw(GL_TRIANGLE_FAN, 0, 4);
@@ -1051,9 +1056,13 @@ public:
 		currentProjectionMatrix = vflipMatrix * cam.getProjectionMatrix(view.size.x / view.size.y);
 		currentViewMatrix = cam.getViewMatrix();
 		currentModelMatrix = MurMatrix<float>().scaled(juce::Vector3D<float>(1/ getScreenScale(), 1/ getScreenScale(), 1 / getScreenScale()));
+
+		useCamera = true;
 	}
 
 	void endCamera(MurCamera cam) {
+		useCamera = false;
+
 		popView();
 	}
 };
