@@ -141,49 +141,7 @@ public:
         transformTheRenderIntoThisContextShape();
     }
     
-//    void commitDeferredView() {
-        /*
-            assert(deferredView != NULL);
-            assert(deferredView != nullptr);
 
-            auto parentViewDrawFunction = currentContext.linkedView_NEW->defferedViewDrawFunc;
-            auto parentView = currentContext.linkedView_NEW;
-        
-            pushContext_NEW(parentView);
-            if (transformTheRenderIntoThisContextShape(currentContext.overlayHolder->disableViewportCrop)) {
-                
-                deferredView->linearLayout.restart(deferredView->shape);
-                
-//                deferredView->draw(*this);
-                
-                (*castDeferredViewDrawFunction(parentViewDrawFunction))(*this);
-                
-                assert(deferredView != NULL);
-                assert(deferredView != nullptr);
-                
-                deferredView->animationRestart();
-                deferredView->mosaicLayout.restart();
-                
-//                //DEBUG - drawing the children frame that we had at the last frame end
-//                setColor(255, 100, 0);
-//                    disableFill();
-//
-//                drawRectangle(((View*)currentContext.murkaView)->childrenBounds.position.x, ((View*)currentContext.murkaView)->childrenBounds.position.y, ((View*)currentContext.murkaView)->childrenBounds.size.x, ((View*)currentContext.murkaView)->childrenBounds.size.y);
-//                    enableFill();
-//                //////
-
-                
-                transformTheRenderBackFromThisContextShape();
-            }
-            popContext();
-                
-            deferredView->resetChildrenBounds();
-        
-        cout << "nullified deferredview";
-        deferredView = nullptr;
-         */
-//    }
-    
     // Immediate mode custom layout
 
     template<typename T>
@@ -230,8 +188,6 @@ public:
 
             
         };
-//        *(std::function<void(Murka &)>*)(parentView->defferedViewDrawFunc) = std::bind(&T::internalDraw, (T*)widgetObject, std::placeholders::_1);
-    //    c.commitDeferredView();
 
         return *((T*)widgetObject);
     }
@@ -251,28 +207,7 @@ public:
         }
         return contextStack[contextStack.size() - 1];
     }
-    /*
-    void pushContext(MurkaViewHandlerInternal* viewSource) {
-        
-        ((View*)currentContext.linkedView)->latestContext = currentContext;
-        
-        MurkaPoint containerPosition = ((View*)viewSource->widgetObjectInternal)->shape.position ;
-        MurkaEventState derivedEventState = currentContext.transformedWith({-containerPosition.x, -containerPosition.y }, 1.0);
 
-        contextStack.push_back(currentContext); // this makes it a parent
-        
-        currentContext.MurkaEventState::operator=(derivedEventState);
-        currentContext.currentViewShape.position += containerPosition;
-        currentContext.currentViewShape.size = ((View*)viewSource->widgetObjectInternal)->shape.size;
-        currentContext.linkedView = ((View*)viewSource->widgetObjectInternal);
-        currentContext.overlayHolder = this;
-        
-        ((View*)viewSource->widgetObjectInternal)->latestContext = this->currentContext;
-        
-        latestChildContext = currentContext;
-    }
-     */
-    
     void pushContext_NEW(ViewBase_NEW* viewSource) {
         
 //        ((ViewBase_NEW*)currentContext.linkedView_NEW)->latestContext = currentContext;

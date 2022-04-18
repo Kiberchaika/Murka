@@ -153,17 +153,6 @@ public:
             return false;
         }
         
-        /*
-        for (auto i: children) {
-            auto shape = ((View_NEW*)i->widgetObjectInternal)->shape;
-            shape.position = ((View_NEW*)i->widgetObjectInternal)->shape.position;
-            
-            if (shape.inside(c.mousePosition)) {
-                return true;
-            }
-        }
-        */
-        
         int index = 0;
 //        typename std::map<imIdentifier, MurkaViewHandler<View_NEW>*>::iterator it;
         for (auto it = imChildren_NEW.begin(); it != imChildren_NEW.end(); it++) {
@@ -198,13 +187,6 @@ public:
     struct Results {};
     
     std::string dataTypeName = "";
-    
-//    MurkaContext latestContext;
-    
-//    MURKA_VIEW_DRAW_FUNCTION_NEW override {
-//
-//    };
-//
     
     // Utility functions for those calling from outside
     
@@ -249,16 +231,9 @@ public:
             // Creating new widget
             
             auto newWidget = new T();
-//            auto resultsObject = newWidget->returnNewResultsObject();
             newWidget->shape = shape;
             newWidget->latestShapeThatCameFromOutside = shape;
             
-            /*
-            MurkaViewHandler<T>* newHandler = new MurkaViewHandler<T>();
-            newHandler->resultsInternal = resultsObject;
-            newHandler->dataToControl = data;
-            newHandler->widgetObjectInternal = newWidget;
-            */
             
             std::cout << "creating a new object";
             
@@ -299,14 +274,6 @@ public:
     MurkaContext latestContext;
 
 };
-
-// // View heirarchy
-
-// New API
-
-
-
-
 
  
 }
