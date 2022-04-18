@@ -578,12 +578,12 @@ public:
 	// downcasting from Renderer to MurkaAssets doesn't work for some reason.
 	// TODO: figure a better way to make setFont() accessible like this.
 
-	void setFont(std::string name, int size) {
-		MurkaAssets::setFont(name, size, this);
+	void setFont(std::string filename, int size) {
+		MurkaAssets::setFont(filename, size, this);
 	}
 
-	void setFont(std::string name, const char *data, int dataSize, int size) {
-		MurkaAssets::setFont(name, data, dataSize, size, this);
+	void setFontFromRawData(std::string name, const char* data, int dataSize, int fontSize) {
+		MurkaAssets::setFont(name, data, dataSize, fontSize, this);
 	}
 
 	void drawString(const std::string & s, float x, float y) {

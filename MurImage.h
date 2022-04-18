@@ -150,18 +150,18 @@ public:
 		bAllocated = true;
 	}
 
-	bool load(const char* data, int dataSize) {
-		juce::Image image = juce::ImageFileFormat::loadFrom(data, dataSize);
+	bool load(const std::string& fileName) {
+        if(!juce::File(fileName).exists()) return false;
+        
+		juce::Image image = juce::ImageFileFormat::loadFrom(juce::File(fileName));
 
 		loadInternal(image);
 
 		return true;
 	}
 
-	bool load(const std::string& fileName) {
-        if(!juce::File(fileName).exists()) return false;
-        
-		juce::Image image = juce::ImageFileFormat::loadFrom(juce::File(fileName));
+	bool loadFromRawData(const char* data, int dataSize) {
+		juce::Image image = juce::ImageFileFormat::loadFrom(data, dataSize);
 
 		loadInternal(image);
 

@@ -256,6 +256,7 @@ public:
 		else {
 			glDrawArrays(drawMode, first, total);
 		}
+		
 		openGLContext->extensions.glBindBuffer(GL_ARRAY_BUFFER, 0);
 		if (indexes.size() > 0) {
 			openGLContext->extensions.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
