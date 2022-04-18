@@ -5,7 +5,7 @@
 
 namespace murka {
 
-class TextField : public murka::View_NEW<TextField> {
+class TextField : public murka::View<TextField> {
     
     class KeyStroke {
         std::vector<int> keys;

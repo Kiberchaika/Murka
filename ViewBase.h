@@ -27,13 +27,13 @@ typename & setter(std::function<void(typename &, argument_type)> callback) { \
 
 namespace murka {
 
-typedef std::tuple<int, std::string> imIdentifier_NEW;
+typedef std::tuple<int, std::string> imIdentifier;
 
-class ViewBase_NEW: public MurkaAnimator {
+class ViewBase: public MurkaAnimator {
 public:
-    phmap::flat_hash_map<imIdentifier_NEW, ViewBase_NEW*> imChildren_NEW = phmap::flat_hash_map<imIdentifier_NEW, ViewBase_NEW*>();
+    phmap::flat_hash_map<imIdentifier, ViewBase*> imChildren = phmap::flat_hash_map<imIdentifier, ViewBase*>();
     
-    ViewBase_NEW() {
+    ViewBase() {
     }
     
     MurkaShape childrenBounds = {(std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)(),

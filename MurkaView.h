@@ -21,7 +21,7 @@ typedef std::function<void (void* dataToControl,
 #define MURKA_VIEW_DRAW_FUNCTION void draw(void* dataToControl, void* parametersObject, void* thisWidgetObject, murka::MurkaContext & context, void* resultObject)
 
 template<typename T>
-class View_NEW: public ViewBase_NEW {
+class View: public ViewBase {
 public:
     
     // This variable is needed to support immediate mode widgets resizing themselves while also receiving sizes from outside.
@@ -31,11 +31,11 @@ public:
     virtual bool wantsClicks() { return true; } // override this if you want to signal to other widgets that you don't want clicks
     
 public:
-    View_NEW() {
+    View() {
     }
     
     // Copy constructor to warn against copying views
-    View_NEW(const View_NEW &p1) {
+    View(const View &p1) {
         /// WARNING!!
         /// Views SHOULD NOT be copied! If you acquire a View from a draw function,
         /// make sure you use an lvalue reference:
@@ -48,27 +48,9 @@ public:
         return *(static_cast<T*>(this));
     }
     
-    ~View_NEW() {
+    ~View() {
         // TODO: delete children
     }
-    
-    // This children list contains all the children objects and their respective data
-    std::vector<MurkaViewHandlerInternal*> children;
-    
-    // This tuple is how Murka identifies the IM mode widget object.
-    // Int stands for object drawing index, void* is a pointer to data, string is typeid
-    typedef std::tuple<int, void*, std::string> imIdentifier;
-    
-
-    /*
-    void clearChildren() {
-        for (auto &i: children) {
-            ((View*)i->widgetObjectInternal)->clearChildren();
-            delete i;
-        }
-        children.clear();
-    }
-     */
     
     int hoverIndexCache = 0;
     
@@ -105,11 +87,11 @@ public:
         
         int index = 0;
 //        typename std::map<imIdentifier, MurkaViewHandler<View_NEW>*>::iterator it;
-        for (auto it = imChildren_NEW.begin(); it != imChildren_NEW.end(); it++) {
-            auto shape = ((View_NEW*)it->second)->shape;
-            shape.position = ((View_NEW*)it->second)->shape.position;
+        for (auto it = imChildren.begin(); it != imChildren.end(); it++) {
+            auto shape = ((View*)it->second)->shape;
+            shape.position = ((View*)it->second)->shape.position;
             
-            if ((shape.inside(m.latestChildContext.mousePosition)) && (((View_NEW*)it->second)->wantsClicks())) {
+            if ((shape.inside(m.latestChildContext.mousePosition)) && (((View*)it->second)->wantsClicks())) {
                 return true;
             }
         }
@@ -136,11 +118,11 @@ public:
         
         int index = 0;
 //        typename std::map<imIdentifier, MurkaViewHandler<View_NEW>*>::iterator it;
-        for (auto it = imChildren_NEW.begin(); it != imChildren_NEW.end(); it++) {
-            auto shape = ((View_NEW*)it->second)->shape;
-            shape.position = ((View_NEW*)it->second)->shape.position;
+        for (auto it = imChildren.begin(); it != imChildren.end(); it++) {
+            auto shape = ((View*)it->second)->shape;
+            shape.position = ((View*)it->second)->shape.position;
             
-            if ((shape.inside(c.mousePosition)) && (((View_NEW*)it->second)->wantsClicks())) {
+            if ((shape.inside(c.mousePosition)) && (((View*)it->second)->wantsClicks())) {
                 return true;
             }
         }
@@ -155,9 +137,9 @@ public:
         
         int index = 0;
 //        typename std::map<imIdentifier, MurkaViewHandler<View_NEW>*>::iterator it;
-        for (auto it = imChildren_NEW.begin(); it != imChildren_NEW.end(); it++) {
-            auto shape = ((View_NEW*)it->second)->shape;
-            shape.position = ((View_NEW*)it->second)->shape.position;
+        for (auto it = imChildren.begin(); it != imChildren.end(); it++) {
+            auto shape = ((View*)it->second)->shape;
+            shape.position = ((View*)it->second)->shape.position;
             
             if (shape.inside(c.mousePosition)) {
                 return true;
@@ -173,7 +155,7 @@ public:
     }
     
     void* returnNewWidgetObject() {
-        return new View_NEW();
+        return new View();
     }
     
     /*
@@ -190,15 +172,15 @@ public:
     
     // Utility functions for those calling from outside
     
-    static T* getOrCreateImModeWidgetObject_NEW(int index, ViewBase_NEW* parentWidget, MurkaShape shape) {
+    static T* getOrCreateImModeWidgetObject_NEW(int index, ViewBase* parentWidget, MurkaShape shape) {
         
         auto idTuple = std::make_tuple(index, typeid(T).name());
-        if (parentWidget->imChildren_NEW.find(idTuple) != parentWidget->imChildren_NEW.end()) {
+        if (parentWidget->imChildren.find(idTuple) != parentWidget->imChildren.end()) {
             // the widget exists
             
 //            ofLog() << "returning the object";
             
-            auto imChild = ((T*)parentWidget->imChildren_NEW[idTuple]);
+            auto imChild = ((T*)parentWidget->imChildren[idTuple]);
             auto widget = imChild;
             
             if (widget->latestShapeThatCameFromOutside != shape) {
@@ -226,7 +208,7 @@ public:
                 parentWidget->childrenBounds.size.y = widget->shape.position.y + widget->shape.size.y - parentWidget->childrenBounds.position.y;
             }
 
-            return (T*)parentWidget->imChildren_NEW[idTuple];
+            return (T*)parentWidget->imChildren[idTuple];
         } else {
             // Creating new widget
             
@@ -237,14 +219,14 @@ public:
             
             std::cout << "creating a new object";
             
-            int z = parentWidget->imChildren_NEW.size();
+            int z = parentWidget->imChildren.size();
             
             if (z == 0) {
                 // This doesn't work implicitly on Mac so we're remaking the map
 //                parentWidget->imChildren_NEW = std::map<imIdentifier_NEW, ViewBase_NEW*>();
             }
             
-            parentWidget->imChildren_NEW.insert(std::pair<imIdentifier_NEW, ViewBase_NEW*>(idTuple, newWidget));
+            parentWidget->imChildren.insert(std::pair<imIdentifier, ViewBase*>(idTuple, newWidget));
 //            parentWidget->imChildren_NEW[idTuple] = new ViewBase_NEW();
 
             // Updating children bounds (this is needed for automatic scrolling and things like that -
