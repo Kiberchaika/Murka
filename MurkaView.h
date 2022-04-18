@@ -43,6 +43,10 @@ public:
         throw;
     }
 
+    T& commit() {
+        defferedViewDrawFunc();
+        return *(static_cast<T*>(this));
+    }
     
     ~View_NEW() {
         // TODO: delete children
