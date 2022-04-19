@@ -892,37 +892,27 @@ public:
 	};
 
 	void drawRectangle(float x, float y, float w, float h) override {
- 
-		if (currentStyle.fill) {
-			MurMatrix<float> modelMatrix;
-			modelMatrix = modelMatrix * MurMatrix<float>::translation(juce::Vector3D<float>(x* getScreenScale(), y* getScreenScale(), 0.0));
-			modelMatrix = modelMatrix.scaled(juce::Vector3D<float>(w * getScreenScale(), h * getScreenScale(), 1.0));
+		MurMatrix<float> modelMatrix;
+		modelMatrix = modelMatrix * MurMatrix<float>::translation(juce::Vector3D<float>(x * getScreenScale(), y * getScreenScale(), 0.0));
+		modelMatrix = modelMatrix.scaled(juce::Vector3D<float>(w * getScreenScale(), h * getScreenScale(), 1.0));
 
 
-			modelMatrix = modelMatrix * stackedMatrix * currentMatrix;
+		modelMatrix = modelMatrix * stackedMatrix * currentMatrix;
 
-			MurMatrix<float> vflipMatrix;
-			if (vflip) {
-				vflipMatrix.scale(juce::Vector3D<float>(1, -1, 1));
-			}
-
-			currentShader->setUniformMatrix4f("matrixModel", modelMatrix  * currentModelMatrix);
-			currentShader->setUniformMatrix4f("matrixView", currentViewMatrix);
-			currentShader->setUniformMatrix4f("matrixProj", vflipMatrix * currentProjectionMatrix);
-
-			currentShader->setUniform1i("useTexture", useTexture);
-			currentShader->setUniform1i("vflip", useCamera);
-			currentShader->setUniform4f("color", currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
-			updateVbo(vboRect);
-			vboRect.internalDraw(GL_TRIANGLE_FAN, 0, 4);
+		MurMatrix<float> vflipMatrix;
+		if (vflip) {
+			vflipMatrix.scale(juce::Vector3D<float>(1, -1, 1));
 		}
-		else { 
-			pushMatrix();
-			translate(x / getScreenScale(), y * getScreenScale(), 0.0);
-			scale(w / getScreenScale(), h / getScreenScale(), 1.0);
-			drawVbo(vboRect, GL_LINE_LOOP, 0, 4);
-			popMatrix();
-		}
+
+		currentShader->setUniformMatrix4f("matrixModel", modelMatrix * currentModelMatrix);
+		currentShader->setUniformMatrix4f("matrixView", currentViewMatrix);
+		currentShader->setUniformMatrix4f("matrixProj", vflipMatrix * currentProjectionMatrix);
+
+		currentShader->setUniform1i("useTexture", useTexture);
+		currentShader->setUniform1i("vflip", useCamera);
+		currentShader->setUniform4f("color", currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
+		updateVbo(vboRect);
+		vboRect.internalDraw(currentStyle.fill ? GL_TRIANGLE_FAN : GL_LINE_LOOP, 0, 4);
 	}
 
 	void drawRectangle(MurkaShape s) override {
@@ -930,35 +920,26 @@ public:
 	}
 
 	void drawCircle(float x, float y, float radius) override {
-		if (currentStyle.fill) {
-			MurMatrix<float> modelMatrix;
-			modelMatrix = modelMatrix * MurMatrix<float>::translation(juce::Vector3D<float>(x * getScreenScale(), y * getScreenScale(), 0.0));
-			modelMatrix = modelMatrix.scaled(juce::Vector3D<float>(radius * getScreenScale(), radius * getScreenScale(), 1.0));
+		MurMatrix<float> modelMatrix;
+		modelMatrix = modelMatrix * MurMatrix<float>::translation(juce::Vector3D<float>(x * getScreenScale(), y * getScreenScale(), 0.0));
+		modelMatrix = modelMatrix.scaled(juce::Vector3D<float>(radius * getScreenScale(), radius * getScreenScale(), 1.0));
 
-			modelMatrix = modelMatrix * stackedMatrix * currentMatrix;
+		modelMatrix = modelMatrix * stackedMatrix * currentMatrix;
 
-			MurMatrix<float> vflipMatrix;
-			if (vflip) {
-				vflipMatrix.scale(juce::Vector3D<float>(1, -1, 1));
-			}
-
-			currentShader->setUniformMatrix4f("matrixModel", modelMatrix * currentModelMatrix);
-			currentShader->setUniformMatrix4f("matrixView", currentViewMatrix);
-			currentShader->setUniformMatrix4f("matrixProj", vflipMatrix * currentProjectionMatrix);
-			
-			currentShader->setUniform1i("useTexture", useTexture);
-			currentShader->setUniform1i("vflip", useCamera);
-			currentShader->setUniform4f("color", currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
-
-			vboCircle.internalDraw(GL_TRIANGLE_FAN, 0, circleResolution);
+		MurMatrix<float> vflipMatrix;
+		if (vflip) {
+			vflipMatrix.scale(juce::Vector3D<float>(1, -1, 1));
 		}
-		else {
-			pushMatrix();
-			translate(x / getScreenScale(), y * getScreenScale(), 0.0);
-			scale(radius / getScreenScale(), radius / getScreenScale(), 1);
-			drawVbo(vboCircle, GL_LINE_LOOP, 0, circleResolution);
-			popMatrix();
-		}
+
+		currentShader->setUniformMatrix4f("matrixModel", modelMatrix * currentModelMatrix);
+		currentShader->setUniformMatrix4f("matrixView", currentViewMatrix);
+		currentShader->setUniformMatrix4f("matrixProj", vflipMatrix * currentProjectionMatrix);
+
+		currentShader->setUniform1i("useTexture", useTexture);
+		currentShader->setUniform1i("vflip", useCamera);
+		currentShader->setUniform4f("color", currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
+
+		vboCircle.internalDraw(currentStyle.fill ? GL_TRIANGLE_FAN : GL_LINE_LOOP, 0, circleResolution);
 	}
 
 	void drawLineNew(float x1, float y1, float x2, float y2) {
