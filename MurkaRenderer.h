@@ -916,10 +916,10 @@ public:
 			updateVbo(vboRect);
 			vboRect.internalDraw(GL_TRIANGLE_FAN, 0, 4);
 		}
-		else {
+		else { 
 			pushMatrix();
-			translate(x, y, 0.0);
-			scale(w, h, 1.0);
+			translate(x / getScreenScale(), y * getScreenScale(), 0.0);
+			scale(w / getScreenScale(), h / getScreenScale(), 1.0);
 			drawVbo(vboRect, GL_LINE_LOOP, 0, 4);
 			popMatrix();
 		}
@@ -954,8 +954,8 @@ public:
 		}
 		else {
 			pushMatrix();
-			translate(x, y, 0.0);
-			scale(radius, radius, 1);
+			translate(x / getScreenScale(), y * getScreenScale(), 0.0);
+			scale(radius / getScreenScale(), radius / getScreenScale(), 1);
 			drawVbo(vboCircle, GL_LINE_LOOP, 0, circleResolution);
 			popMatrix();
 		}

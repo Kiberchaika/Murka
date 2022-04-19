@@ -143,7 +143,7 @@ public:
             ctx.pointerToRenderer->disableFill();
             ctx.pointerToRenderer->setColor(inside ? widgetFgColor : widgetFgColor / 2);
             if (activated) ctx.pointerToRenderer->setColor(widgetFgColor * 1.2);
-            ctx.pointerToRenderer->drawRectangle(1, 1, ctx.getSize().x-2, ctx.getSize().y-2);
+            ctx.pointerToRenderer->drawRectangle(0, 0, ctx.getSize().x, ctx.getSize().y);
             ctx.pointerToRenderer->popStyle();
         }
         
@@ -160,7 +160,7 @@ public:
         
         float glyphXCoordinate = 10;
         ctx.pointerToRenderer->setColor(widgetFgColor);
-        font->drawString(displayString, 10 - cameraPanInsideWidget, ctx.getSize().y / 2 - font->getLineHeight());
+        font->drawString(displayString, 10 - cameraPanInsideWidget, ctx.getSize().y / 2 - font->getLineHeight() / 2);
         
         if (displayString.size() == 0) {
             // drawing hint
