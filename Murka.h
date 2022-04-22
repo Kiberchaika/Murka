@@ -279,6 +279,8 @@ public:
     }
     
     void end() {
+        clearEvents();
+
         disableViewportCrop = true;
         for (auto &overlay: overlays) {
             overlay.func();
@@ -363,7 +365,6 @@ public:
         
 //        latestContext = currentContext;
 
-        clearEvents();
 	}
 
     ////////

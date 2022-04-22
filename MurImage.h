@@ -204,7 +204,7 @@ public:
 		glBindTexture(gltype, 0);
 	}
 
-	void loadData( juce::uint8* data, int glFormat) {
+	void loadData(juce::uint8* data, int glFormat) {
 		glBindTexture(gltype, textureID);
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
