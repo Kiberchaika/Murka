@@ -46,6 +46,7 @@ class MurCamera {
 	MurkaPoint3D target;
 
 	MurkaPoint3D rotation;
+	float fov;
 
 	void updateTransformMatrix() {
 		MurMatrix<float> m;
@@ -73,11 +74,16 @@ class MurCamera {
 
 public:
 	MurCamera(){
+		fov = 60;
 	}
 
 	void setPosition(MurkaPoint3D p) {
 		position = p;
 		updateTransformMatrix();
+	}
+
+	void setFov(float fov) {
+		this->fov = fov;
 	}
 
 	void setRotation(MurkaPoint3D r) {
@@ -100,8 +106,6 @@ public:
 	}
 
 	MurMatrix<float> getProjectionMatrix(float aspect) { 
-		float fov = 60;
-
 		float zFar = 1000;
 		float zNear = 0.001;
 		 
