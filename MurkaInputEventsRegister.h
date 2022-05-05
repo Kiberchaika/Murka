@@ -35,8 +35,12 @@ struct MurkaEventState {
     std::vector<int> keyPresses; // The keys that were just pressed
     std::vector<int> keyHolds; // The keys that were presed in the past frames and not yet released
 
-    bool isKeyPressed(int key) {
+    bool isKeyHeld(int key) {
         return std::find(std::begin(keyHolds), std::end(keyHolds), key) != std::end(keyHolds);
+    }
+
+    bool isKeyPressed(int key) {
+        return std::find(std::begin(keyPresses), std::end(keyPresses), key) != std::end(keyPresses);
     }
     
     MurkaEventState transformedWith(MurkaPoint translatePosition, float scale) {

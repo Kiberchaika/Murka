@@ -86,6 +86,10 @@ public:
 		this->fov = fov;
 	}
 
+	float getFov() {
+		return fov;
+	}
+
 	void setRotation(MurkaPoint3D r) {
 		rotation = r;
 		updateTransformMatrix();

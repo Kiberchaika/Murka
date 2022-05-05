@@ -26,7 +26,7 @@ class TextField : public murka::View<TextField> {
         bool isPressed(MurkaEventState m) {
             if (fired) {
                 bool shouldResetFired = false;
-                for (auto &i: keys) { if (m.isKeyPressed(i)) shouldResetFired = true; }
+                for (auto &i: keys) { if (m.isKeyHeld(i)) shouldResetFired = true; }
                 if (shouldResetFired) {
                     fired = false;
                 }
@@ -35,7 +35,7 @@ class TextField : public murka::View<TextField> {
     
 			bool result = true;
 
-            for (auto &i: keys) { if (!m.isKeyPressed(i)) result = false; }
+            for (auto &i: keys) { if (!m.isKeyHeld(i)) result = false; }
             
 
             if ((std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - timeItFired).count() / 1000.0) < 0.5) {
