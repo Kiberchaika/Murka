@@ -642,11 +642,27 @@ public:
 
 //    bool shouldForceEditorToSelectAll = false;
         
-    TextField & controlling(void* dataToControl_) {
+    TextField & controlling(float* dataToControl_) {
         dataToControl = dataToControl_;
+        dataTypeName = typeid(float*).name();
+
         return *this;
     }
-    
+
+    TextField & controlling(double* dataToControl_) {
+        dataToControl = dataToControl_;
+        dataTypeName = typeid(double*).name();
+
+        return *this;
+    }
+
+    TextField & controlling(int* dataToControl_) {
+        dataToControl = dataToControl_;
+        dataTypeName = typeid(int*).name();
+
+        return *this;
+    }
+
     
     FontObject* font;
     
