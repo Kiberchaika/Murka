@@ -271,6 +271,7 @@ public:
         startFrame();
         
         restartContext();
+        clearEvents();
         
 		currentContext.mousePosition /= getScreenScale();
 
@@ -279,7 +280,7 @@ public:
     }
     
     void end() {
-        clearEvents();
+        
 
         disableViewportCrop = true;
         for (auto &overlay: overlays) {
