@@ -32,6 +32,9 @@ public:
     std::map<FontInfo, FontObject*>::iterator currentFont;
 
      FontObject* getCurrentFont() {
+        if (fonts.size() == 0) {
+            jassertfalse; // you need to load font
+        }
         return currentFont->second;
     }
 
@@ -52,39 +55,49 @@ public:
         }
     }
     
-    void setFont(std::string name, int size, MurkaRendererBase* renderer) {
+    bool setFont(std::string name, int size, MurkaRendererBase* renderer) {
         // todo: get scale from renderer
 
         FontInfo fontId = { name, size };
         auto font = fonts.find(fontId);
+        bool res = true;
+
+        if (font != fonts.end()) {
+            currentFont = font;
+        }
+        else {
+            auto font = new FontObject(); 
+            if (resourcesPath.length() == 0 || !font->load(resourcesPath + (resourcesPath[resourcesPath.length() - 1] == '/' ? "" : "/") + name, size, true, renderer)) {
+                jassertfalse; // can't load font
+                res = false;
+            }
+            fonts[fontId] = font;
+            currentFont = fonts.find(fontId);
+        }
+        return res;
+    }
+
+    bool setFont(std::string name, const char* data, int dataSize, int size, MurkaRendererBase* renderer) {
+        // todo: get scale from renderer
+
+        FontInfo fontId = { name, size };
+        auto font = fonts.find(fontId);
+        bool res = true;
+
         if (font != fonts.end()) {
             currentFont = font;
         }
         else {
             auto font = new FontObject();
-            font->load(resourcesPath +
-                (resourcesPath[resourcesPath.length() - 1] == '/' ? "" : "/") + name, size, true, renderer);
+            if (!font->load(data, dataSize, size, true, renderer)) {
+                jassertfalse; // can't load font
+                res = false;
+            }
             fonts[fontId] = font;
             currentFont = fonts.find(fontId);
         }
+        return res;
     }
-
-    void setFont(std::string name, const char* data, int dataSize, int size, MurkaRendererBase* renderer) {
-        // todo: get scale from renderer
-
-        FontInfo fontId = { name, size };
-        auto font = fonts.find(fontId);
-        if (font != fonts.end()) {
-            currentFont = font;
-        }
-        else {
-            auto font = new FontObject();
-            font->load(data, dataSize, size, true, renderer);
-            fonts[fontId] = font;
-            currentFont = fonts.find(fontId);
-        }
-    }
-
 
     float getFontLineHeight(FontObject* font) {
         if (font == NULL) {
