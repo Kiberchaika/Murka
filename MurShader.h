@@ -121,6 +121,8 @@ public:
 		else {
 			std::string err = shader->getLastError().toStdString();
 			isLoaded = false;
+
+			throw std::runtime_error("Error: " + err);
 		}
 	
 		return isLoaded;

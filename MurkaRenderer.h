@@ -386,6 +386,43 @@ class MurkaRenderer : public MurkaRendererBase {
 
 public:
 
+	std::string vertexShaderBase = R"(
+		varying vec2 vUv;
+		varying vec4 vCol;
+		uniform mat4 matrixModel;
+		uniform mat4 matrixView;
+		uniform mat4 matrixProj;
+		uniform vec4 color;
+		attribute vec3 position;
+		attribute vec2 uv;
+		attribute vec4 col;
+		
+		void main()
+		{
+			vUv = uv;
+			vCol = col;
+			vec4 pos = matrixProj * matrixView * matrixModel * vec4(position, 1.0); 
+			gl_Position =  pos; 
+		};
+	)";
+
+
+	std::string fragmentShaderBase = R"(
+		varying vec2 vUv;
+		varying vec4 vCol;
+		uniform sampler2D mainTexture;
+		uniform vec4 color;
+		uniform bool vflip;
+		uniform bool useTexture;
+
+		void main()
+		{
+			vec2 uv = vUv;
+			if (vflip) uv.y = 1 - uv.y;
+			gl_FragColor = color * vCol * (useTexture ? texture(mainTexture, uv) : vec4(1.0, 1.0, 1.0, 1.0));
+		};
+	)";
+
 	MurkaRenderer() {
 	}
 
@@ -426,42 +463,11 @@ public:
 	void setup() {
         // create main shader
         {
-			std::string vertexShader =
-				"varying vec2 vUv;\n"
-				"varying vec4 vCol;\n"
-				"uniform mat4 matrixModel;\n"
-                "uniform mat4 matrixView;\n"
-                "uniform mat4 matrixProj;\n"
-                "uniform vec4 color;\n"
-				"attribute vec3 position;\n"
-				"attribute vec2 uv;\n"
-				"attribute vec4 col;\n"
-				"\n"
-				"void main()\n"
-				"{\n"
-				"    vUv = uv;"
-				"    vCol = col;"
-				"    vec4 pos = matrixProj * matrixView * matrixModel * vec4(position, 1.0) ; \n"
-				"    gl_Position = pos; \n"
-				"}\n";
 
-			std::string fragmentShader =
-                "varying vec2 vUv;\n"
-				"varying vec4 vCol;\n"
-				"uniform sampler2D mainTexture;\n"
-				"uniform vec4 color;\n"
-				"uniform bool vflip;\n"
-				"uniform bool useTexture;\n"
-                "\n"
-                "void main()\n"
-                "{\n"
-				"    vec2 uv = vUv;"
-				"    if(vflip) uv.y = 1 - uv.y;"
-				"    gl_FragColor = color * vCol * (useTexture ? texture(mainTexture, uv) : vec4 (1.0, 1.0, 1.0, 1.0));\n"
-                "}\n";
+			
 
 			shaderMain.setOpenGLContext(openGLContext);
-			shaderMain.load(vertexShader, fragmentShader);
+			shaderMain.load(vertexShaderBase, fragmentShaderBase);
         }
 
         // vbo for primitives
@@ -672,20 +678,25 @@ public:
 	}
 
 	void popView() override {
-		MurkaShape v = viewportStack.back() / getScreenScale();
-		viewport(v);
-		//setupScreen();
-		viewportStack.pop_back();
+		if (viewportStack.size() > 0) {
+			MurkaShape v = viewportStack.back() / getScreenScale();
+			viewport(v);
+			//setupScreen();
+			viewportStack.pop_back();
 
-		// camera
-		currentModelMatrix = modelStack.back();
-		modelStack.pop_back();
+			// camera
+			currentModelMatrix = modelStack.back();
+			modelStack.pop_back();
 
-		currentViewMatrix = viewStack.back();
-		viewStack.pop_back();
+			currentViewMatrix = viewStack.back();
+			viewStack.pop_back();
 
-		currentProjectionMatrix = projectionStack.back();
-		projectionStack.pop_back();
+			currentProjectionMatrix = projectionStack.back();
+			projectionStack.pop_back();
+		}
+		else {
+			throw std::runtime_error("Check the count of push/popView calls");
+		}
 	}
 
 	void pushMatrix() override {
@@ -695,9 +706,14 @@ public:
 	}
 
 	void popMatrix() override {
-		currentMatrix = matrixStack.back();
-		matrixStack.pop_back();
-		updateStackedMatrix();
+		if (matrixStack.size() > 0) {
+			currentMatrix = matrixStack.back();
+			matrixStack.pop_back();
+			updateStackedMatrix();
+		}
+		else {
+			throw std::runtime_error("Check the count of push/popMatrix calls");
+		}
 	}
 
 	void translate(float x, float y, float z) override {
@@ -834,8 +850,13 @@ public:
 	};
 
 	void popStyle() override {
-		currentStyle = styleStack.back();
-		styleStack.pop_back();
+		if (styleStack.size() > 0) {
+			currentStyle = styleStack.back();
+			styleStack.pop_back();
+		}
+		else {
+			throw std::runtime_error("Check the count of push/popStyle calls");
+		}
 	};
 
 	// color operations
