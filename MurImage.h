@@ -56,11 +56,11 @@ public:
 		internal.getTexture().clear();
 	}
 
-	float getWidth() {
+	int getWidth() {
 		return internal.getWidth();
 	}
 
-	float getHeight() {
+	int getHeight() {
 		return internal.getHeight();
 	}
 };
@@ -224,11 +224,11 @@ public:
         }
 	}
 
-	float getWidth() const {
+	int getWidth() const {
 		return width;
 	}
 
-	float getHeight() const {
+	int getHeight() const {
 		return height;
 	}
 };

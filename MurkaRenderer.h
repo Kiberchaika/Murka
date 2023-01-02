@@ -1,9 +1,6 @@
 #pragma once
 
-#include "MurkaTypes.h"
 #include "MurkaRendererBase.h"
-#include "MurImage.h"
-#include "MurVbo.h"
 #include "MurMatrix.h"
 #include "MurShader.h"
 
@@ -89,12 +86,20 @@ public:
 		ofRenderer->unbind(img.internal.getTexture(), location);
 	}
 
-	void bind(const MurTexture & texture, int location = 0) override {
+	void bind(const MurTexture& texture, int location = 0) override {
 		ofRenderer->bind(texture.internal, location);
 	}
 
-	void unbind(const MurTexture & texture, int location = 0) override {
+	void unbind(const MurTexture& texture, int location = 0) override {
 		ofRenderer->unbind(texture.internal, location);
+	}
+
+	void bind(const MurFbo& fbo, int location = 0) override {
+		ofRenderer->bind(fbo.internal, location);
+	}
+
+	void unbind(const MurFbo& texture, int location = 0) override {
+		ofRenderer->unbind(fbo.internal, location);
 	}
 
 	// transformations
@@ -378,6 +383,7 @@ class MurkaRenderer : public MurkaRendererBase {
 	}
 
 	bool vflip = true;
+	bool useFbo = false;
 	bool useTexture = false;
 	bool useCamera = false;
 
@@ -630,7 +636,7 @@ public:
 		modelMatrix = modelMatrix * stackedMatrix * currentMatrix;
 
 		MurMatrix<float> vflipMatrix;
-		if (vflip) {
+		if (vflip && !useFbo) {
 			vflipMatrix.scale(juce::Vector3D<float>(1, -1, 1));
 		}
 
@@ -652,20 +658,41 @@ public:
 
 	void unbind(const MurImage & img, int location = 0) override {
 		useTexture = false;
-		openGLContext->extensions.glActiveTexture(GL_TEXTURE0 + location);
 		img.unbind();
 	}
 	
-	void bind(const MurTexture & texture, int location = 0) override {
+	void bind(const MurTexture& texture, int location = 0) override {
 		useTexture = true;
 		openGLContext->extensions.glActiveTexture(GL_TEXTURE0 + location);
 		texture.bind();
 	}
 
-	void unbind(const MurTexture & texture, int location = 0) override {
+	void unbind(const MurTexture& texture, int location = 0) override {
 		useTexture = false;
 		openGLContext->extensions.glActiveTexture(GL_TEXTURE0 + location);
 		texture.unbind();
+	}
+
+	void bind(const MurFbo& fbo, int location = 0) override {
+		useTexture = true;
+		openGLContext->extensions.glActiveTexture(GL_TEXTURE0 + location);
+		fbo.bind();
+	}
+
+	void unbind(const MurFbo& fbo, int location = 0) override {
+		useTexture = false;
+		openGLContext->extensions.glActiveTexture(GL_TEXTURE0 + location);
+		fbo.unbind();
+	}
+
+	void beginFbo(MurFbo& fbo) {
+		useFbo = true;
+		fbo.begin();
+	}
+
+	void endFbo(MurFbo& fbo) {
+		useFbo = false;
+		fbo.end();
 	}
 
 	void pushView() override {
@@ -866,50 +893,43 @@ public:
 	 
 	void setColor(int r, int g, int b) override {
 		currentStyle.color = MurkaColor(1.0 * r / 255, 1.0 * g / 255, 1.0 * b / 255);
-		glColor4f(currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
 	}; // 0-255
 
 	void setColor(int r, int g, int b, int a) override {
 		currentStyle.color = MurkaColor(1.0 * r / 255, 1.0 * g / 255, 1.0 * b / 255, 1.0 * a / 255);
-		glColor4f(currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
 	}; // 0-255
 
 	void setColor(const MurkaColor & color) override {
 		currentStyle.color = MurkaColor(color.r, color.g, color.b, color.a);
-		glColor4f(currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
 	};
 
 	void setColor(const MurkaColor & color, int _a) override {
 		currentStyle.color = MurkaColor(color.r, color.g, color.b, 1.0 * _a / 255);
-		glColor4f(currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
 	};
 
 	void setColor(int gray) override {
 		currentStyle.color = MurkaColor(1.0 * gray / 255, 1.0 * gray / 255, 1.0 * gray / 255);
-		glColor4f(currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
 	}; // 0 - 255
 
 	void setColor(int gray, int _a) override {
 		currentStyle.color = MurkaColor(1.0 * gray / 255, 1.0 * gray / 255, 1.0 * gray / 255, 1.0 * _a / 255);
-		glClearColor(currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
 	}; // 0-255
-
 
 	void clear() override {
 		glClearColor(currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	};
 
 	void clear(int r, int g, int b, int a = 0) override {
 		MurkaColor col(1.0 * r / 255, 1.0 * g / 255, 1.0 * b / 255, 1.0 * a / 255);
 		glClearColor(col.r, col.g, col.b, col.a);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	};
 
 	void clear(int gray, int a = 0) override {
 		MurkaColor col(1.0 * gray / 255, 1.0 * gray / 255, 1.0 * gray / 255, 1.0 * a / 255);
 		glClearColor(col.r, col.g, col.b, col.a);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	};
 
 	void drawRectangle(float x, float y, float w, float h) override {
@@ -921,7 +941,7 @@ public:
 		modelMatrix = modelMatrix * stackedMatrix * currentMatrix;
 
 		MurMatrix<float> vflipMatrix;
-		if (vflip) {
+		if (vflip && !useFbo) {
 			vflipMatrix.scale(juce::Vector3D<float>(1, -1, 1));
 		}
 
@@ -948,7 +968,7 @@ public:
 		modelMatrix = modelMatrix * stackedMatrix * currentMatrix;
 
 		MurMatrix<float> vflipMatrix;
-		if (vflip) {
+		if (vflip && !useFbo) {
 			vflipMatrix.scale(juce::Vector3D<float>(1, -1, 1));
 		}
 
@@ -979,7 +999,7 @@ public:
 		modelMatrix = modelMatrix * MurMatrix<float>::translation(juce::Vector3D<float>(x1, y1, 0.0));
 
 		MurMatrix<float> vflipMatrix;
-		if (vflip) {
+		if (vflip && !useFbo) {
 			vflipMatrix.scale(juce::Vector3D<float>(1, -1, 1));
 		}
 
@@ -1045,7 +1065,7 @@ public:
 		pushView();
 
 		MurMatrix<float> vflipMatrix;
-		if (vflip) {
+		if (vflip && !useFbo) {
 			vflipMatrix.scale(juce::Vector3D<float>(1, -1, 1));
 		}
 

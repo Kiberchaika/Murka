@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MurVbo.h"
+#include "MurFbo.h"
 #include "MurTexture.h"
 #include "MurImage.h"
 #include "MurkaTypes.h"
@@ -31,15 +32,17 @@ public:
     virtual void drawImage(const MurImage & image, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) = 0;
 	virtual void drawImage(const MurImage& image, float x, float y, float z, float w, float h) = 0;
 	virtual void drawImage(const MurImage& image, float x, float y, float w, float h) = 0;
-	virtual void drawImage(const MurImage & image, float x, float y) = 0;
+	virtual void drawImage(const MurImage& image, float x, float y) = 0;
 
     virtual void drawTexture(const MurTexture & texture, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) = 0;
     
     // Textures binding
 	virtual void bind(const MurImage & img, int location = 0) = 0;
 	virtual void unbind(const MurImage & img, int location = 0) = 0;
-	virtual void bind(const MurTexture & texture, int location = 0) = 0;
-	virtual void unbind(const MurTexture & texture, int location = 0) = 0;
+	virtual void bind(const MurTexture& texture, int location = 0) = 0;
+	virtual void unbind(const MurTexture& texture, int location = 0) = 0;
+	virtual void bind(const MurFbo& fbo, int location = 0) = 0;
+	virtual void unbind(const MurFbo& fbo, int location = 0) = 0;
 
     // transformations
     virtual void pushView() = 0;
