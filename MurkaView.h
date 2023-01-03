@@ -39,8 +39,11 @@ public:
         return *(static_cast<T*>(this));
     }
     
-    ~View() {
-        // TODO: delete children
+    virtual ~View()  {
+        // delete children
+        for (auto it = imChildren.begin(); it != imChildren.end(); it++) {
+            delete ((View*)it->second);
+        }
     }
     
     int hoverIndexCache = 0;

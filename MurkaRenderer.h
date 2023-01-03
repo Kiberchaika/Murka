@@ -448,6 +448,9 @@ public:
 	}
 
 	void closeOpenGLContext() {
+		if (shaderMain.isLoaded()) {
+			shaderMain.unload();
+		}
 	}
    
 	void bindShader(MurShader* shader) {
@@ -469,9 +472,6 @@ public:
 	void setup() {
         // create main shader
         {
-
-			
-
 			shaderMain.setOpenGLContext(openGLContext);
 			shaderMain.load(vertexShaderBase, fragmentShaderBase);
         }
