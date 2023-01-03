@@ -18,7 +18,20 @@ class MurkaRenderer;
 #if defined(MURKA_OF)
 
 class MurShader {
+	friend class MurkaRenderer;
+
 	ofShader shader;
+
+protected:
+	void bind() {
+		shader.begin();
+	}
+
+	void unbind() {
+		shader.end();
+	}
+
+
 public:
 	MurShader(){}
   
@@ -32,14 +45,6 @@ public:
 
 	void unload() {
 		shader.unload();
-	}
-
-	void bind() {
-		shader.begin();
-	}
-
-	void unbind() {
-		shader.end();
 	}
 
 	void setUniform1i(std::string name, int v) {
@@ -71,6 +76,8 @@ public:
 #elif defined(MURKA_JUCE)
 
 class MurShader {
+	friend class MurkaRenderer;
+
 	juce::OpenGLContext* openGLContext = nullptr;
 	juce::OpenGLShaderProgram* shader = nullptr;
 	std::map<std::string, juce::OpenGLShaderProgram::Uniform*> uniforms;
@@ -94,6 +101,10 @@ class MurShader {
 		return nullptr;
 	}
 
+protected:
+	void use() {
+		shader->use();
+	}
 
 public:
 	MurShader() {
@@ -152,10 +163,6 @@ public:
 		shader = nullptr;
 
 		bLoaded = false;
-	}
-
-	void use() {
-		shader->use();
 	}
 
 	void setUniform1i(std::string name, int v) {

@@ -56,6 +56,7 @@ public:
 namespace murka {
 
 class MurFbo {
+	friend class MurkaRenderer;
 
 	juce::OpenGLFrameBuffer openGLFrameBuffer;
 	GLuint textureID;
@@ -64,6 +65,23 @@ class MurFbo {
 
 	juce::OpenGLContext* openGLContext = nullptr;
 	bool bAllocated = false;
+
+protected:
+	void begin() {
+		openGLFrameBuffer.makeCurrentRenderingTarget();
+	}
+
+	void end() {
+		openGLFrameBuffer.releaseAsRenderingTarget();
+	}
+
+	void bind() const {
+		glBindTexture(GL_TEXTURE_2D, textureID);
+	}
+
+	void unbind() const {
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
 
 public:
 
@@ -77,7 +95,7 @@ public:
 		}
 	};
 
-	bool isAllocated() {
+	bool isAllocated() const {
 		return bAllocated;
 	}
 
@@ -93,22 +111,6 @@ public:
 			width = w;
 			height = h;
 		}
-	}
-
-	void begin() {
-		openGLFrameBuffer.makeCurrentRenderingTarget();
-	}
-
-	void end() {
-		openGLFrameBuffer.releaseAsRenderingTarget();
-	}
-
-	void bind() const {
-		glBindTexture(GL_TEXTURE_2D, textureID);
-	}
-
-	void unbind() const {
-		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
 	float getWidth() const {

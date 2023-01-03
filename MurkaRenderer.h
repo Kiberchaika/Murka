@@ -604,27 +604,32 @@ public:
 
 	// Object drawing
 	void drawImage(const MurImage& image, float x, float y) override {
-		bind(image, 0);
-		drawRectangle(x, y, image.getWidth(), image.getHeight());
-		unbind(image, 0);
+		if (image.isAllocated()) {
+			bind(image, 0);
+			drawRectangle(x, y, image.getWidth(), image.getHeight());
+			unbind(image, 0);
+		}
 	}
 
 	void drawImage(const MurImage& image, float x, float y, float w, float h) override {
-		bind(image, 0);
-		drawRectangle(x, y, w, h);
-		unbind(image, 0);
+		if (image.isAllocated()) {
+			bind(image, 0);
+			drawRectangle(x, y, w, h);
+			unbind(image, 0);
+		}
 	}
 
 	void drawImage(const MurImage& image, float x, float y, float z, float w, float h) override {
-		bind(image, 0);
-		drawRectangle(x, y, w, h);
-		unbind(image, 0);
+		if (image.isAllocated()) {
+			bind(image, 0);
+			drawRectangle(x, y, w, h);
+			unbind(image, 0);
+		}
 	}
 
 	void drawImage(const MurImage& image, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) override {
 		std::cout << "TODO" << std::endl;
 	}
-
 
 	void drawTexture(const MurTexture & texture, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) override {
 		std::cout << "TODO" << std::endl;
@@ -651,48 +656,64 @@ public:
 
 	// Textures binding
 	void bind(const MurImage & img, int location = 0) override {
-		useTexture = true;
-		openGLContext->extensions.glActiveTexture(GL_TEXTURE0 + location);
-		img.bind();
+		if (img.isAllocated()) {
+			useTexture = true;
+			openGLContext->extensions.glActiveTexture(GL_TEXTURE0 + location);
+			img.bind();
+		}
 	}
 
 	void unbind(const MurImage & img, int location = 0) override {
-		useTexture = false;
-		img.unbind();
+		if (img.isAllocated()) {
+			useTexture = false;
+			img.unbind();
+		}
 	}
 	
 	void bind(const MurTexture& texture, int location = 0) override {
-		useTexture = true;
-		openGLContext->extensions.glActiveTexture(GL_TEXTURE0 + location);
-		texture.bind();
+		if (texture.isAllocated()) {
+			useTexture = true;
+			openGLContext->extensions.glActiveTexture(GL_TEXTURE0 + location);
+			texture.bind();
+		}
 	}
 
 	void unbind(const MurTexture& texture, int location = 0) override {
-		useTexture = false;
-		openGLContext->extensions.glActiveTexture(GL_TEXTURE0 + location);
-		texture.unbind();
+		if (texture.isAllocated()) {
+			useTexture = false;
+			openGLContext->extensions.glActiveTexture(GL_TEXTURE0 + location);
+			texture.unbind();
+		}
 	}
 
 	void bind(const MurFbo& fbo, int location = 0) override {
-		useTexture = true;
-		openGLContext->extensions.glActiveTexture(GL_TEXTURE0 + location);
-		fbo.bind();
+		if (fbo.isAllocated()) {
+			useTexture = true;
+			openGLContext->extensions.glActiveTexture(GL_TEXTURE0 + location);
+			fbo.bind();
+		}
 	}
 
 	void unbind(const MurFbo& fbo, int location = 0) override {
-		useTexture = false;
-		openGLContext->extensions.glActiveTexture(GL_TEXTURE0 + location);
-		fbo.unbind();
+		if (fbo.isAllocated()) {
+			useTexture = false;
+			openGLContext->extensions.glActiveTexture(GL_TEXTURE0 + location);
+			fbo.unbind();
+		}
 	}
 
 	void beginFbo(MurFbo& fbo) {
-		useFbo = true;
-		fbo.begin();
+		if (fbo.isAllocated()) {
+			useFbo = true;
+			fbo.begin();
+		}
 	}
 
 	void endFbo(MurFbo& fbo) {
-		useFbo = false;
-		fbo.end();
+		if (fbo.isAllocated()) {
+			useFbo = false;
+			fbo.end();
+		}
 	}
 
 	void pushView() override {

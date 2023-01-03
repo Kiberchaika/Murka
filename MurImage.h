@@ -13,6 +13,15 @@
 namespace murka {
 
 class MurImage {
+	friend class MurkaRenderer;
+
+protected:
+	void bind() const {
+	}
+
+	void unbind() const {
+	}
+
 public:
 	MurImage() {
 
@@ -72,6 +81,7 @@ public:
 namespace murka {
 
 class MurImage {
+	friend class MurkaRenderer;
 
 	GLuint textureID;
 	int width = 0, height = 0;
@@ -105,6 +115,16 @@ class MurImage {
 
 		update();
 	}
+
+protected:
+	void bind() const {
+		glBindTexture(gltype, textureID);
+	}
+
+	void unbind() const {
+		glBindTexture(gltype, 0);
+	}
+
 
 public:
 
@@ -166,14 +186,6 @@ public:
 		loadInternal(image);
 
 		return true;
-	}
-
-	void bind() const {
-		glBindTexture(gltype, textureID);
-	}
-
-	void unbind() const {
-		glBindTexture(gltype, 0);
 	}
 
 	void setColor(int x, int y, const MurkaColor col) {
