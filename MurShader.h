@@ -76,10 +76,10 @@ class MurShader {
 	std::map<std::string, juce::OpenGLShaderProgram::Uniform*> uniforms;
 	std::map<std::string, int> attributes;
 	
-	bool isLoaded = false;
+	bool bLoaded = false;
 
 	juce::OpenGLShaderProgram::Uniform* getUniformByName(std::string name) {
-		if (isLoaded) {
+		if (bLoaded) {
 			if (uniforms.find(name) != uniforms.end()) {
 				return uniforms[name];
 			}
@@ -116,20 +116,20 @@ public:
 			shader->addFragmentShader(juce::OpenGLHelpers::translateFragmentShaderToV3(frag)) &&
 			shader->link()
 			) {
-			isLoaded = true;
+			bLoaded = true;
 		}
 		else {
 			std::string err = shader->getLastError().toStdString();
-			isLoaded = false;
+			bLoaded = false;
 
 			throw std::runtime_error("Error: " + err);
 		}
 	
-		return isLoaded;
+		return bLoaded;
 	}
 
 	int getAttributeLocation(std::string name) {
-		if (isLoaded) {
+		if (bLoaded) {
 			if (attributes.find(name) != attributes.end()) {
 				return attributes[name];
 			}
@@ -151,7 +151,7 @@ public:
 		delete shader;
 		shader = nullptr;
 
-		isLoaded = false;
+		bLoaded = false;
 	}
 
 	void use() {
@@ -198,6 +198,10 @@ public:
 		if (uniform) {
 			uniform->setMatrix4((GLfloat*)&(m.mat[0]), 1, false);
 		}
+	}
+
+	bool isLoaded() {
+		return bLoaded;
 	}
 
 };

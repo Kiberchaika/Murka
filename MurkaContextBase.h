@@ -6,19 +6,16 @@
 
 namespace murka {
 
-class MurkaContextBase: public MurkaEventState, public MurkaRenderer {
+class MurkaContextBase: public MurkaEventState {
 public:
     MurkaOverlayHolder* overlayHolder;
     MurkaRenderer* pointerToRenderer;
     
     // Assets access functions
-    
     FontObject* getCurrentFont() const {
         return ((MurkaAssets*)pointerToRenderer)->getCurrentFont();
     }
 
-    //
-    
     MurkaShape getParentContextShape() const {
         return getParentContextShapeInternal();
     }
@@ -50,7 +47,6 @@ public:
     
     std::function<int()> iterateHoverIndex = []()->int {return 0;};
     std::function<int()> getMaxHoverIndex = []()->int {return 0;};
-
 };
 
 }
