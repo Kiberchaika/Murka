@@ -23,7 +23,7 @@ public:
             onClickCallbackPosition(*this, {25, 11});
         }
         
-        auto font = c.getCurrentFont();
+        auto font = m.getCurrentFont();
         
         if (alignment == TEXT_LEFT) {
             font->drawString(label, 5, 0);

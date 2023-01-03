@@ -65,8 +65,7 @@ public:
     
     //////////////////////////////////////////////////////////////////
     // NEW API 1.0
-    
-    
+
     std::function<void(Murka &)>* castDeferredViewDrawFunction(void* function) {
         // We need this to use the draw functions for widgets that are anonymously stored inside
         // other widgets.
@@ -319,7 +318,6 @@ public:
 //        pointerToRenderer = this; // Switching this MurkaContext's Renderer base class for a pointer to this renderer
 
         
-        currentContext.pointerToRenderer = this;
         currentContext.linkedView = this;
         currentContext.linkedView = this;
         currentContext.overlayHolder = this;

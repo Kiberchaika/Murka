@@ -19,7 +19,7 @@ public:
         // Your drawing and interaction code goes here.
         // Don't forget that all of this executes at each frame for each
         // widget that is drawn on screen.
-        auto font = m.currentContext.getCurrentFont();
+        auto font = m.getCurrentFont();
         
         MurkaColor fgColor = customColor ? color : m.getColor();
         m.setColor(fgColor);
@@ -61,7 +61,7 @@ public:
 
 		MurkaColor fgColor = m.getColor();
 
-        float pushed = 0.2 - (m.currentContext.getRunningTime() - lastTimeClicked);
+        float pushed = 0.2 - (m.getElapsedTime() - lastTimeClicked);
         if (pushed < 0) pushed = 0;
         pushed /= 0.2;
 
@@ -78,12 +78,12 @@ public:
         
         m.enableFill();
         
-        auto font = m.currentContext.getCurrentFont();
+        auto font = m.getCurrentFont();
         font->drawString(label, 30, 0);
         
         if (inside && m.currentContext.mouseDownPressed[0]) {
             *booleanToControl = !*booleanToControl;
-            lastTimeClicked = m.currentContext.getRunningTime();
+            lastTimeClicked = m.getElapsedTime();
 			results = booleanToControl;
 		}
 		else results = false;
@@ -128,7 +128,7 @@ public:
 
 		MurkaColor fgColor = m.getColor();
 
-		float pushed = 0.2 - (m.currentContext.getRunningTime() - lastTimeClicked);
+		float pushed = 0.2 - (m.getElapsedTime() - lastTimeClicked);
 		if (pushed < 0) pushed = 0;
 		pushed /= 0.2;
             
@@ -151,13 +151,13 @@ public:
 			}
 			m.enableFill();
 
-			auto font = m.currentContext.getCurrentFont();
+			auto font = m.getCurrentFont();
 			font->drawString(labels[i], 30, 10);
 
 			if (rowHover * inside && m.currentContext.mouseDownPressed[0]) {
 				*dataToControl = i;
 				results = true;
-				lastTimeClicked = m.currentContext.getRunningTime();
+				lastTimeClicked = m.getElapsedTime();
 			}
 
 			m.popStyle();
@@ -331,7 +331,7 @@ public:
         }
         
         m.setColor(255);
-        auto font = m.currentContext.getCurrentFont();
+        auto font = m.getCurrentFont();
         font->drawString(label, 0, 0);
         
         // Drawing symbols to show that we're going to resize this widget
@@ -401,13 +401,13 @@ public:
 
          if ((m.currentContext.mouseDownPressed[0]) && (m.currentContext.isHovered())) {
 			 pressed = true;
-            lastTimeClicked = m.currentContext.getRunningTime();
+            lastTimeClicked = m.getElapsedTime();
          } else pressed = false;
         
-         auto font = m.currentContext.getCurrentFont();
+         auto font = m.getCurrentFont();
         
         
-             float pushed = 0.2 - (m.currentContext.getRunningTime() - lastTimeClicked);
+             float pushed = 0.2 - (m.getElapsedTime() - lastTimeClicked);
              if (pushed < 0) pushed = 0;
              pushed /= 0.2;
          
@@ -479,7 +479,7 @@ public:
             *(dataToControl) = newValue;
         }
         
-        auto font = m.currentContext.getCurrentFont();
+        auto font = m.getCurrentFont();
         
 
         

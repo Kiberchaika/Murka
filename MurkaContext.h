@@ -84,8 +84,6 @@ public:
     std::function<void(ViewBase*)> pushContextInternal = [](ViewBase* v) {};
     std::function<void()> popContextInternal = []() {};
 
-    double getRunningTime()  {return pointerToRenderer->getElapsedTime();}
-
 private:
     int imCounter = 0; // the counter that we use to distinguish new widgets from the ones we
     // want to reuse in IM mode.
