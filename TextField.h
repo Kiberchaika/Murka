@@ -135,38 +135,38 @@ public:
         MurkaColor c = m.getColor();
         
         if (drawBounds) {
-            ctx.pointerToRenderer->pushStyle();
-            ctx.pointerToRenderer->enableFill();
-            ctx.pointerToRenderer->setColor(widgetBgColor);
-            ctx.pointerToRenderer->drawRectangle(0, 0, ctx.getSize().x, ctx.getSize().y);
+            m.pushStyle();
+            m.enableFill();
+            m.setColor(widgetBgColor);
+            m.drawRectangle(0, 0, ctx.getSize().x, ctx.getSize().y);
             
-            ctx.pointerToRenderer->disableFill();
-            ctx.pointerToRenderer->setColor(inside ? widgetFgColor : widgetFgColor / 2);
-            if (activated) ctx.pointerToRenderer->setColor(widgetFgColor * 1.2);
-            ctx.pointerToRenderer->drawRectangle(0, 0, ctx.getSize().x, ctx.getSize().y);
-            ctx.pointerToRenderer->popStyle();
+            m.disableFill();
+            m.setColor(inside ? widgetFgColor : widgetFgColor / 2);
+            if (activated) m.setColor(widgetFgColor * 1.2);
+            m.drawRectangle(0, 0, ctx.getSize().x, ctx.getSize().y);
+            m.popStyle();
         }
         
         if (isSelectingTextNow()) {
 
             auto selectionShape = returnSelectionVisualShape();
-            MurkaColor selectionColor = (ctx.pointerToRenderer->getColor() * 0.7 +
-                                         ctx.pointerToRenderer->getColor() * 0.7) * 255;
-            ctx.pointerToRenderer->setColor(100, 100, 100, 200);
-            ctx.pointerToRenderer->drawRectangle(10 - cameraPanInsideWidget + selectionShape.x(), 4, selectionShape.width(), ctx.getSize().y - 8);
+            MurkaColor selectionColor = (m.getColor() * 0.7 +
+                                         m.getColor() * 0.7) * 255;
+            m.setColor(100, 100, 100, 200);
+            m.drawRectangle(10 - cameraPanInsideWidget + selectionShape.x(), 4, selectionShape.width(), ctx.getSize().y - 8);
         }
         
         recalcGlyphLengths(displayString, &ctx);
         
         float glyphXCoordinate = 10;
-        ctx.pointerToRenderer->setColor(widgetFgColor);
+        m.setColor(widgetFgColor);
         font->drawString(displayString, 10 - cameraPanInsideWidget, ctx.getSize().y / 2 - font->getLineHeight() / 2);
         
         if (displayString.size() == 0) {
             // drawing hint
-            MurkaColor hintColor = ctx.pointerToRenderer->getColor() * 0.5 +
-                                   ctx.pointerToRenderer->getColor() * 0.5;
-            ctx.pointerToRenderer->setColor(hintColor * 255);
+            MurkaColor hintColor = m.getColor() * 0.5 +
+                                   m.getColor() * 0.5;
+            m.setColor(hintColor * 255);
             font->drawString(hint, 10, ctx.getSize().y / 2 - font->getLineHeight() / 2);
         }
         
@@ -190,7 +190,7 @@ public:
             
             MurkaShape currentSymbolShape = {glyphXCoordinate, 0, currentGlyphLengths[i], ctx.getSize().y};
             
-            bool safeToUseMouseClickEventsCauseEnoughTimeSinceDoubleClickPassed = ((ctx.pointerToRenderer->getElapsedTime() - lastLeftMousebuttonClicktime) > 0.2);
+            bool safeToUseMouseClickEventsCauseEnoughTimeSinceDoubleClickPassed = ((m.getElapsedTime() - lastLeftMousebuttonClicktime) > 0.2);
             
             // Setting cursor position inside the string if pressed inside it
             if ((insideGlyph) && (ctx.mouseDownPressed[0])) {
@@ -258,10 +258,10 @@ public:
 
         // drawing cursor
         if (activated && !isSelectingTextNow()) {
-            float timeMod = ctx.getRunningTime() / 1.0 - int(ctx.getRunningTime() / 1.0);
-            ctx.pointerToRenderer->setColor(200);
+            float timeMod = m.getElapsedTime() / 1.0 - int(m.getElapsedTime() / 1.0);
+            m.setColor(200);
             if (timeMod > 0.5)
-                ctx.pointerToRenderer->drawLine(cursorPositionInPixels - cameraPanInsideWidget, 3,
+                m.drawLine(cursorPositionInPixels - cameraPanInsideWidget, 3,
                            cursorPositionInPixels - cameraPanInsideWidget, 30);
         }
 
@@ -285,7 +285,7 @@ public:
                 
                 auto substr = displayString.substr(selectionSymbolsRange.first, selectionSymbolsRange.second - selectionSymbolsRange.first);
                 
-				ctx.pointerToRenderer->setClipboardString(substr);
+				m.setClipboardString(substr);
 
                 copyText.fire();
             } else
@@ -297,7 +297,7 @@ public:
                 if (isSelectingTextNow()) { // if we select now, backspace just deletes
                     auto substr = displayString.substr(selectionSymbolsRange.first, selectionSymbolsRange.second - selectionSymbolsRange.first);
                     
-					ctx.pointerToRenderer->setClipboardString(substr);
+					m.setClipboardString(substr);
                     
                     displayString.replace(selectionSymbolsRange.first, selectionSymbolsRange.second - selectionSymbolsRange.first, "");
                     cursorPosition = selectionSymbolsRange.first;
@@ -317,8 +317,8 @@ public:
                     cursorPosition = selectionSymbolsRange.first;
                 }
 				
-                displayString.insert(cursorPosition, ctx.pointerToRenderer->getClipboardString());
-                cursorPosition += ctx.pointerToRenderer->getClipboardString().length();
+                displayString.insert(cursorPosition, m.getClipboardString());
+                cursorPosition += m.getClipboardString().length();
                 
                 pasteText.fire();
             } else
