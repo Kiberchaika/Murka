@@ -18,7 +18,6 @@ public:
     // This variable is needed to support immediate mode widgets resizing themselves while also receiving sizes from outside.
     MurkaShape latestShapeThatCameFromOutside;
     
-    
     virtual bool wantsClicks() { return true; } // override this if you want to signal to other widgets that you don't want clicks
     
 public:
@@ -158,7 +157,6 @@ public:
     }
      */
     
-    
     struct Parameters {};
     struct Results {};
     
@@ -171,9 +169,7 @@ public:
         auto idTuple = std::make_tuple(index, typeid(T).name());
         if (parentWidget->imChildren.find(idTuple) != parentWidget->imChildren.end()) {
             // the widget exists
-            
-//            ofLog() << "returning the object";
-            
+                        
             auto imChild = ((T*)parentWidget->imChildren[idTuple]);
             auto widget = imChild;
             
@@ -187,15 +183,12 @@ public:
             // Updating children bounds
             if (parentWidget->childrenBounds.position.x > widget->shape.position.x) {
                 parentWidget->childrenBounds.position.x = widget->shape.position.x;
-//                ofLog() << "updated cb x (2) to " << shape.position.x;
             }
             if (parentWidget->childrenBounds.position.y > widget->shape.position.y) {
                 parentWidget->childrenBounds.position.y = widget->shape.position.y;
-//                ofLog() << "updated cb y (2) to " << shape.position.y;
             }
             if ((parentWidget->childrenBounds.size.x + parentWidget->childrenBounds.position.x) < (widget->shape.position.x + widget->shape.size.x)) {
                 parentWidget->childrenBounds.size.x = widget->shape.position.x + widget->shape.size.x - parentWidget->childrenBounds.position.x;
-//                ofLog() << "updated cb sx (2) to " << parentWidget->childrenBounds.size.x;
             }
             
             if ((parentWidget->childrenBounds.size.y + parentWidget->childrenBounds.position.y) < widget->shape.position.y + widget->shape.size.y) {
@@ -210,9 +203,9 @@ public:
             newWidget->shape = shape;
             newWidget->latestShapeThatCameFromOutside = shape;
             
-            
-            std::cout << "creating a new object";
-            
+#ifdef MURKA_DEBUG
+            std::cout << "creating a new object" << std::endl;
+#endif
             int z = parentWidget->imChildren.size();
             
             if (z == 0) {
@@ -227,15 +220,12 @@ public:
             // basically informing parent widget of how much space does its children occupy)
             if (parentWidget->childrenBounds.position.x > shape.position.x) {
                 parentWidget->childrenBounds.position.x = shape.position.x;
-//                ofLog() << "updated cb x (1) to " << shape.position.x;
             }
             if (parentWidget->childrenBounds.position.y > shape.position.y) {
                 parentWidget->childrenBounds.position.y = shape.position.y;
-//                ofLog() << "updated cb y (1) to " << shape.position.y;
             }
             if ((parentWidget->childrenBounds.size.x + parentWidget->childrenBounds.position.x) < (shape.position.x + shape.size.x)) {
                 parentWidget->childrenBounds.size.x = shape.position.x + shape.size.x - parentWidget->childrenBounds.position.x;
-//                ofLog() << "updated cb sx (2) to " << parentWidget->childrenBounds.size.x;
             }
             
             if ((parentWidget->childrenBounds.size.y + parentWidget->childrenBounds.position.y) < (shape.position.y + shape.size.y)) {
@@ -245,11 +235,6 @@ public:
             return newWidget;
         }
     }
-    
-    
     MurkaContext latestContext;
-
 };
-
- 
 }

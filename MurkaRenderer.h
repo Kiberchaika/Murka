@@ -628,11 +628,15 @@ public:
 	}
 
 	void drawImage(const MurImage& image, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) override {
+#ifdef MURKA_DEBUG
 		std::cout << "TODO" << std::endl;
+#endif
 	}
 
 	void drawTexture(const MurTexture & texture, float x, float y, float z, float w, float h, float sx, float sy, float sw, float sh) override {
+#ifdef MURKA_DEBUG
 		std::cout << "TODO" << std::endl;
+#endif
 	}
 	
 	void drawVbo(const MurVbo & vbo, GLuint drawMode, int first, int total) override {

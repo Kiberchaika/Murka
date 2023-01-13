@@ -53,14 +53,15 @@ public:
         } else {
             // not found, creating
             animationsMap[AIndex + 1] = double(X);
+#ifdef MURKA_DEBUG
             std::cout << "c!...";
+#endif
         }
         
         AIndex++;
         return animationsMap[AIndex];
     }
      */
-
 };
 
 }
