@@ -409,7 +409,7 @@ public:
 			vCol = col;
 			vec4 pos = matrixProj * matrixView * matrixModel * vec4(position, 1.0); 
 			gl_Position =  pos; 
-		};
+		}
 	)";
 
 
@@ -426,7 +426,7 @@ public:
 			vec2 uv = vUv;
 			if (vflip) uv.y = 1 - uv.y;
 			gl_FragColor = color * vCol * (useTexture ? texture(mainTexture, uv) : vec4(1.0, 1.0, 1.0, 1.0));
-		};
+		}
 	)";
 
 	MurkaRenderer() {
