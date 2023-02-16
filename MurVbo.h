@@ -92,6 +92,14 @@ class MurVbo {
 	bool loaded = false;
     bool inited = false;
 
+	void glBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid* data, int usage) // fast version
+	{
+		openGLContext->extensions.glBufferData(GL_ARRAY_BUFFER, size * sizeof(VboData), 0, usage);
+		GLvoid* ptr = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+		memcpy(ptr, vboData.data(), size * sizeof(VboData));
+		glUnmapBuffer(GL_ARRAY_BUFFER);
+	}
+
 public:
 	MurVbo() {
 
@@ -227,14 +235,18 @@ public:
 			openGLContext->extensions.glVertexAttribPointer(attribLocationCol, 4, GL_FLOAT, GL_FALSE, sizeof(VboData), (GLvoid*)offsetof(VboData, col));
 			openGLContext->extensions.glEnableVertexAttribArray(attribLocationCol);
 
+			glBufferSubData(GL_ARRAY_BUFFER, 0, size * sizeof(VboData), vboData.data(), usage);
+			/*
 			openGLContext->extensions.glBufferData(GL_ARRAY_BUFFER, size * sizeof(VboData), 0, usage);
 			openGLContext->extensions.glBufferSubData(GL_ARRAY_BUFFER, 0, size * sizeof(VboData), vboData.data());
+			*/
 
             needToRecreate = false;
 			loaded = true;
 		}
         else {
-            openGLContext->extensions.glBufferSubData(GL_ARRAY_BUFFER, 0, size * sizeof(VboData), vboData.data());
+			glBufferSubData(GL_ARRAY_BUFFER, 0, size * sizeof(VboData), vboData.data(), usage);
+            //openGLContext->extensions.glBufferSubData(GL_ARRAY_BUFFER, 0, size * sizeof(VboData), vboData.data());
 		}
 
 		openGLContext->extensions.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
