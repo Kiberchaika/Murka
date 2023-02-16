@@ -360,19 +360,19 @@ class MurkaRenderer : public MurkaRendererBase {
 	MurVbo vboCircle;
 
 	void recreateCircleVbo() {
-		std::vector<MurkaPoint3D> verts;
+		std::vector<MurkaPoint3D> verts(circleResolution);
 		for (int i = 0; i < circleResolution; i++)
 		{
 			float theta = 2.0f * juce::MathConstants<float>::pi * float(i) / float(circleResolution);
 			float x = 1.0 * cosf(theta);
 			float y = 1.0 * sinf(theta);
-			verts.push_back(MurkaPoint3D(x, y, 0));
+			verts[i] = (MurkaPoint3D(x, y, 0));
 		}
 
 		vboCircle.setOpenGLContext(openGLContext);
 		vboCircle.setup();
 		vboCircle.setVertexData(verts.data(), verts.size());
-		vboCircle.update(GL_STREAM_DRAW, shaderMain.getAttributeLocation("position"), shaderMain.getAttributeLocation("uv"), shaderMain.getAttributeLocation("col"));
+		vboCircle.update(GL_STREAM_DRAW, currentShader->attributePosition, currentShader->attributeUv, currentShader->attributeCol);
 	}
 
 	void updateStackedMatrix() {
@@ -474,6 +474,7 @@ public:
         {
 			shaderMain.setOpenGLContext(openGLContext);
 			shaderMain.load(vertexShaderBase, fragmentShaderBase);
+			bindShader(&shaderMain);
         }
 
         // vbo for primitives
@@ -649,12 +650,12 @@ public:
 			vflipMatrix.scale(juce::Vector3D<float>(1, -1, 1));
 		}
 
-		currentShader->setUniformMatrix4f("matrixModel", modelMatrix * currentModelMatrix);
-		currentShader->setUniformMatrix4f("matrixView", currentViewMatrix);
-		currentShader->setUniformMatrix4f("matrixProj", vflipMatrix * currentProjectionMatrix);
+		currentShader->setUniformMatrix4f(currentShader->uniformMatrixModel, modelMatrix * currentModelMatrix);
+		currentShader->setUniformMatrix4f(currentShader->uniformMatrixView, currentViewMatrix);
+		currentShader->setUniformMatrix4f(currentShader->uniformMatrixProj, vflipMatrix * currentProjectionMatrix);
 		
-		currentShader->setUniform1i("useTexture", useTexture);
-		currentShader->setUniform4f("color", currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
+		currentShader->setUniform1i(currentShader->uniformUseTexture, useTexture);
+		currentShader->setUniform4f(currentShader->uniformColor, currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
 		vbo.internalDraw(drawMode, first, total);
 	}
 
@@ -890,7 +891,7 @@ public:
 	}
 
 	void updateVbo(MurVbo& vbo) override {
-		vbo.update(GL_STATIC_DRAW, shaderMain.getAttributeLocation("position"), shaderMain.getAttributeLocation("uv"), shaderMain.getAttributeLocation("col"));
+		vbo.update(GL_STATIC_DRAW, currentShader->attributePosition, currentShader->attributeUv, currentShader->attributeCol);
 	}
 
 	void disableAlphaBlending() override {
@@ -970,13 +971,13 @@ public:
 			vflipMatrix.scale(juce::Vector3D<float>(1, -1, 1));
 		}
 
-		currentShader->setUniformMatrix4f("matrixModel", modelMatrix * currentModelMatrix);
-		currentShader->setUniformMatrix4f("matrixView", currentViewMatrix);
-		currentShader->setUniformMatrix4f("matrixProj", vflipMatrix * currentProjectionMatrix);
+		currentShader->setUniformMatrix4f(currentShader->uniformMatrixModel, modelMatrix * currentModelMatrix);
+		currentShader->setUniformMatrix4f(currentShader->uniformMatrixView, currentViewMatrix);
+		currentShader->setUniformMatrix4f(currentShader->uniformMatrixProj, vflipMatrix * currentProjectionMatrix);
 
-		currentShader->setUniform1i("useTexture", useTexture);
-		currentShader->setUniform1i("vflip", useCamera);
-		currentShader->setUniform4f("color", currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
+		currentShader->setUniform1i(currentShader->uniformUseTexture, useTexture);
+		currentShader->setUniform1i(currentShader->uniformVflip, useCamera);
+		currentShader->setUniform4f(currentShader->uniformColor, currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
 		updateVbo(vboRect);
 		vboRect.internalDraw(currentStyle.fill ? GL_TRIANGLE_FAN : GL_LINE_LOOP, 0, 4);
 	}
@@ -997,13 +998,13 @@ public:
 			vflipMatrix.scale(juce::Vector3D<float>(1, -1, 1));
 		}
 
-		currentShader->setUniformMatrix4f("matrixModel", modelMatrix * currentModelMatrix);
-		currentShader->setUniformMatrix4f("matrixView", currentViewMatrix);
-		currentShader->setUniformMatrix4f("matrixProj", vflipMatrix * currentProjectionMatrix);
+		currentShader->setUniformMatrix4f(currentShader->uniformMatrixModel, modelMatrix * currentModelMatrix);
+		currentShader->setUniformMatrix4f(currentShader->uniformMatrixView, currentViewMatrix);
+		currentShader->setUniformMatrix4f(currentShader->uniformMatrixProj, vflipMatrix * currentProjectionMatrix);
 
-		currentShader->setUniform1i("useTexture", useTexture);
-		currentShader->setUniform1i("vflip", useCamera);
-		currentShader->setUniform4f("color", currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
+		currentShader->setUniform1i(currentShader->uniformUseTexture, useTexture);
+		currentShader->setUniform1i(currentShader->uniformVflip, useCamera);
+		currentShader->setUniform4f(currentShader->uniformColor, currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
 
 		vboCircle.internalDraw(currentStyle.fill ? GL_TRIANGLE_FAN : GL_LINE_LOOP, 0, circleResolution);
 	}
@@ -1028,13 +1029,13 @@ public:
 			vflipMatrix.scale(juce::Vector3D<float>(1, -1, 1));
 		}
 
-		currentShader->setUniformMatrix4f("matrixModel", modelMatrix * currentModelMatrix);
-		currentShader->setUniformMatrix4f("matrixView", currentViewMatrix);
-		currentShader->setUniformMatrix4f("matrixProj", vflipMatrix * currentProjectionMatrix);
+		currentShader->setUniformMatrix4f(currentShader->uniformMatrixModel, modelMatrix * currentModelMatrix);
+		currentShader->setUniformMatrix4f(currentShader->uniformMatrixView, currentViewMatrix);
+		currentShader->setUniformMatrix4f(currentShader->uniformMatrixProj, vflipMatrix * currentProjectionMatrix);
 
-		currentShader->setUniform1i("useTexture", useTexture);
-		currentShader->setUniform1i("vflip", useCamera);
-		currentShader->setUniform4f("color", currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
+		currentShader->setUniform1i(currentShader->uniformUseTexture, useTexture);
+		currentShader->setUniform1i(currentShader->uniformVflip, useCamera);
+		currentShader->setUniform4f(currentShader->uniformColor, currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
 
 		vboLine.internalDraw(GL_TRIANGLE_FAN, 0, 4);
 	}
@@ -1044,9 +1045,9 @@ public:
 	}
 
 	void drawLine(float x1, float y1, float x2, float y2) override {
-		std::vector<MurkaPoint3D> verts;
-		verts.push_back(MurkaPoint3D(x1, y1, 0));
-		verts.push_back(MurkaPoint3D(x2, y2, 0));
+		std::vector<MurkaPoint3D> verts(2);
+		verts[0] = (MurkaPoint3D(x1, y1, 0));
+		verts[1] = (MurkaPoint3D(x2, y2, 0));
 		vboLineOld.setVertexData(verts.data(), verts.size());
 
 		updateVbo(vboLineOld);
