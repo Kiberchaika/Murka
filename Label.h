@@ -36,7 +36,7 @@ public:
             float textX = (shape.size.x - 10) - font->getStringBoundingBox(label, 0, 0).width;
             font->drawString(label, textX, 0);
         }
-   };
+   }
    
     bool isHovered = false;
  

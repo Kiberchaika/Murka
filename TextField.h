@@ -511,7 +511,7 @@ public:
         
         // Deactivating the widget and updating the data
         
-        results = false;
+        editingFinished = false;
         
         if ((activated) && (!alwaysActivated))
         if ((enterPressed) || (ctx.mouseDownPressed[0] && !inside)) {
@@ -522,13 +522,13 @@ public:
             
             updateExternalData(dataToControl, clampNumber);
             
-            results = true;
+            editingFinished = true;
         }
 
 //            drawWidget<Label>(ctx, {""});
     };
     
-    bool results = false;
+    bool editingFinished = false;
     
     void updateExternalData(void* dataToControl, bool clamp = false) {
 #ifdef MURKA_DEBUG
@@ -689,11 +689,6 @@ public:
     }
     
     FontObject* font;
-    
-    // The results type, you also need to define it even if it's nothing.
-    typedef bool Results;
-    
-    // Everything else is for handling the internal state
     
     float cameraPanInsideWidget = 0;
 

@@ -257,7 +257,7 @@ public:
 				//                         ofLog() << m.currentContext.currentViewShape.position.x;
 				for (int i = 0; i < options.size(); i++) {
 					std::string buttonLabel = options[i];
-					auto el = m.draw<DropdownElementButton>({ contextPosition.x, contextPosition.y + 30 * i, 150, 30 });
+					auto el = m.prepare<DropdownElementButton>({ contextPosition.x, contextPosition.y + 30 * i, 150, 30 });
 					el.label = buttonLabel;
                     el.commit();
 					if (el.pressed) {

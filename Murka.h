@@ -10,75 +10,14 @@
 #include "MurkaLinearLayoutGenerator.h"
 #include "MurkaRenderer.h"
 #include "MurkaChildContextHolder.h"
-/*
- 
- // Custom widget template:
- 
- #pragma once
- #include "Murka.h"
 
- namespace murka {
-
- class Label : public View_NEW<Label> {
- public:
-     
-     void internalDraw(const MurkaContextBase & c)  {
-         
-         bool inside = c.isHovered() * !areChildrenHovered(c);
-     }
- 
-     MURKA_CALLBACK(Label, // class name
-                    onHoverChangeCallback, // callback variable name
-                    onHoverChange) // callback setter
-     
-     MURKA_CALLBACK(Label,
-                    onClickCallback,
-                    onClick)
-     
-     MURKA_CALLBACK_1ARGUMENT(Label, // class name
-                              onClickCallbackPosition, // callback variable name
-                              onClickPosition, // callback setter
-                              MurkaPoint) // callback argument type
-     
-     MURKA_PARAMETER(Label, // class name
-                     TextAlignment, // parameter type
-                     alignment, // parameter variable name
-                     withAlignment, // setter
-                     TEXT_LEFT) // default
-     
-     MURKA_PARAMETER(Label, // class name
-                     std::string, // parameter type
-                     label, // parameter variable name
-                     text, // setter
-                     "") // default
-}
- 
- */
 
 namespace murka {
 
 class Murka : public View<Murka>, public MurkaInputEventsRegister, public MurkaRenderer, public MurkaOverlayHolder, public MurkaChildContextHolder {
-public:
-	Murka() {
-        setupEvents();
-	}
-    
-    //////////////////////////////////////////////////////////////////
-    // NEW API 1.0
-
-    std::function<void(Murka &)>* castDeferredViewDrawFunction(void* function) {
-        // We need this to use the draw functions for widgets that are anonymously stored inside
-        // other widgets.
-        
-        return (std::function<void(Murka &)>*)function;
-    }
-    
+private:
     MurkaShape getParentContextShape() {
         return getParentContext().currentViewShape;
-    }
-    
-    MurkaShape getSize() {
-        return currentContext.currentViewShape;
     }
     
     // Utility function to transform the render into the shape of this context.
@@ -140,11 +79,10 @@ public:
         transformTheRenderIntoThisContextShape();
     }
     
-
     // Immediate mode custom layout
 
     template<typename T>
-    T & drawWidget(MurkaShape shape) {
+    T & prepareWidget(MurkaShape shape) {
 
         //        auto context = &(m.currentContext);
         int counter = currentContext.getImCounter();
@@ -190,16 +128,7 @@ public:
         return *((T*)widgetObject);
     }
     
-
-	void setScreenScale(float newScreenScale) override {
-		MurkaRenderer::setScreenScale(newScreenScale);
-		MurkaInputEventsRegister::setInputEventsScale(newScreenScale);
-	}
-
-	MurkaContext currentContext;
-    std::vector<MurkaContext> contextStack;
-    
-    MurkaContext getParentContext() {
+    MurkaContext getParentContext() { // MOVE TO PRIVATE
         if (contextStack.size() == 0) {
             return MurkaContext();
         }
@@ -253,9 +182,6 @@ public:
         }
     }
     
-    bool doesHaveAWidgetThatHoldsKeyboardFocus() {
-        return keyboardFocusHaver != nullptr;
-    }
     
     int getMaxHoverIndex() {
         return maxHoverIndex;
@@ -265,45 +191,12 @@ public:
         hoverIndex++;
         return hoverIndex;
     }
-
-    void begin() { // this version is without arguments cause it creates the context
-        startFrame();
-        
-        restartContext();
-        clearEvents();
-        
-		currentContext.mousePosition /= getScreenScale();
-
-        hoverIndex = 0;
-        
-    }
     
-    void end() {
-        
-
-        disableViewportCrop = true;
-        for (auto &overlay: overlays) {
-            overlay.func();
-        }
-
-        disableViewportCrop = false;
-        overlays.clear();
-        
-        maxHoverIndex = hoverIndex;
-
-	}
     
-    template<typename T>
-    T& draw(MurkaShape place) {
-        return drawWidget<T>(place);
-    }
-
-
-
-	// This function gets called in the beginning of the step. It clears everything and initialises context.
-	// it also packs the user input into the context and clears the user input buffer data.
-	// It should also free the memory used for function responses.
-	void restartContext () {
+    // This function gets called in the beginning of the step. It clears everything and initialises context.
+    // it also packs the user input into the context and clears the user input buffer data.
+    // It should also free the memory used for function responses.
+    void restartContext () {
 //        if (currentContext.parentContext != NULL) {
 //            delete currentContext.parentContext;
 //        }
@@ -311,7 +204,7 @@ public:
         contextStack.resize(0);
         
         
-		currentContext = MurkaContext();
+        currentContext = MurkaContext();
         
         *((MurkaEventState*)&currentContext) = eventState; // copying eventState
 //        MurkaRenderer* pointerToRenderer = (MurkaRenderer*)&currentContext;
@@ -364,14 +257,8 @@ public:
         
 //        latestContext = currentContext;
 
-	}
+    }
 
-    ////////
-    //////// Immediate mode
-    ////////
-    
-    operator MurkaContext&() { return currentContext; }
-    
     MurkaContext getContextFromMurkaView(View* view) {
 //        view->latestContext.resetImCounter();
         return view->latestContext;
@@ -395,6 +282,73 @@ public:
         return ((ViewBase*)latestChildContext.linkedView)->shape;
     }
 
+
+
+public:
+	Murka() {
+        setupEvents();
+	}
+    
+    //////////////////////////////////////////////////////////////////
+
+    bool doesHaveAWidgetThatHoldsKeyboardFocus() {
+        return keyboardFocusHaver != nullptr;
+    }
+
+    MurkaShape getSize() {
+        return currentContext.currentViewShape;
+    }
+
+	void setScreenScale(float newScreenScale) override {
+		MurkaRenderer::setScreenScale(newScreenScale);
+		MurkaInputEventsRegister::setInputEventsScale(newScreenScale);
+	}
+    
+    float getScreenScale() override {
+        return MurkaRenderer::getScreenScale();
+    }
+
+	MurkaContext currentContext; // MOVE TO PRIVATE
+    std::vector<MurkaContext> contextStack; // MOVE TO PRIVATE
+    
+
+
+    void begin() { // this version is without arguments cause it creates the context
+        startFrame();
+        
+        restartContext();
+        clearEvents();
+        
+		currentContext.mousePosition /= getScreenScale();
+
+        hoverIndex = 0;
+        
+    }
+    
+    void end() {
+        
+
+        disableViewportCrop = true;
+        for (auto &overlay: overlays) {
+            overlay.func();
+        }
+
+        disableViewportCrop = false;
+        overlays.clear();
+        
+        maxHoverIndex = hoverIndex;
+
+	}
+    
+    template<typename T>
+    T& prepare(MurkaShape place) {
+        return prepareWidget<T>(place);
+    }
+
+    
+    operator MurkaContext&() { return currentContext; }
+    
+
     void setCurrentLayoutStructure(std::initializer_list<MurkaLinearLayoutGenerator::ShapePartDescriptor> list) {
        ((View*)currentContext.linkedView)->linearLayout.setLayoutStructure(list);
     }
@@ -415,11 +369,6 @@ public:
         ((View*)currentContext.linkedView)->linearLayout.addSpacing(spacing);
     }
 
-    ////////
-    //////// Object oriented view heirarchy management
-    ////////
-    
-
     
     ///////////////////
     
@@ -428,8 +377,6 @@ public:
 	}
 
     struct Parameters {};
-
-    typedef bool Results;
 
 private:
     
