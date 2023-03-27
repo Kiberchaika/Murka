@@ -259,7 +259,7 @@ public:
 					std::string buttonLabel = options[i];
 					auto el = m.prepare<DropdownElementButton>({ contextPosition.x, contextPosition.y + 30 * i, 150, 30 });
 					el.label = buttonLabel;
-                    el.commit();
+                    el.draw();
 					if (el.pressed) {
 #ifdef MURKA_DEBUG
 						std::cout << i << " pressed" << std::endl;

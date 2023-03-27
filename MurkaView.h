@@ -33,7 +33,7 @@ public:
         throw;
     }
 
-    T& commit() {
+    T& draw() {
         defferedViewDrawFunc();
         return *(static_cast<T*>(this));
     }
