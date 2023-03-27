@@ -18,7 +18,20 @@ class MurkaRenderer;
 #if defined(MURKA_OF)
 
 class MurShader {
+	friend class MurkaRenderer;
+
 	ofShader shader;
+
+protected:
+	void bind() {
+		shader.begin();
+	}
+
+	void unbind() {
+		shader.end();
+	}
+
+
 public:
 	MurShader(){}
   
@@ -32,14 +45,6 @@ public:
 
 	void unload() {
 		shader.unload();
-	}
-
-	void bind() {
-		shader.begin();
-	}
-
-	void unbind() {
-		shader.end();
 	}
 
 	void setUniform1i(std::string name, int v) {
@@ -71,15 +76,17 @@ public:
 #elif defined(MURKA_JUCE)
 
 class MurShader {
+	friend class MurkaRenderer;
+
 	juce::OpenGLContext* openGLContext = nullptr;
 	juce::OpenGLShaderProgram* shader = nullptr;
 	std::map<std::string, juce::OpenGLShaderProgram::Uniform*> uniforms;
 	std::map<std::string, int> attributes;
 	
-	bool isLoaded = false;
+	bool bLoaded = false;
 
 	juce::OpenGLShaderProgram::Uniform* getUniformByName(std::string name) {
-		if (isLoaded) {
+		if (bLoaded) {
 			if (uniforms.find(name) != uniforms.end()) {
 				return uniforms[name];
 			}
@@ -94,8 +101,24 @@ class MurShader {
 		return nullptr;
 	}
 
+protected:
+	void use() {
+		shader->use();
+	}
 
 public:
+	juce::OpenGLShaderProgram::Uniform* uniformMatrixModel = nullptr;
+	juce::OpenGLShaderProgram::Uniform* uniformMatrixView = nullptr;
+	juce::OpenGLShaderProgram::Uniform* uniformMatrixProj = nullptr;
+	juce::OpenGLShaderProgram::Uniform* uniformColor = nullptr;
+	juce::OpenGLShaderProgram::Uniform* uniformMainTexture = nullptr;
+	juce::OpenGLShaderProgram::Uniform* uniformVflip = nullptr;
+	juce::OpenGLShaderProgram::Uniform* uniformUseTexture = nullptr;
+
+	int attributePosition = -1;
+	int attributeUv = -1;
+	int attributeCol = -1;
+
 	MurShader() {
 
 	};
@@ -116,18 +139,32 @@ public:
 			shader->addFragmentShader(juce::OpenGLHelpers::translateFragmentShaderToV3(frag)) &&
 			shader->link()
 			) {
-			isLoaded = true;
+			bLoaded = true;
 		}
 		else {
 			std::string err = shader->getLastError().toStdString();
-			isLoaded = false;
+			bLoaded = false;
+
+			throw std::runtime_error("Error: " + err);
 		}
 	
-		return isLoaded;
+		uniformMatrixModel = getUniformByName("matrixModel");
+		uniformMatrixView = getUniformByName("matrixView");
+		uniformMatrixProj = getUniformByName("matrixProj");
+		uniformColor = getUniformByName("color");
+		uniformMainTexture = getUniformByName("mainTexture");
+		uniformVflip = getUniformByName("vflip");
+		uniformUseTexture = getUniformByName("useTexture");
+
+		attributePosition = getAttributeLocation("position");
+		attributeUv = getAttributeLocation("uv");
+		attributeCol = getAttributeLocation("col");
+
+		return bLoaded;
 	}
 
 	int getAttributeLocation(std::string name) {
-		if (isLoaded) {
+		if (bLoaded) {
 			if (attributes.find(name) != attributes.end()) {
 				return attributes[name];
 			}
@@ -149,15 +186,23 @@ public:
 		delete shader;
 		shader = nullptr;
 
-		isLoaded = false;
+		bLoaded = false;
 	}
 
-	void use() {
-		shader->use();
+	void setUniform1i(juce::OpenGLShaderProgram::Uniform* uniform, int v) {
+		if (uniform) {
+			uniform->set(v);
+		}
 	}
 
 	void setUniform1i(std::string name, int v) {
 		juce::OpenGLShaderProgram::Uniform* uniform = getUniformByName(name);
+		if (uniform) {
+			uniform->set(v);
+		}
+	}
+
+	void setUniform1f(juce::OpenGLShaderProgram::Uniform* uniform, float v) {
 		if (uniform) {
 			uniform->set(v);
 		}
@@ -170,10 +215,21 @@ public:
 		}
 	}
 
+	void setUniform2f(juce::OpenGLShaderProgram::Uniform* uniform, float v1, float v2) {
+		if (uniform) {
+			uniform->set(v1, v2);
+		}
+	}
 	void setUniform2f(std::string name, float v1, float v2) {
 		juce::OpenGLShaderProgram::Uniform* uniform = getUniformByName(name);
 		if (uniform) {
 			uniform->set(v1, v2);
+		}
+	}
+
+	void setUniform3f(juce::OpenGLShaderProgram::Uniform* uniform, float v1, float v2, float v3) {
+		if (uniform) {
+			uniform->set(v1, v2, v3);
 		}
 	}
 
@@ -184,10 +240,22 @@ public:
 		}
 	}
 
+	void setUniform4f(juce::OpenGLShaderProgram::Uniform* uniform, float v1, float v2, float v3, float v4) {
+		if (uniform) {
+			uniform->set(v1, v2, v3, v4);
+		}
+	}
+
 	void setUniform4f(std::string name, float v1, float v2, float v3, float v4) {
 		juce::OpenGLShaderProgram::Uniform* uniform = getUniformByName(name);
 		if (uniform) {
 			uniform->set(v1, v2, v3, v4);
+		}
+	}
+
+	void setUniformMatrix4f(juce::OpenGLShaderProgram::Uniform* uniform, MurMatrix<float> m) {
+		if (uniform) {
+			uniform->setMatrix4((GLfloat*)&(m.mat[0]), 1, false);
 		}
 	}
 
@@ -196,6 +264,10 @@ public:
 		if (uniform) {
 			uniform->setMatrix4((GLfloat*)&(m.mat[0]), 1, false);
 		}
+	}
+
+	bool isLoaded() {
+		return bLoaded;
 	}
 
 };

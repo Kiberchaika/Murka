@@ -17,7 +17,6 @@ public:
         thisFrameShapes.clear();
     }
     
-    
     std::vector<MurkaShape> thisFrameShapes;
     
     inline bool upperThanAllFour(MurkaPoint input, MurkaPoint a, MurkaPoint b, MurkaPoint c, MurkaPoint d) {
@@ -46,10 +45,8 @@ public:
                                                  a.position.y + a.size.y);
         MurkaPoint rightTopPointA = MurkaPoint(a.position.x + a.size.x,
                                                a.position.y);
-        
         MurkaPoint bottomRightPointB = MurkaPoint(b.position.x + b.size.x,
                                                   b.position.y + b.size.y);
-
         MurkaPoint leftTopPointB = MurkaPoint(b.position.x, b.position.y);
 
         MurkaPoint rightTopPointB = MurkaPoint(b.position.x + b.size.x, b.position.y);
@@ -80,16 +77,13 @@ public:
             (toTheLeftOfAllFour(bottomLeftPointA, bottomRightPointB, leftTopPointB, rightTopPointB, bottomLeftPointB)) &&
             (toTheRightOfAllFour(rightTopPointA, bottomRightPointB, leftTopPointB, rightTopPointB, bottomLeftPointB)) &&
             (toTheRightOfAllFour(bottomRightPointA, bottomRightPointB, leftTopPointB, rightTopPointB, bottomLeftPointB))) {
-            
-//            ofLog() << "OBERLAP TYPE Z";
-            
+                        
             float xComponent = 0;
             if (abs(bottomLeftPointA.x - bottomRightPointB.x) <
                 abs(bottomRightPointA.x - bottomLeftPointB.x)) {
                 // moving it to the right
                 return {bottomLeftPointA.x - bottomRightPointB.x, 0};
             } else return {bottomRightPointA.x - bottomLeftPointB.x, 0};
-
         }
 
         if ((upperThanAllFour(leftTopPointA, bottomRightPointB, leftTopPointB, rightTopPointB, bottomLeftPointB)) &&
@@ -101,7 +95,6 @@ public:
                 (toTheLeftOfAllFour(bottomLeftPointB, bottomRightPointA, leftTopPointA, rightTopPointA, bottomLeftPointA)) &&
                 (toTheRightOfAllFour(bottomRightPointB, bottomRightPointA, leftTopPointA, rightTopPointA, bottomLeftPointA)) &&
                 (toTheRightOfAllFour(rightTopPointB, bottomRightPointA, leftTopPointA, rightTopPointA, bottomLeftPointA))) {
-//                ofLog() << "A overlaps B by y, B overlaps A by x..";
                 
                 float yComponent = 0;
                 if ((abs((bottomLeftPointB - leftTopPointB).length()) <
@@ -110,7 +103,6 @@ public:
                 } else {
                     yComponent = leftTopPointA.y - bottomLeftPointB.y;
                 }
-                
                 return {0, yComponent};
             }
             
@@ -160,16 +152,15 @@ public:
                 }
             }
         }
-        
         return maxOverlappingVector;
     }
     
     inline float overlapArea(MurkaShape s1, MurkaShape s2) {
      
         float left = fmax(s1.position.x, s2.position.x);
-        float right = fmin(s1.position.x + s1.size.x, s2.position.x + s2.size.x);
-        float bottom = fmin(s1.position.y + s1.size.y, s2.position.y + s2.size.y);
-        float top = fmax(s1.position.y, s2.position.y);
+		float right = fmin(s1.position.x + s1.size.x, s2.position.x + s2.size.x);
+		float bottom = fmin(s1.position.y + s1.size.y, s2.position.y + s2.size.y);
+		float top = fmax(s1.position.y, s2.position.y);
 
         if ((left < right) && (top < bottom)) {
             return (right - left) * (bottom - top);
@@ -181,7 +172,6 @@ public:
         for (auto &j: others) {
             sumOverlapArea += overlapArea(shape, j);
         }
-        
         return sumOverlapArea;
     }
     
@@ -295,7 +285,9 @@ public:
 //            return validOptions[0];
         } else {
             // What happened?
+#ifdef MURKA_DEBUG
             std::cout << "  WARNING!";
+#endif
             thisFrameShapes.push_back(input);
             return input;
         }

@@ -3,9 +3,9 @@
 
 namespace murka {
 
-class Label : public View_NEW<Label> {
+
+class Label : public View<Label> {
 public:
-    
 	void internalDraw(Murka & m) {
 		MurkaContext& c = m.currentContext;
 
@@ -23,7 +23,7 @@ public:
             onClickCallbackPosition(*this, {25, 11});
         }
         
-        auto font = c.getCurrentFont();
+        auto font = m.getCurrentFont();
         
         if (alignment == TEXT_LEFT) {
             font->drawString(label, 5, 0);
@@ -36,7 +36,7 @@ public:
             float textX = (shape.size.x - 10) - font->getStringBoundingBox(label, 0, 0).width;
             font->drawString(label, textX, 0);
         }
-   };
+   }
    
     bool isHovered = false;
  

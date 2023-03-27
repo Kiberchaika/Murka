@@ -92,6 +92,7 @@ class MurVbo {
 	bool loaded = false;
     bool inited = false;
 
+
 public:
 	MurVbo() {
 
@@ -227,14 +228,16 @@ public:
 			openGLContext->extensions.glVertexAttribPointer(attribLocationCol, 4, GL_FLOAT, GL_FALSE, sizeof(VboData), (GLvoid*)offsetof(VboData, col));
 			openGLContext->extensions.glEnableVertexAttribArray(attribLocationCol);
 
-			openGLContext->extensions.glBufferData(GL_ARRAY_BUFFER, size * sizeof(VboData), 0, usage);
-			openGLContext->extensions.glBufferSubData(GL_ARRAY_BUFFER, 0, size * sizeof(VboData), vboData.data());
+			openGLContext->extensions.glBufferData(GL_ARRAY_BUFFER, size * sizeof(VboData), vboData.data(), usage);
+			//openGLContext->extensions.glBufferData(GL_ARRAY_BUFFER, size * sizeof(VboData), 0, usage);
+			//openGLContext->extensions.glBufferSubData(GL_ARRAY_BUFFER, 0, size * sizeof(VboData), vboData.data());
 
             needToRecreate = false;
 			loaded = true;
 		}
         else {
-            openGLContext->extensions.glBufferSubData(GL_ARRAY_BUFFER, 0, size * sizeof(VboData), vboData.data());
+			openGLContext->extensions.glBufferData(GL_ARRAY_BUFFER, size * sizeof(VboData), vboData.data(), usage);
+            //openGLContext->extensions.glBufferSubData(GL_ARRAY_BUFFER, 0, size * sizeof(VboData), vboData.data());
 		}
 
 		openGLContext->extensions.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -256,6 +259,7 @@ public:
 		else {
 			glDrawArrays(drawMode, first, total);
 		}
+		
 		openGLContext->extensions.glBindBuffer(GL_ARRAY_BUFFER, 0);
 		if (indexes.size() > 0) {
 			openGLContext->extensions.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

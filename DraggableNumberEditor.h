@@ -7,7 +7,7 @@ namespace murka {
 // PRE-1.0 made draggable number editor.
 // TO BE UPDATED TO 1.0
 
-class DraggableNumberEditor : public View_NEW<DraggableNumberEditor> {
+class DraggableNumberEditor : public View<DraggableNumberEditor> {
 public:
 	void internalDraw(Murka & m) {
 	    MurkaContext& c = m.currentContext;

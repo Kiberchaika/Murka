@@ -7,7 +7,7 @@
 namespace murka {
 
 
-class Header : public View_NEW<Header> {
+class Header : public View<Header> {
 public:
     Header() {
 
@@ -19,10 +19,10 @@ public:
         // Your drawing and interaction code goes here.
         // Don't forget that all of this executes at each frame for each
         // widget that is drawn on screen.
-        auto font = m.currentContext.getCurrentFont();
+        auto font = m.getCurrentFont();
         
-        MurkaColor fgColor = customColor ? color : m.currentContext.pointerToRenderer->getColor();
-        m.currentContext.pointerToRenderer->setColor(fgColor);
+        MurkaColor fgColor = customColor ? color : m.getColor();
+        m.setColor(fgColor);
         if (alignment == TEXT_LEFT) {
             font->drawString(label, 5, 5);
         }
@@ -49,7 +49,7 @@ public:
 };
 
 
-class Checkbox : public View_NEW<Checkbox> {
+class Checkbox : public View<Checkbox> {
 public:
     void internalDraw(Murka & m) {
         
@@ -59,36 +59,36 @@ public:
 
 		pressed = false;
 
-		MurkaColor fgColor = m.currentContext.pointerToRenderer->getColor();
+		MurkaColor fgColor = m.getColor();
 
-        float pushed = 0.2 - (m.currentContext.getRunningTime() - lastTimeClicked);
+        float pushed = 0.2 - (m.getElapsedTime() - lastTimeClicked);
         if (pushed < 0) pushed = 0;
         pushed /= 0.2;
 
-        m.currentContext.pointerToRenderer->pushStyle();
-        m.currentContext.pointerToRenderer->setColor((inside ? fgColor : fgColor / 2) * (1.0 + 0.2 * pushed));
+        m.pushStyle();
+        m.setColor((inside ? fgColor : fgColor / 2) * (1.0 + 0.2 * pushed));
 
-        m.currentContext.pointerToRenderer->disableFill();
-        m.currentContext.pointerToRenderer->drawRectangle(5, 5, 20, 20);
+        m.disableFill();
+        m.drawRectangle(5, 5, 20, 20);
         if (*booleanToControl) {
             float symbolOffset = 4;
-            m.currentContext.pointerToRenderer->drawLine(5 + symbolOffset, 5 + symbolOffset, 25 - symbolOffset, 25 - symbolOffset);
-            m.currentContext.pointerToRenderer->drawLine(25 - symbolOffset, 5 + symbolOffset, 5 + symbolOffset, 25 - symbolOffset);
+            m.drawLine(5 + symbolOffset, 5 + symbolOffset, 25 - symbolOffset, 25 - symbolOffset);
+            m.drawLine(25 - symbolOffset, 5 + symbolOffset, 5 + symbolOffset, 25 - symbolOffset);
         }
         
-        m.currentContext.pointerToRenderer->enableFill();
+        m.enableFill();
         
-        auto font = m.currentContext.getCurrentFont();
+        auto font = m.getCurrentFont();
         font->drawString(label, 30, 0);
         
         if (inside && m.currentContext.mouseDownPressed[0]) {
             *booleanToControl = !*booleanToControl;
-            lastTimeClicked = m.currentContext.getRunningTime();
+            lastTimeClicked = m.getElapsedTime();
 			results = booleanToControl;
 		}
 		else results = false;
 
-        m.currentContext.pointerToRenderer->popStyle();
+        m.popStyle();
     };
     
 	std::string label;
@@ -105,63 +105,59 @@ public:
 		setDataToControl, // setter
 		nullptr
 	) // default
-
-
    
-    // The two functions needed for optional UI state saving. It's up to you
-    // to use those.
+    // The two functions needed for optional UI state saving. It's up to you to use those.
 //    std::vector<MurkaVar> saveInternalData(int indexX, int indexY) override { }
 //    void loadInternalData(std::vector<MurkaVar>) override {}
-    
-    
-    // Everything else in the class is for handling the internal state. It persistы.
+     
+    // Everything else in the class is for handling the internal state. It persistant.
     double lastTimeClicked = 0;
 };
 
 
-class Radiobutton : public View_NEW<Radiobutton> {
+class Radiobutton : public View<Radiobutton> {
 public:
 	void internalDraw(Murka & m) {
 		results = false;
 
 		bool inside = m.currentContext.isHovered() * !areChildrenHovered(m.currentContext);
 
-		MurkaColor fgColor = m.currentContext.pointerToRenderer->getColor();
+		MurkaColor fgColor = m.getColor();
 
-		float pushed = 0.2 - (m.currentContext.getRunningTime() - lastTimeClicked);
+		float pushed = 0.2 - (m.getElapsedTime() - lastTimeClicked);
 		if (pushed < 0) pushed = 0;
 		pushed /= 0.2;
             
         int lineHeight = 25;
 
 		for (int i = 0; i < labels.size(); i++) {
-			m.currentContext.pointerToRenderer->pushMatrix();
-			m.currentContext.pointerToRenderer->pushStyle();
-			m.currentContext.pointerToRenderer->translate(0, lineHeight * i, 0);
+			m.pushMatrix();
+			m.pushStyle();
+			m.translate(0, lineHeight * i, 0);
 			MurkaShape rowShape = { 0, lineHeight * i, m.currentContext.getSize().x, lineHeight };
 			bool rowHover = rowShape.inside(m.currentContext.mousePosition);
 
-			m.currentContext.pointerToRenderer->setColor((rowHover * inside ? fgColor : fgColor / 2) * (1.0 + 0.2 * pushed));
+			m.setColor((rowHover * inside ? fgColor : fgColor / 2) * (1.0 + 0.2 * pushed));
 
-			m.currentContext.pointerToRenderer->disableFill();
-			m.currentContext.pointerToRenderer->drawCircle(5 + 20 / 2, 5 + 20 / 2, 10);
+			m.disableFill();
+			m.drawCircle(5 + 20 / 2, 5 + 20 / 2, 10);
 			if (*dataToControl == i) {
-				m.currentContext.pointerToRenderer->enableFill();
-				m.currentContext.pointerToRenderer->drawCircle(5 + 20 / 2, 5 + 20 / 2, 6);
+				m.enableFill();
+				m.drawCircle(5 + 20 / 2, 5 + 20 / 2, 6);
 			}
-			m.currentContext.pointerToRenderer->enableFill();
+			m.enableFill();
 
-			auto font = m.currentContext.getCurrentFont();
+			auto font = m.getCurrentFont();
 			font->drawString(labels[i], 30, 10);
 
 			if (rowHover * inside && m.currentContext.mouseDownPressed[0]) {
 				*dataToControl = i;
 				results = true;
-				lastTimeClicked = m.currentContext.getRunningTime();
+				lastTimeClicked = m.getElapsedTime();
 			}
 
-			m.currentContext.pointerToRenderer->popStyle();
-			m.currentContext.pointerToRenderer->popMatrix();
+			m.popStyle();
+			m.popMatrix();
 		}
 	};
 
@@ -172,7 +168,6 @@ public:
 		nullptr
 	) // default
 
-
 	std::vector<std::string> labels;
 	bool results;
 
@@ -181,15 +176,14 @@ public:
 };
 
 
-
-class DropdownElementButton : public View_NEW<DropdownElementButton> {
+class DropdownElementButton : public View<DropdownElementButton> {
 public:
 	void internalDraw(Murka & m) {
 
 		bool inside = m.currentContext.isHovered() * !areChildrenHovered(m.currentContext);
 
-		m.currentContext.pointerToRenderer->setColor(MurkaColor(90 / 255.0, 90 / 255.0, 90 / 255.0) * (0.8 + 0.2 * inside));
-		m.currentContext.pointerToRenderer->drawRectangle(0, 0, m.currentContext.getSize().x, m.currentContext.getSize().y);
+		m.setColor(MurkaColor(90 / 255.0, 90 / 255.0, 90 / 255.0) * (0.8 + 0.2 * inside));
+		m.drawRectangle(0, 0, m.currentContext.getSize().x, m.currentContext.getSize().y);
 
 		if (justInitialised) {
 			justInitialised = false;
@@ -198,15 +192,17 @@ public:
 			// ^ ghetto way to prevent this button from activating right away
 		}
 
-		auto currentLastFrame = m.currentContext.pointerToRenderer->getFrameNum();
+		auto currentLastFrame = m.getFrameNum();
 
-		m.currentContext.pointerToRenderer->setColor(255);
-		m.currentContext.pointerToRenderer->drawString(label, 10, 5);
+		m.setColor(255);
+		m.drawString(label, 10, 5);
 
 		if ((currentLastFrame - lastFrameItWasRendered) <= 1) { // only allow clicking if it was rendered at last frame - to avoid instant clicks in overlays
 			if ((m.currentContext.mouseDownPressed[0]) && (inside)) {
 				// click if it's not the same frame it was shown
-				std::cout << "btn pressd. justInitialised? " << justInitialised;
+#ifdef MURKA_DEBUG
+				std::cout << "btn pressd. justInitialised? " << justInitialised << std::endl;
+#endif
 				pressed = true;
 
 				return;
@@ -230,15 +226,14 @@ public:
 };
 
 
-class DropdownButton : public View_NEW<DropdownButton> {
+class DropdownButton : public View<DropdownButton> {
 public:
 	void internalDraw(Murka & m) {
 
-		
 		bool inside = m.currentContext.isHovered() * !areChildrenHovered(m.currentContext);
 
-		m.currentContext.pointerToRenderer->setColor(MurkaColor(90 / 255.0, 90 / 255.0, 90 / 255.0) * (0.5 + 0.3 * inside));
-		m.currentContext.pointerToRenderer->drawRectangle(0, 0, m.currentContext.getSize().x, m.currentContext.getSize().y);
+		m.setColor(MurkaColor(90 / 255.0, 90 / 255.0, 90 / 255.0) * (0.5 + 0.3 * inside));
+		m.drawRectangle(0, 0, m.currentContext.getSize().x, m.currentContext.getSize().y);
 
 		if ((m.currentContext.mouseDownPressed[0]) && (inside)) {
 			if (!showingTheDropdown) {
@@ -253,8 +248,8 @@ public:
 
 		options = options;
 
-		m.currentContext.pointerToRenderer->setColor(MurkaColor(66 / 255.0, 67 / 255.0, 71 / 255.0) * 3.2);
-		m.currentContext.pointerToRenderer->drawString(options[selectedOption], 5, 5);
+		m.setColor(MurkaColor(66 / 255.0, 67 / 255.0, 71 / 255.0) * 3.2);
+		m.drawString(options[selectedOption], 5, 5);
 
 		if (showingTheDropdown) {
 			contextPosition = m.currentContext.currentViewShape.position;
@@ -262,11 +257,13 @@ public:
 				//                         ofLog() << m.currentContext.currentViewShape.position.x;
 				for (int i = 0; i < options.size(); i++) {
 					std::string buttonLabel = options[i];
-					auto el = m.draw<DropdownElementButton>({ contextPosition.x, contextPosition.y + 30 * i, 150, 30 });
+					auto el = m.prepare<DropdownElementButton>({ contextPosition.x, contextPosition.y + 30 * i, 150, 30 });
 					el.label = buttonLabel;
-					m.commitDeferredView();
+                    el.draw();
 					if (el.pressed) {
-						std::cout << i << " pressed";
+#ifdef MURKA_DEBUG
+						std::cout << i << " pressed" << std::endl;
+#endif
 						showingTheDropdown = false;
 						changedSelection = true;
 						selectedOption = i;
@@ -306,7 +303,7 @@ public:
 };
 
 
-class BlankPanel : public View_NEW<BlankPanel> {
+class BlankPanel : public View<BlankPanel> {
 public:
     void internalDraw(Murka & m) {
         
@@ -320,28 +317,28 @@ public:
             } else gonnaResize = true;
         }
 
-        m.currentContext.pointerToRenderer->pushStyle();
-        m.currentContext.pointerToRenderer->enableFill();
-        m.currentContext.pointerToRenderer->setColor(r, g, b, a);
-        m.currentContext.pointerToRenderer->drawRectangle(0, 0, m.currentContext.getSize().x, m.currentContext.getSize().y);
+        m.pushStyle();
+        m.enableFill();
+        m.setColor(r, g, b, a);
+        m.drawRectangle(0, 0, m.currentContext.getSize().x, m.currentContext.getSize().y);
         if (drawBorder) {
-            m.currentContext.pointerToRenderer->setColor(30);
-            m.currentContext.pointerToRenderer->disableFill();
-            m.currentContext.pointerToRenderer->drawRectangle(0, 0, m.currentContext.getSize().x, m.currentContext.getSize().y);
+            m.setColor(30);
+            m.disableFill();
+            m.drawRectangle(0, 0, m.currentContext.getSize().x, m.currentContext.getSize().y);
         }
         
-        m.currentContext.pointerToRenderer->setColor(255);
-        auto font = m.currentContext.getCurrentFont();
+        m.setColor(255);
+        auto font = m.getCurrentFont();
         font->drawString(label, 0, 0);
         
         // Drawing symbols to show that we're going to resize this widget
         if ((gonnaResize) && (inside)) {
-            m.currentContext.pointerToRenderer->drawLine(m.currentContext.currentViewShape.size.x - 5, m.currentContext.currentViewShape.size.y - 5,
+            m.drawLine(m.currentContext.currentViewShape.size.x - 5, m.currentContext.currentViewShape.size.y - 5,
                        m.currentContext.currentViewShape.size.x - 15, m.currentContext.currentViewShape.size.y - 5);
-            m.currentContext.pointerToRenderer->drawLine(m.currentContext.currentViewShape.size.x - 5, m.currentContext.currentViewShape.size.y - 5,
+            m.drawLine(m.currentContext.currentViewShape.size.x - 5, m.currentContext.currentViewShape.size.y - 5,
                        m.currentContext.currentViewShape.size.x - 5, m.currentContext.currentViewShape.size.y - 15);
         }
-        m.currentContext.pointerToRenderer->popStyle();
+        m.popStyle();
 
         // Moving & resizing logic
         
@@ -373,7 +370,6 @@ public:
                 shape.size.y = minimumHeight;
             }
         }
-        
     };
     
     
@@ -386,14 +382,13 @@ public:
 	float minimumWidth = 200, minimumHeight = 200;
 
 	bool results;
-    
 
 	MurkaPoint initialPosition, initialMousePosition;
     bool dragging = false, resizing = false;
 };
 
 
-class Button : public View_NEW<Button> {
+class Button : public View<Button> {
 public:
     void internalDraw(Murka & m) {
          
@@ -401,43 +396,41 @@ public:
 
          if ((m.currentContext.mouseDownPressed[0]) && (m.currentContext.isHovered())) {
 			 pressed = true;
-            lastTimeClicked = m.currentContext.getRunningTime();
+            lastTimeClicked = m.getElapsedTime();
          } else pressed = false;
         
-         auto font = m.currentContext.getCurrentFont();
+         auto font = m.getCurrentFont();
         
-        
-             float pushed = 0.2 - (m.currentContext.getRunningTime() - lastTimeClicked);
-             if (pushed < 0) pushed = 0;
-             pushed /= 0.2;
-         
-             m.currentContext.pointerToRenderer->pushStyle();
-             m.currentContext.pointerToRenderer->enableFill();
-             if (inside) {
-                 m.currentContext.pointerToRenderer->setColor(MurkaColor(r, g, b) * (1.0 + 0.2 * pushed));
-             } else m.currentContext.pointerToRenderer->setColor(75 * (1.0 + 0.2 * pushed));
-             m.currentContext.pointerToRenderer->drawRectangle(0, 0, m.currentContext.getSize().x, m.currentContext.getSize().y);
-             m.currentContext.pointerToRenderer->setColor(30);
-             m.currentContext.pointerToRenderer->disableFill();
-             m.currentContext.pointerToRenderer->drawRectangle(0, 0, m.currentContext.getSize().x, m.currentContext.getSize().y);
-        
-             m.currentContext.pointerToRenderer->setColor(255);
-			 m.currentContext.pointerToRenderer->drawRectangle(0, 0, 2,2);
+			float pushed = 0.2 - (m.getElapsedTime() - lastTimeClicked);
+			if (pushed < 0) pushed = 0;
+			pushed /= 0.2;
 
-             float offset = (font->stringWidth(label) / 2);
-        
-			 font->drawString(label, m.currentContext.getSize().x / 2 - offset, m.currentContext.getSize().y / 2 - font->getLineHeight() / 2);
+			m.pushStyle();
+			m.enableFill();
+			if (inside) {
+			 m.setColor(MurkaColor(r, g, b) * (1.0 + 0.2 * pushed));
+			} else m.setColor(75 * (1.0 + 0.2 * pushed));
+			m.drawRectangle(0, 0, m.currentContext.getSize().x, m.currentContext.getSize().y);
+			m.setColor(30);
+			m.disableFill();
+			m.drawRectangle(0, 0, m.currentContext.getSize().x, m.currentContext.getSize().y);
 
-             m.currentContext.pointerToRenderer->popStyle();
+			m.setColor(255);
+			m.drawRectangle(0, 0, 2,2);
+
+			float offset = (font->stringWidth(label) / 2);
+
+			font->drawString(label, m.currentContext.getSize().x / 2 - offset, m.currentContext.getSize().y / 2 - font->getLineHeight() / 2);
+
+			m.popStyle();
     };
-    
+
     
 	MURKA_PARAMETER(Button, // class name
 		std::string, // parameter type
 		label, // parameter variable name
 		text, // setter
 		"") // default
-
 
 
     // Whatever the parameters and the results are, the functions have to be defined here
@@ -454,7 +447,7 @@ public:
 };
 
 
-class SliderFloat : public View_NEW<SliderFloat> {
+class SliderFloat : public View<SliderFloat> {
 public:
     void internalDraw(Murka & m) {
         results = false;
@@ -479,18 +472,18 @@ public:
             *(dataToControl) = newValue;
         }
         
-        auto font = m.currentContext.getCurrentFont();
+        auto font = m.getCurrentFont();
         
 
         
-		MurkaColor fgColor = m.currentContext.pointerToRenderer->getColor();
+		MurkaColor fgColor = m.getColor();
 
-        m.currentContext.pointerToRenderer->pushStyle();
-        m.currentContext.pointerToRenderer->enableFill();
-        m.currentContext.pointerToRenderer->setColor(15);
-        m.currentContext.pointerToRenderer->drawRectangle(0, 0, m.currentContext.getSize().x, m.currentContext.getSize().y);
+        m.pushStyle();
+        m.enableFill();
+        m.setColor(15);
+        m.drawRectangle(0, 0, m.currentContext.getSize().x, m.currentContext.getSize().y);
         
-        m.currentContext.pointerToRenderer->setColor(r + (inside ? 20 : 0),
+        m.setColor(r + (inside ? 20 : 0),
                    g + (inside ? 20 : 0),
                    b + (inside ? 20 : 0), 200);
         float currentValue = *(dataToControl);
@@ -500,22 +493,21 @@ public:
         if (currentValue < minValue) {
             currentValue = minValue;
         }
-        m.currentContext.pointerToRenderer->drawRectangle(0, 0, m.currentContext.getSize().x * ((currentValue - minValue) / (maxValue - minValue)), m.currentContext.getSize().y);
-        m.currentContext.pointerToRenderer->setColor(80);
-		m.currentContext.pointerToRenderer->disableFill();
+        m.drawRectangle(0, 0, m.currentContext.getSize().x * ((currentValue - minValue) / (maxValue - minValue)), m.currentContext.getSize().y);
+        m.setColor(80);
+		m.disableFill();
         if (inside) {
-            m.currentContext.pointerToRenderer->drawRectangle(0, 0, m.currentContext.getSize().x, m.currentContext.getSize().y);
+            m.drawRectangle(0, 0, m.currentContext.getSize().x, m.currentContext.getSize().y);
         }
         
-
-        m.currentContext.pointerToRenderer->setColor(inside ? fgColor : fgColor / 2);
+        m.setColor(inside ? fgColor : fgColor / 2);
         auto resultString = label + ": " + std::to_string(*((float*)dataToControl));
         
-        
+
         float offset = font->stringWidth(resultString) / 2;
         
         font->drawString(resultString, m.currentContext.getSize().x / 2 - offset, m.currentContext.getSize().y / 2 - font->getLineHeight()/2);
-        m.currentContext.pointerToRenderer->popStyle();
+        m.popStyle();
     };
     
     
@@ -542,8 +534,6 @@ public:
     bool dragging = false;
     
     // Helpers that didn't work in templated class yet :(
-    
 };
-
 
 }

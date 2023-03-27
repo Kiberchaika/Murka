@@ -21,3 +21,7 @@ A feline inspired tiny mixed-mode UI library for C++. It allows you to build fai
 - I will probably merge MurkaViewInterface and View into a single templated class, thus killing the anonymous View. Maybe.
 - MurkaViewHandler is a templated class that wraps the View object with everything it needs to get from external code that calls the drawing - Parameters object, Results object, Data to control and the object itself. The internal part, MurkaViewHandlerInternal, is not templated and it just holds anonymous pointers.
 - MurkaContext is global in weird way currently, it's a variable of Murka class that gets propagated through the graph of widgets via pushContext and popContext that's forwarded through lambda from the "singleton" main class. This is not a good pattern and the downside is, you should never ever try to pass around MurkaContext not by lvalue (&), if you do that it'll break things in weird places. At the very least, something won't render.
+
+## Compiler Options
+
+- `MURKA_DEBUG` - displays cout style debug messages

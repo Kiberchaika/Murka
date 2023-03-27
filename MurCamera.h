@@ -45,6 +45,9 @@ class MurCamera {
 	MurkaPoint3D position;
 	MurkaPoint3D target;
 
+	MurkaPoint3D rotation;
+	float fov;
+
 	void updateTransformMatrix() {
 		MurMatrix<float> m;
 
@@ -64,18 +67,38 @@ class MurCamera {
 		transformMatrix = MurMatrix<float>();
 		transformMatrix = transformMatrix.scaled(juce::Vector3D<float>(1, 1, 1));
 		transformMatrix = transformMatrix * m;
+
+		transformMatrix = transformMatrix * MurMatrix<float>::rotation(juce::Vector3D<float>(rotation.x, rotation.y, rotation.z) * M_PI / 180);
 		transformMatrix = transformMatrix * MurMatrix<float>::translation(juce::Vector3D<float>(position.x, position.y, position.z));
 	}
 
 public:
 	MurCamera(){
+		fov = 60;
 	}
 
 	void setPosition(MurkaPoint3D p) {
 		position = p;
 		updateTransformMatrix();
 	}
-	
+
+	void setFov(float fov) {
+		this->fov = fov;
+	}
+
+	float getFov() {
+		return fov;
+	}
+
+	void setRotation(MurkaPoint3D r) {
+		rotation = r;
+		updateTransformMatrix();
+	}
+
+	MurkaPoint3D getRotation() {
+		return rotation;
+	}
+
 	void lookAt(MurkaPoint3D p) {
 		target = p;
 		updateTransformMatrix();
@@ -87,8 +110,6 @@ public:
 	}
 
 	MurMatrix<float> getProjectionMatrix(float aspect) { 
-		float fov = 60;
-
 		float zFar = 1000;
 		float zNear = 0.001;
 		 

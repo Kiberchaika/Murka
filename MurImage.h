@@ -13,6 +13,15 @@
 namespace murka {
 
 class MurImage {
+	friend class MurkaRenderer;
+
+protected:
+	void bind() const {
+	}
+
+	void unbind() const {
+	}
+
 public:
 	MurImage() {
 
@@ -56,11 +65,11 @@ public:
 		internal.getTexture().clear();
 	}
 
-	float getWidth() {
+	int getWidth() {
 		return internal.getWidth();
 	}
 
-	float getHeight() {
+	int getHeight() {
 		return internal.getHeight();
 	}
 };
@@ -72,6 +81,7 @@ public:
 namespace murka {
 
 class MurImage {
+	friend class MurkaRenderer;
 
 	GLuint textureID;
 	int width = 0, height = 0;
@@ -105,6 +115,16 @@ class MurImage {
 
 		update();
 	}
+
+protected:
+	void bind() const {
+		glBindTexture(gltype, textureID);
+	}
+
+	void unbind() const {
+		glBindTexture(gltype, 0);
+	}
+
 
 public:
 
@@ -150,14 +170,6 @@ public:
 		bAllocated = true;
 	}
 
-	bool load(const char* data, int dataSize) {
-		juce::Image image = juce::ImageFileFormat::loadFrom(data, dataSize);
-
-		loadInternal(image);
-
-		return true;
-	}
-
 	bool load(const std::string& fileName) {
         if(!juce::File(fileName).exists()) return false;
         
@@ -168,12 +180,12 @@ public:
 		return true;
 	}
 
-	void bind() const {
-		glBindTexture(gltype, textureID);
-	}
+	bool loadFromRawData(const char* data, int dataSize) {
+		juce::Image image = juce::ImageFileFormat::loadFrom(data, dataSize);
 
-	void unbind() const {
-		glBindTexture(gltype, 0);
+		loadInternal(image);
+
+		return true;
 	}
 
 	void setColor(int x, int y, const MurkaColor col) {
@@ -204,7 +216,7 @@ public:
 		glBindTexture(gltype, 0);
 	}
 
-	void loadData( juce::uint8* data, int glFormat) {
+	void loadData(juce::uint8* data, int glFormat) {
 		glBindTexture(gltype, textureID);
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
@@ -224,11 +236,11 @@ public:
         }
 	}
 
-	float getWidth() const {
+	int getWidth() const {
 		return width;
 	}
 
-	float getHeight() const {
+	int getHeight() const {
 		return height;
 	}
 };

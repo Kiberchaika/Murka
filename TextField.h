@@ -5,19 +5,19 @@
 
 namespace murka {
 
-class TextField : public murka::View_NEW<TextField> {
+class TextField : public murka::View<TextField> {
     
     class KeyStroke {
-        vector<int> keys;
+        std::vector<int> keys;
         
         bool fired = false;
         
 		std::chrono::steady_clock::time_point timeItFired;
     public:
         
-        operator vector<int>() { return keys; };
+        operator std::vector<int>() { return keys; };
         
-        KeyStroke(const initializer_list<int> &il) {
+        KeyStroke(const std::initializer_list<int> &il) {
             for (auto x: il) { keys.push_back(x); }
         }
         
@@ -26,7 +26,7 @@ class TextField : public murka::View_NEW<TextField> {
         bool isPressed(MurkaEventState m) {
             if (fired) {
                 bool shouldResetFired = false;
-                for (auto &i: keys) { if (m.isKeyPressed(i)) shouldResetFired = true; }
+                for (auto &i: keys) { if (m.isKeyHeld(i)) shouldResetFired = true; }
                 if (shouldResetFired) {
                     fired = false;
                 }
@@ -35,7 +35,7 @@ class TextField : public murka::View_NEW<TextField> {
     
 			bool result = true;
 
-            for (auto &i: keys) { if (!m.isKeyPressed(i)) result = false; }
+            for (auto &i: keys) { if (!m.isKeyHeld(i)) result = false; }
             
 
             if ((std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - timeItFired).count() / 1000.0) < 0.5) {
@@ -135,38 +135,38 @@ public:
         MurkaColor c = m.getColor();
         
         if (drawBounds) {
-            ctx.pointerToRenderer->pushStyle();
-            ctx.pointerToRenderer->enableFill();
-            ctx.pointerToRenderer->setColor(widgetBgColor);
-            ctx.pointerToRenderer->drawRectangle(0, 0, ctx.getSize().x, ctx.getSize().y);
+            m.pushStyle();
+            m.enableFill();
+            m.setColor(widgetBgColor);
+            m.drawRectangle(0, 0, ctx.getSize().x, ctx.getSize().y);
             
-            ctx.pointerToRenderer->disableFill();
-            ctx.pointerToRenderer->setColor(inside ? widgetFgColor : widgetFgColor / 2);
-            if (activated) ctx.pointerToRenderer->setColor(widgetFgColor * 1.2);
-            ctx.pointerToRenderer->drawRectangle(1, 1, ctx.getSize().x-2, ctx.getSize().y-2);
-            ctx.pointerToRenderer->popStyle();
+            m.disableFill();
+            m.setColor(inside ? widgetFgColor : widgetFgColor / 2);
+            if (activated) m.setColor(widgetFgColor * 1.2);
+            m.drawRectangle(0, 0, ctx.getSize().x, ctx.getSize().y);
+            m.popStyle();
         }
         
         if (isSelectingTextNow()) {
 
             auto selectionShape = returnSelectionVisualShape();
-            MurkaColor selectionColor = (ctx.pointerToRenderer->getColor() * 0.7 +
-                                         ctx.pointerToRenderer->getColor() * 0.7) * 255;
-            ctx.pointerToRenderer->setColor(100, 100, 100, 200);
-            ctx.pointerToRenderer->drawRectangle(10 - cameraPanInsideWidget + selectionShape.x(), 4, selectionShape.width(), ctx.getSize().y - 8);
+            MurkaColor selectionColor = (m.getColor() * 0.7 +
+                                         m.getColor() * 0.7) * 255;
+            m.setColor(100, 100, 100, 200);
+            m.drawRectangle(10 - cameraPanInsideWidget + selectionShape.x(), 4, selectionShape.width(), ctx.getSize().y - 8);
         }
         
         recalcGlyphLengths(displayString, &ctx);
         
         float glyphXCoordinate = 10;
-        ctx.pointerToRenderer->setColor(widgetFgColor);
-        font->drawString(displayString, 10 - cameraPanInsideWidget, ctx.getSize().y / 2 - font->getLineHeight());
+        m.setColor(widgetFgColor);
+        font->drawString(displayString, 10 - cameraPanInsideWidget, ctx.getSize().y / 2 - font->getLineHeight() / 2);
         
         if (displayString.size() == 0) {
             // drawing hint
-            MurkaColor hintColor = ctx.pointerToRenderer->getColor() * 0.5 +
-                                   ctx.pointerToRenderer->getColor() * 0.5;
-            ctx.pointerToRenderer->setColor(hintColor * 255);
+            MurkaColor hintColor = m.getColor() * 0.5 +
+                                   m.getColor() * 0.5;
+            m.setColor(hintColor * 255);
             font->drawString(hint, 10, ctx.getSize().y / 2 - font->getLineHeight() / 2);
         }
         
@@ -190,7 +190,7 @@ public:
             
             MurkaShape currentSymbolShape = {glyphXCoordinate, 0, currentGlyphLengths[i], ctx.getSize().y};
             
-            bool safeToUseMouseClickEventsCauseEnoughTimeSinceDoubleClickPassed = ((ctx.pointerToRenderer->getElapsedTime() - lastLeftMousebuttonClicktime) > 0.2);
+            bool safeToUseMouseClickEventsCauseEnoughTimeSinceDoubleClickPassed = ((m.getElapsedTime() - lastLeftMousebuttonClicktime) > 0.2);
             
             // Setting cursor position inside the string if pressed inside it
             if ((insideGlyph) && (ctx.mouseDownPressed[0])) {
@@ -214,14 +214,18 @@ public:
                     didSetCursorPosition = true;
                     updateTextSelectionSecond(i);
                     if (doubleClick) {
-                        std::cout << "updating second even tho its a doubleclick";
+#ifdef MURKA_DEBUG
+                        std::cout << "updating second even tho its a doubleclick" << std::endl;
+#endif
                     }
                 } else {
                     cursorPosition = i + 1;
                     didSetCursorPosition = true;
                     updateTextSelectionSecond(i + 1);
                     if (doubleClick) {
-                        std::cout << "updating second even tho its a doubleclick";
+#ifdef MURKA_DEBUG
+                        std::cout << "updating second even tho its a doubleclick" << std::endl;
+#endif
                     }
                 }
             }
@@ -254,15 +258,13 @@ public:
 
         // drawing cursor
         if (activated && !isSelectingTextNow()) {
-            float timeMod = ctx.getRunningTime() / 1.0 - int(ctx.getRunningTime() / 1.0);
-            ctx.pointerToRenderer->setColor(200);
+            float timeMod = m.getElapsedTime() / 1.0 - int(m.getElapsedTime() / 1.0);
+            m.setColor(200);
             if (timeMod > 0.5)
-                ctx.pointerToRenderer->drawLine(cursorPositionInPixels - cameraPanInsideWidget, 3,
+                m.drawLine(cursorPositionInPixels - cameraPanInsideWidget, 3,
                            cursorPositionInPixels - cameraPanInsideWidget, 30);
         }
-        
 
-        
         bool enterPressed = false;
         
         // Text editing logic
@@ -277,21 +279,25 @@ public:
             // Keystrokes support
             
             if ((copyText.isPressed(ctx)) && (activated) && (isSelectingTextNow())) {
-                std::cout << "copytext!!";
+#ifdef MURKA_DEBUG
+                std::cout << "copytext!!" << std::endl;
+#endif
                 
                 auto substr = displayString.substr(selectionSymbolsRange.first, selectionSymbolsRange.second - selectionSymbolsRange.first);
                 
-				ctx.pointerToRenderer->setClipboardString(substr);
+				m.setClipboardString(substr);
 
                 copyText.fire();
             } else
             if ((cutText.isPressed(ctx)) && (activated) && (isSelectingTextNow())) {
-                std::cout << "cutText!!";
+#ifdef MURKA_DEBUG
+                std::cout << "cutText!!" << std::endl;
+#endif
                 
                 if (isSelectingTextNow()) { // if we select now, backspace just deletes
                     auto substr = displayString.substr(selectionSymbolsRange.first, selectionSymbolsRange.second - selectionSymbolsRange.first);
                     
-					ctx.pointerToRenderer->setClipboardString(substr);
+					m.setClipboardString(substr);
                     
                     displayString.replace(selectionSymbolsRange.first, selectionSymbolsRange.second - selectionSymbolsRange.first, "");
                     cursorPosition = selectionSymbolsRange.first;
@@ -302,20 +308,24 @@ public:
                 cutText.fire();
             } else
             if ((pasteText.isPressed(ctx)) && (activated)) {
-                std::cout << "pasteText!!";
+#ifdef MURKA_DEBUG
+                std::cout << "pasteText!!" << std::endl;
+#endif
                 
                 if (isSelectingTextNow()) { // if we select now, it also replaces the selected text
                     displayString.replace(selectionSymbolsRange.first, selectionSymbolsRange.second - selectionSymbolsRange.first, "");
                     cursorPosition = selectionSymbolsRange.first;
                 }
 				
-                displayString.insert(cursorPosition, ctx.pointerToRenderer->getClipboardString());
-                cursorPosition += ctx.pointerToRenderer->getClipboardString().length();
+                displayString.insert(cursorPosition, m.getClipboardString());
+                cursorPosition += m.getClipboardString().length();
                 
                 pasteText.fire();
             } else
             if ((goLeft.isPressed(ctx)) && (activated)) {
-                std::cout << "goLeft!!";
+#ifdef MURKA_DEBUG
+                std::cout << "goLeft!!" << std::endl;
+#endif
                 
                 cursorPosition = 0;
                 
@@ -324,12 +334,16 @@ public:
                     updateTextSelectionSecond(cursorPosition);
                 } else { // shift pressed, so we enlarge the selected text shape
                     if (selectionSymbolsRange.first == selectionSymbol1Index) {
-                        std::cout << "updating first to left...";
+#ifdef MURKA_DEBUG
+                        std::cout << "updating first to left..." << std::endl;
+#endif
                         auto second = selectionSymbolsRange.second;
                         updateTextSelectionFirst(cursorPosition);
                         updateTextSelectionSecond(second);
                     } else {
-                        std::cout << "updating second to left...";
+#ifdef MURKA_DEBUG
+                        std::cout << "updating second to left..." << std::endl;
+#endif
                         updateTextSelectionSecond(cursorPosition);
                     }
                 }
@@ -338,7 +352,9 @@ public:
                 goLeft.fire();
             } else
             if ((goRight.isPressed(ctx)) && (activated)) {
-                std::cout << "goRight!!";
+#ifdef MURKA_DEBUG
+                std::cout << "goRight!!" << std::endl;
+#endif
 
                 cursorPosition = displayString.size();
 
@@ -358,7 +374,9 @@ public:
                 goRight.fire();
             } else
             if ((selectAll.isPressed(ctx)) && (activated)) {
-                std::cout << "selectAll!!";
+#ifdef MURKA_DEBUG
+                std::cout << "selectAll!!" << std::endl;
+#endif
                 
                 updateTextSelectionFirst(0);
                 updateTextSelectionSecond(displayString.length());
@@ -368,7 +386,9 @@ public:
             if (ctx.keyPresses.size() != 0) {
            
                 for (auto key: ctx.keyPresses) {
-//                        std::cout << key;
+#ifdef MURKA_DEBUG
+                    std::cout << key << std::endl;
+#endif
                     
                     if (key == MURKA_KEY_RETURN) { // enter
                         enterPressed = true;
@@ -448,10 +468,13 @@ public:
                         
                     }
                     else if (key >= 45 && key <= 57) { // number keys, - and .
-                        
-                        std::cout << "pressed numeric key " << key;
+#ifdef MURKA_DEBUG
+                        std::cout << "pressed numeric key " << key << std::endl;
+#endif
                         if (isSelectingTextNow()) {
-                            std::cout << "   .. and selecting text now ..";
+#ifdef MURKA_DEBUG
+                            std::cout << "   .. and selecting text now .." << std::endl;
+#endif
                             displayString.replace(selectionSymbolsRange.first, selectionSymbolsRange.second - selectionSymbolsRange.first, "");
                             cursorPosition = selectionSymbolsRange.first;
                         }
@@ -464,10 +487,13 @@ public:
                         updateTextSelectionSecond(cursorPosition);
                     }
 					else if (!numbersOnly && key >= 32 && key <= 255) { // symbol keys
-
-						std::cout << "pressed symbol key " << key;
+#ifdef MURKA_DEBUG
+						std::cout << "pressed symbol key " << key << std::endl;
+#endif
 						if (isSelectingTextNow()) {
-							std::cout << "   .. and selecting text now ..";
+#ifdef MURKA_DEBUG
+							std::cout << "   .. and selecting text now .." << std::endl;
+#endif
 							displayString.replace(selectionSymbolsRange.first, selectionSymbolsRange.second - selectionSymbolsRange.first, "");
 							cursorPosition = selectionSymbolsRange.first;
 						}
@@ -479,15 +505,13 @@ public:
 						updateTextSelectionFirst(cursorPosition);
 						updateTextSelectionSecond(cursorPosition);
 					}
-
                 }
-
 			}
         }
         
         // Deactivating the widget and updating the data
         
-        results = false;
+        editingFinished = false;
         
         if ((activated) && (!alwaysActivated))
         if ((enterPressed) || (ctx.mouseDownPressed[0] && !inside)) {
@@ -498,17 +522,19 @@ public:
             
             updateExternalData(dataToControl, clampNumber);
             
-            results = true;
+            editingFinished = true;
         }
-        
+
 //            drawWidget<Label>(ctx, {""});
     };
     
-    bool results = false;
+    bool editingFinished = false;
     
     void updateExternalData(void* dataToControl, bool clamp = false) {
-//            std::cout << "datatype: " << dataTypeName;
-//            std::cout << "stringtype: " << typeid(std::string*).name();
+#ifdef MURKA_DEBUG
+            std::cout << "datatype: " << dataTypeName << std::endl;
+            std::cout << "stringtype: " << typeid(std::string*).name() << std::endl;
+#endif
             if (dataTypeName == typeid(std::string*).name()) {
                 *((std::string*)dataToControl) = displayString;
             }
@@ -517,7 +543,9 @@ public:
 
 				*floatData = std::stof(displayString);
                 
-				std::cout << "setting it to " << *floatData;
+#ifdef MURKA_DEBUG
+				std::cout << "setting it to " << *floatData << std::endl;
+#endif
             }
             if (dataTypeName == typeid(double*).name()) {
                 double* doubleData = ((double*)dataToControl);
@@ -555,7 +583,6 @@ public:
                     displayString = to_string_with_precision(max, precision);
                 }
             }
-
         }
         if (dataTypeName == typeid(double*).name()) {
             double* doubleData = ((double*)dataToControl);
@@ -569,7 +596,6 @@ public:
                     displayString = to_string_with_precision(max, precision);
                 }
             }
-
         }
         if (dataTypeName == typeid(int*).name()) {
             int* intData = ((int*)dataToControl);
@@ -583,7 +609,6 @@ public:
                     displayString = to_string_with_precision(int(max));
                 }
             }
-
         }
         
         if (!isItStringData) {
@@ -642,18 +667,28 @@ public:
 
 //    bool shouldForceEditorToSelectAll = false;
         
-    TextField & controlling(void* dataToControl_) {
+    TextField & controlling(float* dataToControl_) {
         dataToControl = dataToControl_;
+        dataTypeName = typeid(float*).name();
+
+        return *this;
+    }
+
+    TextField & controlling(double* dataToControl_) {
+        dataToControl = dataToControl_;
+        dataTypeName = typeid(double*).name();
+
+        return *this;
+    }
+
+    TextField & controlling(int* dataToControl_) {
+        dataToControl = dataToControl_;
+        dataTypeName = typeid(int*).name();
+
         return *this;
     }
     
-    
     FontObject* font;
-    
-    // The results type, you also need to define it even if it's nothing.
-    typedef bool Results;
-    
-    // Everything else is for handling the internal state
     
     float cameraPanInsideWidget = 0;
 
@@ -705,8 +740,8 @@ public:
     }
     
     void updateTextSelectionRange() {
-        selectionSymbolsRange = {min(selectionSymbol1Index, selectionSymbol2Index),
-                                 max(selectionSymbol1Index, selectionSymbol2Index)};
+        selectionSymbolsRange = {(std::min)(selectionSymbol1Index, selectionSymbol2Index),
+                                 (std::max)(selectionSymbol1Index, selectionSymbol2Index)};
         
     }
     
@@ -714,8 +749,6 @@ public:
         
         MurkaShape selectionFirstSymbolShape = {0, 0, 0, 0};
         MurkaShape selectionLastSymbolShape = {0, 0, 0, 0};
-
-//        std::cout << "bounds!!!";
         
         float x = 0;
         for (int i = 0; i < currentGlyphLengths.size(); i++) {
@@ -727,7 +760,6 @@ public:
             }
             x += currentGlyphLengths[i];
         }
-        
         
         if (selectionFirstSymbolShape.x() < selectionLastSymbolShape.x()) {
             return {selectionFirstSymbolShape.x(), 0, selectionLastSymbolShape.x() + selectionLastSymbolShape.width() - selectionFirstSymbolShape.x(), 20};
@@ -741,7 +773,6 @@ public:
     virtual bool wantsClicks() override { // this will signal the parent widget's "inside" function to allow to drag the parent widget around or do something else unless this one is activated; but we allow it to activate
         
         return thisWantsClicks;
-        
     }
 
     bool pastSelectingTextResult = false;
@@ -750,7 +781,9 @@ public:
         bool result = (activated && (selectionSymbolsRange.first != selectionSymbolsRange.second));
         
         if (pastSelectingTextResult != result) {
-            std::cout << "ok switch!";
+#ifdef MURKA_DEBUG
+            std::cout << "ok switch!" << std::endl;
+#endif
         }
         pastSelectingTextResult = result;
         
@@ -758,7 +791,7 @@ public:
     }
     
     int selectionSymbol1Index = 0, selectionSymbol2Index = 0; // 2 selection symbols, the first is where selection was started, the second is where it is "now"
-    pair<int, int> selectionSymbolsRange = {0, 0}; // Range of symbols is calculated from symbols 1 & 2, the lesser of those becomes the beginning of the range, the bigger becomes the end
+    std::pair<int, int> selectionSymbolsRange = {0, 0}; // Range of symbols is calculated from symbols 1 & 2, the lesser of those becomes the beginning of the range, the bigger becomes the end
     
     std::string displayString;
     
@@ -770,5 +803,4 @@ public:
     
     float textHeight;
 };
-
 }

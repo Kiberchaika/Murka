@@ -24,7 +24,8 @@ private:
      */
     
 public:
-
+    
+    int drawingTicketId = -1;
    
     std::pair<MurkaShape, MurkaPoint> getCroppedViewport(MurkaShape parent, MurkaShape view) const {
         MurkaPoint pos = {(std::max)(parent.position.x + view.position.x, parent.position.x),
@@ -44,15 +45,11 @@ public:
         return std::make_pair(MurkaShape(pos.x, pos.y, size.x, size.y), negativePosition);
     }
     
-
     
-    
-    // All shapes are absolute
+    // All shapes are absolute coordinates
     MurkaShape* currentWidgetShapeSource; // this shape pointer points to a shape of the current
-    // view that you could use inside the widget to reshape it if needed // TODO: get rid of this (v2)
-    void* linkedView = nullptr; // the MurkaView that this context once represented
-    
-    ViewBase_NEW* linkedView_NEW = nullptr; // the MurkaView that this context last represented
+    // view that you could use inside the widget to reshape it if needed // TODO: get rid of this (v1.0)
+    ViewBase* linkedView = nullptr; // the MurkaView that this context last represented
     
 
 
@@ -64,17 +61,13 @@ public:
     void resetImCounter() {
         imCounter = 0;
     }
-    
-//    void pushContext(MurkaViewHandlerInternal* viewSource) {
-//        pushContextInternal(viewSource);
-//    }
 
-    void pushContext_NEW(ViewBase_NEW* viewSource) {
-        pushContextInternal_NEW(viewSource);
+    void pushContext_NEW(ViewBase* viewSource) {
+        pushContextInternal(viewSource);
     }
 
     void popContext() {
-        popContextInternal_NEW();
+        popContextInternal();
     }
     
     std::function<void(void*)> claimKeyboardFocus = [](void*) {return; };
@@ -82,10 +75,8 @@ public:
     std::function<bool(void*)> checkKeyboardFocus = [](void*)->bool {return true; }; // aka "widget is allowed to use keyboard"
 
     // This uses Animator class because you can't include View from here
-    std::function<void(ViewBase_NEW*)> pushContextInternal_NEW = [](ViewBase_NEW* v) {};
-    std::function<void()> popContextInternal_NEW = []() {};
-
-    double getRunningTime()  {return pointerToRenderer->getElapsedTime();}
+    std::function<void(ViewBase*)> pushContextInternal = [](ViewBase* v) {};
+    std::function<void()> popContextInternal = []() {};
 
 private:
     int imCounter = 0; // the counter that we use to distinguish new widgets from the ones we

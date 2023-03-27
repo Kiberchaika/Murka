@@ -8,7 +8,7 @@
 
 namespace murka {
 
-class LambdaButton : public View_NEW<LambdaButton> {
+class LambdaButton : public View<LambdaButton> {
 public:
     MURKA_VIEW_DRAW_FUNCTION  {
 

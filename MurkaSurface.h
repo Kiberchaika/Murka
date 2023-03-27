@@ -93,7 +93,9 @@ public:
             
             if (!c.mouseDown[0]) {
                 if (draggingData.panActive) {
-//                    std::cout << "stopping pan.";
+#ifdef MURKA_DEBUG
+                    std::cout << "stopping pan." << std::endl;
+#endif
                 }
                 draggingData.panActive = false;
                 draggingData.internalDragCaptureActive = false;
@@ -123,7 +125,9 @@ public:
 #endif
             
             if (!performingMultitouchZoomNow) { // checking if this was trackpad gesture
-//                std::cout << "no multitouch.";
+#ifdef MURKA_DEBUG
+                std::cout << "no multitouch." << std::endl;
+#endif
                 if (surface.scrollwheelShouldZoom) {
                     zoom(c.mouseScroll.y * 5 * osScrollwheelMultiplier, c);
                 } else
