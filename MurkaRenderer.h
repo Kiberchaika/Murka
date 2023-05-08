@@ -662,7 +662,7 @@ public:
 	// Textures binding
 	void bind(const MurImage & img, int location = 0) override {
 		if (img.isAllocated()) {
-			useTexture = true;
+			if(location==0) useTexture = true;
 			openGLContext->extensions.glActiveTexture(GL_TEXTURE0 + location);
 			img.bind();
 		}
@@ -670,14 +670,15 @@ public:
 
 	void unbind(const MurImage & img, int location = 0) override {
 		if (img.isAllocated()) {
-			useTexture = false;
+			if (location == 0) useTexture = false;
+			openGLContext->extensions.glActiveTexture(GL_TEXTURE0 + location);
 			img.unbind();
 		}
 	}
 	
 	void bind(const MurTexture& texture, int location = 0) override {
 		if (texture.isAllocated()) {
-			useTexture = true;
+			if (location == 0) useTexture = true;
 			openGLContext->extensions.glActiveTexture(GL_TEXTURE0 + location);
 			texture.bind();
 		}
@@ -685,7 +686,7 @@ public:
 
 	void unbind(const MurTexture& texture, int location = 0) override {
 		if (texture.isAllocated()) {
-			useTexture = false;
+			if (location == 0) useTexture = false;
 			openGLContext->extensions.glActiveTexture(GL_TEXTURE0 + location);
 			texture.unbind();
 		}
@@ -693,7 +694,7 @@ public:
 
 	void bind(const MurFbo& fbo, int location = 0) override {
 		if (fbo.isAllocated()) {
-			useTexture = true;
+			if (location == 0) useTexture = true;
 			openGLContext->extensions.glActiveTexture(GL_TEXTURE0 + location);
 			fbo.bind();
 		}
@@ -701,7 +702,7 @@ public:
 
 	void unbind(const MurFbo& fbo, int location = 0) override {
 		if (fbo.isAllocated()) {
-			useTexture = false;
+			if (location == 0) useTexture = false;
 			openGLContext->extensions.glActiveTexture(GL_TEXTURE0 + location);
 			fbo.unbind();
 		}

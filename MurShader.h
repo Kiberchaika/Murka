@@ -220,6 +220,7 @@ public:
 			uniform->set(v1, v2);
 		}
 	}
+
 	void setUniform2f(std::string name, float v1, float v2) {
 		juce::OpenGLShaderProgram::Uniform* uniform = getUniformByName(name);
 		if (uniform) {
@@ -264,6 +265,10 @@ public:
 		if (uniform) {
 			uniform->setMatrix4((GLfloat*)&(m.mat[0]), 1, false);
 		}
+	}
+
+	void setTextureLocation(std::string name, int v) {
+		setUniform1i(name, v);
 	}
 
 	bool isLoaded() {
