@@ -233,6 +233,8 @@ public:
         if (bAllocated) {
             glDeleteTextures(1, &textureID);
             bAllocated = false;
+			width = 0;
+			height = 0;
         }
 	}
 
