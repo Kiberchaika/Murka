@@ -23,7 +23,7 @@ class TextField : public murka::View<TextField> {
         
         KeyStroke() { }
         
-        bool isPressed(MurkaEventState m) {
+        bool isPressed(MurkaViewEventsContainer m) {
             if (fired) {
                 bool shouldResetFired = false;
                 for (auto &i: keys) { if (m.isKeyHeld(i)) shouldResetFired = true; }
@@ -71,10 +71,7 @@ public:
     
     void internalDraw(Murka & m) {
 
-        MurkaContext& ctx = m.currentContext;
-
-        bool inside = ctx.isHovered() *
-            !areInteractiveChildrenHovered(ctx) *
+        bool isInside = inside() *
             hasMouseFocus(m);
 
         std::string* stringData;
@@ -95,7 +92,7 @@ public:
 
         useCustomFont ? font = customFont : font = m.getCurrentFont();
         
-        bool doubleClick = false;
+        bool doubleClicked = false;
         
         if (shouldForceEditorToSelectAll) {
             updateTextSelectionFirst(0);
@@ -103,30 +100,36 @@ public:
             lastLeftMousebuttonClicktime = m.getElapsedTime();
         }
         
+        // grabbing focus is asked to explicitly
+        
+        if (shouldGrabFocusThisFrame) {
+            claimKeyboardFocus();
+        }
+        
         // activating if always selected
         
         if (alwaysActivated) {
             activated = true;
             updateExternalData(dataToControl, clampNumber);
-            ctx.claimKeyboardFocus(this);
+            claimKeyboardFocus();
         }
 
         // activation & deactivation & doubleclick
-        if (ctx.mouseDownPressed[0]) {
-            if (inside && !activated) {
+        if (mouseDownPressed(0)) {
+            if (isInside && !activated) {
                 if (activateByDoubleClickOnly) {
-                    activated = ctx.doubleClick;
+                    activated = doubleClick();
                 } else { // activate by any click
                     activated = true;
                 }
                 
-                if (activated) ctx.claimKeyboardFocus(this);
+                if (activated) claimKeyboardFocus();
                 
                 updateInternalRepresenation(dataToControl, precision, clampNumber, minNumber, maxNumber);
             }
             
             if (((m.getElapsedTime() - lastLeftMousebuttonClicktime) < 0.2) && (activated)) {
-                doubleClick = true;
+                doubleClicked = true;
             }
 
             lastLeftMousebuttonClicktime = m.getElapsedTime();
@@ -138,12 +141,12 @@ public:
             m.pushStyle();
             m.enableFill();
             m.setColor(widgetBgColor);
-            m.drawRectangle(0, 0, ctx.getSize().x, ctx.getSize().y);
+            m.drawRectangle(0, 0, getSize().x, getSize().y);
             
             m.disableFill();
-            m.setColor(inside ? widgetFgColor : widgetFgColor / 2);
+            m.setColor(isInside ? widgetFgColor : widgetFgColor / 2);
             if (activated) m.setColor(widgetFgColor * 1.2);
-            m.drawRectangle(0, 0, ctx.getSize().x, ctx.getSize().y);
+            m.drawRectangle(0, 0, getSize().x, getSize().y);
             m.popStyle();
         }
         
@@ -153,33 +156,33 @@ public:
             MurkaColor selectionColor = (m.getColor() * 0.7 +
                                          m.getColor() * 0.7) * 255;
             m.setColor(100, 100, 100, 200);
-            m.drawRectangle(10 - cameraPanInsideWidget + selectionShape.x(), 4, selectionShape.width(), ctx.getSize().y - 8);
+            m.drawRectangle(10 - cameraPanInsideWidget + selectionShape.x(), 4, selectionShape.width(), getSize().y - 8);
         }
         
-        recalcGlyphLengths(displayString, &ctx);
+        recalcGlyphLengths(displayString);
         
         float glyphXCoordinate = 10;
         m.setColor(widgetFgColor);
-        font->drawString(displayString, 10 - cameraPanInsideWidget, ctx.getSize().y / 2 - font->getLineHeight() / 2);
+        font->drawString(displayString, 10 - cameraPanInsideWidget, getSize().y / 2 - font->getLineHeight() / 2);
         
         if (displayString.size() == 0) {
             // drawing hint
             MurkaColor hintColor = m.getColor() * 0.5 +
                                    m.getColor() * 0.5;
             m.setColor(hintColor * 255);
-            font->drawString(hint, 10, ctx.getSize().y / 2 - font->getLineHeight() / 2);
+            font->drawString(hint, 10, getSize().y / 2 - font->getLineHeight() / 2);
         }
         
-        textHeight = ctx.getSize().y; // this is cache for text selection rect retrieavl
+        textHeight = getSize().y; // this is cache for text selection rect retrieavl
         
         bool didSetCursorPosition = false;
         float cursorPositionInPixels = 0;
         float sumGlyphWidths;
         for (int i = 0; i < displayString.size(); i++) {
             
-            MurkaShape glyphShape = MurkaShape(glyphXCoordinate - cameraPanInsideWidget, 0, currentGlyphLengths[i], ctx.getSize().y);
+            MurkaShape glyphShape = MurkaShape(glyphXCoordinate - cameraPanInsideWidget, 0, currentGlyphLengths[i], getSize().y);
             
-            bool insideGlyph = glyphShape.inside(ctx.mousePosition);
+            bool insideGlyph = glyphShape.inside(mousePosition());
             
             /*
 			ctx.renderer->disableFill();
@@ -188,13 +191,13 @@ public:
 			ctx.renderer->enableFill();
 			*/
             
-            MurkaShape currentSymbolShape = {glyphXCoordinate, 0, currentGlyphLengths[i], ctx.getSize().y};
+            MurkaShape currentSymbolShape = {glyphXCoordinate, 0, currentGlyphLengths[i], getSize().y};
             
             bool safeToUseMouseClickEventsCauseEnoughTimeSinceDoubleClickPassed = ((m.getElapsedTime() - lastLeftMousebuttonClicktime) > 0.2);
             
             // Setting cursor position inside the string if pressed inside it
-            if ((insideGlyph) && (ctx.mouseDownPressed[0])) {
-                if (((ctx.mousePosition.x - glyphXCoordinate) / currentGlyphLengths[i]) < 0.5) {
+            if ((insideGlyph) && (mouseDownPressed(0))) {
+                if (((mousePosition().x - glyphXCoordinate) / currentGlyphLengths[i]) < 0.5) {
                     cursorPosition = i;
                     didSetCursorPosition = true;
                     updateTextSelectionFirst(i);
@@ -207,13 +210,13 @@ public:
             
             // Moving text selection if mouse was already pressed, and moving the cursror too
             
-            if ((insideGlyph) && (ctx.mouseDown[0]) && (!ctx.mouseDownPressed[0])
+            if ((insideGlyph) && (mouseDown(0)) && (!mouseDownPressed(0))
                 && (safeToUseMouseClickEventsCauseEnoughTimeSinceDoubleClickPassed)) {
-                if (((ctx.mousePosition.x - glyphXCoordinate) / currentGlyphLengths[i]) < 0.5) {
+                if (((mousePosition().x - glyphXCoordinate) / currentGlyphLengths[i]) < 0.5) {
                     cursorPosition = i;
                     didSetCursorPosition = true;
                     updateTextSelectionSecond(i);
-                    if (doubleClick) {
+                    if (doubleClicked) {
 #ifdef MURKA_DEBUG
                         std::cout << "updating second even tho its a doubleclick" << std::endl;
 #endif
@@ -222,7 +225,7 @@ public:
                     cursorPosition = i + 1;
                     didSetCursorPosition = true;
                     updateTextSelectionSecond(i + 1);
-                    if (doubleClick) {
+                    if (doubleClicked) {
 #ifdef MURKA_DEBUG
                         std::cout << "updating second even tho its a doubleclick" << std::endl;
 #endif
@@ -237,7 +240,7 @@ public:
         
         
         // Setting cursor position to the end of the string if mouse pressed outside of it
-        if ((inside) && (ctx.mouseDownPressed[0]) && (!didSetCursorPosition)) {
+        if ((isInside) && (mouseDownPressed(0)) && (!didSetCursorPosition)) {
             cursorPosition = displayString.size();
         }
         
@@ -251,8 +254,8 @@ public:
                 cameraPanInsideWidget = cursorPositionInPixels - 5;
             }
             
-            if (cursorPositionInPixels > (ctx.getSize().x + cameraPanInsideWidget)) {
-                cameraPanInsideWidget = cursorPositionInPixels - ctx.getSize().x + 5;
+            if (cursorPositionInPixels > (getSize().x + cameraPanInsideWidget)) {
+                cameraPanInsideWidget = cursorPositionInPixels - getSize().x + 5;
             }
         }
 
@@ -270,7 +273,7 @@ public:
         // Text editing logic
         if (activated) { // remember that drawing occurs even if its not activated
 
-            if (doubleClick) {
+            if (doubleClicked) {
                 updateTextSelectionFirst(0);
                 updateTextSelectionSecond(displayString.length());
                 updateTextSelectionRange();
@@ -278,7 +281,7 @@ public:
 
             // Keystrokes support
             
-            if ((copyText.isPressed(ctx)) && (activated) && (isSelectingTextNow())) {
+            if ((copyText.isPressed(*this)) && (activated) && (isSelectingTextNow())) {
 #ifdef MURKA_DEBUG
                 std::cout << "copytext!!" << std::endl;
 #endif
@@ -289,7 +292,7 @@ public:
 
                 copyText.fire();
             } else
-            if ((cutText.isPressed(ctx)) && (activated) && (isSelectingTextNow())) {
+            if ((cutText.isPressed(*this)) && (activated) && (isSelectingTextNow())) {
 #ifdef MURKA_DEBUG
                 std::cout << "cutText!!" << std::endl;
 #endif
@@ -307,7 +310,7 @@ public:
                 
                 cutText.fire();
             } else
-            if ((pasteText.isPressed(ctx)) && (activated)) {
+            if ((pasteText.isPressed(*this)) && (activated)) {
 #ifdef MURKA_DEBUG
                 std::cout << "pasteText!!" << std::endl;
 #endif
@@ -322,14 +325,14 @@ public:
                 
                 pasteText.fire();
             } else
-            if ((goLeft.isPressed(ctx)) && (activated)) {
+            if ((goLeft.isPressed(*this)) && (activated)) {
 #ifdef MURKA_DEBUG
                 std::cout << "goLeft!!" << std::endl;
 #endif
                 
                 cursorPosition = 0;
                 
-                if (!shiftLeft.isPressed(ctx)) {
+                if (!shiftLeft.isPressed(*this)) {
                     updateTextSelectionFirst(cursorPosition);
                     updateTextSelectionSecond(cursorPosition);
                 } else { // shift pressed, so we enlarge the selected text shape
@@ -351,14 +354,14 @@ public:
 
                 goLeft.fire();
             } else
-            if ((goRight.isPressed(ctx)) && (activated)) {
+            if ((goRight.isPressed(*this)) && (activated)) {
 #ifdef MURKA_DEBUG
                 std::cout << "goRight!!" << std::endl;
 #endif
 
                 cursorPosition = displayString.size();
 
-                if (!shiftRight.isPressed(ctx)) {
+                if (!shiftRight.isPressed(*this)) {
                     updateTextSelectionFirst(cursorPosition);
                     updateTextSelectionSecond(cursorPosition);
                 } else {
@@ -373,7 +376,7 @@ public:
                     
                 goRight.fire();
             } else
-            if ((selectAll.isPressed(ctx)) && (activated)) {
+            if ((selectAll.isPressed(*this)) && (activated)) {
 #ifdef MURKA_DEBUG
                 std::cout << "selectAll!!" << std::endl;
 #endif
@@ -383,9 +386,21 @@ public:
                 
                 selectAll.fire();
             } else
-            if (ctx.keyPresses.size() != 0) {
+            if (keyReleases().size() != 0) {
+                
+                for (auto key: keyReleases()) {
+#ifdef MURKA_DEBUG
+                    std::cout << key << std::endl;
+#endif
+                    if (key == MURKA_KEY_RETURN) { // enter
+                        enterPressed = true;
+                    }
+                }
+            }
+            else
+            if (keyPresses().size() != 0) {
            
-                for (auto key: ctx.keyPresses) {
+                for (auto key: keyPresses()) {
 #ifdef MURKA_DEBUG
                     std::cout << key << std::endl;
 #endif
@@ -432,7 +447,7 @@ public:
                                 cursorPosition --;
                             }
                             
-                            if (!shiftLeft.isPressed(ctx)) {
+                            if (!shiftLeft.isPressed(*this)) {
                                 // pressing left collapses the text selection if shift isn't pressed
                                 updateTextSelectionFirst(cursorPosition);
                                 updateTextSelectionSecond(cursorPosition);
@@ -456,7 +471,7 @@ public:
                             }
 
                             
-                            if (!shiftRight.isPressed(ctx)) {
+                            if (!shiftRight.isPressed(*this)) {
                                 // pressing left collapses the text selection if shift isn't pressed
                                 updateTextSelectionFirst(cursorPosition);
                                 updateTextSelectionSecond(cursorPosition);
@@ -514,11 +529,11 @@ public:
         editingFinished = false;
         
         if ((activated) && (!alwaysActivated))
-        if ((enterPressed) || (ctx.mouseDownPressed[0] && !inside)) {
+        if ((enterPressed) || (mouseDownPressed(0) && !isInside)) {
             activated = false;
             cameraPanInsideWidget = 0;
             
-            ctx.resetKeyboardFocus(this);
+            resetKeyboardFocus();
             
             updateExternalData(dataToControl, clampNumber);
             
@@ -688,11 +703,20 @@ public:
         return *this;
     }
     
+    TextField & grabKeyboardFocus() {
+        shouldGrabFocusThisFrame = true;
+        
+        return *this;
+    }
+    
+    bool shouldGrabFocusThisFrame = false;
+
+    
     FontObject* font;
     
     float cameraPanInsideWidget = 0;
 
-    void recalcGlyphLengths(std::string text, const MurkaContext* ctx) {
+    void recalcGlyphLengths(std::string text) {
         if (currentGlyphLengths.size() < text.size()) {
             currentGlyphLengths.resize(text.size());
         }

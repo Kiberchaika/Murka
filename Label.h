@@ -7,18 +7,17 @@ namespace murka {
 class Label : public View<Label> {
 public:
 	void internalDraw(Murka & m) {
-		MurkaContext& c = m.currentContext;
-
-        bool inside = c.isHovered() * !areChildrenHovered(c);
         
-        if (isHovered != inside) {
-            isHovered = inside;
+        bool isInside = inside();
+        
+        if (isHovered != isInside) {
+            isHovered = isInside;
             onHoverChangeCallback(*this);
         }
         
         if (isHovered) onHoverCallback(*this);
          
-        if (c.mouseDownPressed[0] && inside) {
+        if (mouseDownPressed(0) && isInside) {
             onClickCallback(*this);
             onClickCallbackPosition(*this, {25, 11});
         }

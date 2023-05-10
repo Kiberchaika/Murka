@@ -8,17 +8,20 @@
 #include "MurkaLinearLayoutGenerator.h"
 #include "MurkaAnimator.h"
 #include "MurkaChildContextHolder.h"
+#include "MurkaViewEventsContainer.h"
 
 namespace murka {
     
 template<typename T>
-class View: public ViewBase {
+class View: public ViewBase, public MurkaViewEventsContainer {
 public:
     
     // This variable is needed to support immediate mode widgets resizing themselves while also receiving sizes from outside.
     MurkaShape latestShapeThatCameFromOutside;
     
     virtual bool wantsClicks() { return true; } // override this if you want to signal to other widgets that you don't want clicks
+    
+    MurkaContext currentContext = MurkaContext();
     
 public:
     View() {
@@ -47,11 +50,26 @@ public:
     
     int hoverIndexCache = 0;
     
+    void registerCurrentContext(MurkaContext c) {
+        currentContext = c;
+    }
+    
+    MurkaPoint getSize() {
+        return currentContext.getSize();
+    }
+
+    MurkaPoint getAbsoluteViewPosition() {
+        return currentContext.currentViewShape.position;
+    }
+
+    void addOverlay(std::function<void()> func, void* object) {
+        currentContext.overlayHolder->addOverlay(func, object);
+    }
+    
+    // This function is used to prevent hover if one of the children is hovered.
     bool hasMouseFocus(MurkaChildContextHolder& m) {
-        bool inside = m.latestChildContext.isHovered() * !areInteractiveChildrenHovered(m.latestChildContext);
-        
         bool pass = false;
-        if (inside && wantsClicks()) {
+        if (inside() && wantsClicks()) {
             auto itr = m.latestChildContext.iterateHoverIndex();
             if (hoverIndexCache != m.latestChildContext.getMaxHoverIndex()) pass = false;
                 else pass = true;
@@ -61,70 +79,83 @@ public:
         
         return pass;
     }
+
+    // This function is used to prevent hover if one of the children is hovered.
+    bool hasMouseFocus(MurkaContext& c) {
+        bool pass = false;
+        if (isHovered() && wantsClicks()) {
+            auto itr = c.iterateHoverIndex();
+            if (hoverIndexCache != c.getMaxHoverIndex()) pass = false;
+                else pass = true;
+                
+            hoverIndexCache = itr;
+        }
+        
+        return pass;
+    }
+
+
+    bool areInteractiveChildrenHovered() {
+        if (!currentContext.isHovered()) {
+            return false;
+        }
+        
+        /*
+        for (auto i: children) {
+            auto shape = ((View*)i->widgetObjectInternal)->shape;
+            shape.position = ((View*)i->widgetObjectInternal)->shape.position;
+            
+            if ((shape.inside(c.mousePosition)) && (((View*)i->widgetObjectInternal)->wantsClicks())) {
+                return true;
+            }
+        }
+        */
+        
+        int index = 0;
+//        typename std::map<imIdentifier, MurkaViewHandler<View_NEW>*>::iterator it;
+        for (auto it = imChildren.begin(); it != imChildren.end(); it++) {
+            auto shape = ((View*)it->second)->shape;
+            shape.position = ((View*)it->second)->shape.position;
+            
+            if ((shape.inside(currentContext.mousePosition)) && (((View*)it->second)->wantsClicks())) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
     
-    bool areInteractiveChildrenHovered(MurkaChildContextHolder& m) {
-        if (!m.latestChildContext.isHovered()) {
-            return false;
+    bool isHovered() {
+        return currentContext.isHovered();
+    }
+    
+    bool inside(bool includingAllChildren = false,
+                bool includingInteractiveChildrenButNotAll = false) {
+        bool result = false;
+        if (!includingAllChildren && !includingInteractiveChildrenButNotAll) {
+            result = currentContext.isHovered() * !areChildrenHovered();
+        } else if (includingAllChildren) {
+            result = currentContext.isHovered();
+        } else if (includingInteractiveChildrenButNotAll) {
+            result = areInteractiveChildrenHovered();
         }
         
-        /*
-        for (auto i: children) {
-            auto shape = ((View*)i->widgetObjectInternal)->shape;
-            shape.position = ((View*)i->widgetObjectInternal)->shape.position;
-            
-            if ((shape.inside(c.mousePosition)) && (((View*)i->widgetObjectInternal)->wantsClicks())) {
-                return true;
-            }
-        }
-        */
+        if (wantsClicks()) result *= hasMouseFocus(currentContext);
         
-        int index = 0;
-//        typename std::map<imIdentifier, MurkaViewHandler<View_NEW>*>::iterator it;
-        for (auto it = imChildren.begin(); it != imChildren.end(); it++) {
-            auto shape = ((View*)it->second)->shape;
-            shape.position = ((View*)it->second)->shape.position;
-            
-            if ((shape.inside(m.latestChildContext.mousePosition)) && (((View*)it->second)->wantsClicks())) {
-                return true;
-            }
-        }
-        
-        return false;
+        return result;
+    }
+    
+    void claimKeyboardFocus(void* view = nullptr) {
+        if (view == nullptr) view = this;
+        currentContext.claimKeyboardFocus(view);
+    }
+    
+    void resetKeyboardFocus() {
+        currentContext.resetKeyboardFocus(this);
     }
 
-
-    bool areInteractiveChildrenHovered(const MurkaContextBase& c) {
-        if (!c.isHovered()) {
-            return false;
-        }
-        
-        /*
-        for (auto i: children) {
-            auto shape = ((View*)i->widgetObjectInternal)->shape;
-            shape.position = ((View*)i->widgetObjectInternal)->shape.position;
-            
-            if ((shape.inside(c.mousePosition)) && (((View*)i->widgetObjectInternal)->wantsClicks())) {
-                return true;
-            }
-        }
-        */
-        
-        int index = 0;
-//        typename std::map<imIdentifier, MurkaViewHandler<View_NEW>*>::iterator it;
-        for (auto it = imChildren.begin(); it != imChildren.end(); it++) {
-            auto shape = ((View*)it->second)->shape;
-            shape.position = ((View*)it->second)->shape.position;
-            
-            if ((shape.inside(c.mousePosition)) && (((View*)it->second)->wantsClicks())) {
-                return true;
-            }
-        }
-        
-        return false;
-    }
-
-    bool areChildrenHovered(const MurkaContextBase & c) {
-        if (!c.isHovered()) {
+    bool areChildrenHovered() {
+        if (!currentContext.isHovered()) {
             return false;
         }
         
@@ -134,7 +165,7 @@ public:
             auto shape = ((View*)it->second)->shape;
             shape.position = ((View*)it->second)->shape.position;
             
-            if (shape.inside(c.mousePosition)) {
+            if (shape.inside(currentContext.mousePosition)) {
                 return true;
             }
         }
@@ -150,12 +181,6 @@ public:
     void* returnNewWidgetObject() {
         return new View();
     }
-    
-    /*
-    virtual MURKA_VIEW_DRAW_FUNCTION {
-        ofLog() << "drawing an empty func...";
-    }
-     */
     
     struct Parameters {};
     struct Results {};
@@ -235,6 +260,6 @@ public:
             return newWidget;
         }
     }
-    MurkaContext latestContext;
+//    MurkaContext latestContext;
 };
 }

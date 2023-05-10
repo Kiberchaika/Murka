@@ -14,8 +14,6 @@ public:
     }
 
     void internalDraw(Murka & m) {
-        bool inside = m.currentContext.isHovered() * !areChildrenHovered(m.currentContext);
-        
         // Your drawing and interaction code goes here.
         // Don't forget that all of this executes at each frame for each
         // widget that is drawn on screen.
@@ -53,8 +51,6 @@ class Checkbox : public View<Checkbox> {
 public:
     void internalDraw(Murka & m) {
         
-		bool inside = m.currentContext.isHovered() * !areChildrenHovered(m.currentContext);
-        
         bool* booleanToControl = ((bool*)dataToControl);
 
 		pressed = false;
@@ -66,7 +62,7 @@ public:
         pushed /= 0.2;
 
         m.pushStyle();
-        m.setColor((inside ? fgColor : fgColor / 2) * (1.0 + 0.2 * pushed));
+        m.setColor((inside() ? fgColor : fgColor / 2) * (1.0 + 0.2 * pushed));
 
         m.disableFill();
         m.drawRectangle(5, 5, 20, 20);
@@ -81,7 +77,7 @@ public:
         auto font = m.getCurrentFont();
         font->drawString(label, 30, 0);
         
-        if (inside && m.currentContext.mouseDownPressed[0]) {
+        if (inside() && mouseDownPressed(0)) {
             *booleanToControl = !*booleanToControl;
             lastTimeClicked = m.getElapsedTime();
 			results = booleanToControl;
@@ -120,8 +116,6 @@ public:
 	void internalDraw(Murka & m) {
 		results = false;
 
-		bool inside = m.currentContext.isHovered() * !areChildrenHovered(m.currentContext);
-
 		MurkaColor fgColor = m.getColor();
 
 		float pushed = 0.2 - (m.getElapsedTime() - lastTimeClicked);
@@ -134,10 +128,10 @@ public:
 			m.pushMatrix();
 			m.pushStyle();
 			m.translate(0, lineHeight * i, 0);
-			MurkaShape rowShape = { 0, lineHeight * i, m.currentContext.getSize().x, lineHeight };
-			bool rowHover = rowShape.inside(m.currentContext.mousePosition);
+			MurkaShape rowShape = { 0, lineHeight * i, getSize().x, lineHeight };
+			bool rowHover = rowShape.inside(mousePosition());
 
-			m.setColor((rowHover * inside ? fgColor : fgColor / 2) * (1.0 + 0.2 * pushed));
+			m.setColor((rowHover * inside() ? fgColor : fgColor / 2) * (1.0 + 0.2 * pushed));
 
 			m.disableFill();
 			m.drawCircle(5 + 20 / 2, 5 + 20 / 2, 10);
@@ -150,7 +144,7 @@ public:
 			auto font = m.getCurrentFont();
 			font->drawString(labels[i], 30, 10);
 
-			if (rowHover * inside && m.currentContext.mouseDownPressed[0]) {
+			if (rowHover * inside() && mouseDownPressed(0)) {
 				*dataToControl = i;
 				results = true;
 				lastTimeClicked = m.getElapsedTime();
@@ -180,10 +174,9 @@ class DropdownElementButton : public View<DropdownElementButton> {
 public:
 	void internalDraw(Murka & m) {
 
-		bool inside = m.currentContext.isHovered() * !areChildrenHovered(m.currentContext);
 
-		m.setColor(MurkaColor(90 / 255.0, 90 / 255.0, 90 / 255.0) * (0.8 + 0.2 * inside));
-		m.drawRectangle(0, 0, m.currentContext.getSize().x, m.currentContext.getSize().y);
+		m.setColor(MurkaColor(90 / 255.0, 90 / 255.0, 90 / 255.0) * (0.8 + 0.2 * inside()));
+		m.drawRectangle(0, 0, getSize().x, getSize().y);
 
 		if (justInitialised) {
 			justInitialised = false;
@@ -198,7 +191,7 @@ public:
 		m.drawString(label, 10, 5);
 
 		if ((currentLastFrame - lastFrameItWasRendered) <= 1) { // only allow clicking if it was rendered at last frame - to avoid instant clicks in overlays
-			if ((m.currentContext.mouseDownPressed[0]) && (inside)) {
+			if ((mouseDownPressed(0)) && (inside())) {
 				// click if it's not the same frame it was shown
 #ifdef MURKA_DEBUG
 				std::cout << "btn pressd. justInitialised? " << justInitialised << std::endl;
@@ -230,12 +223,10 @@ class DropdownButton : public View<DropdownButton> {
 public:
 	void internalDraw(Murka & m) {
 
-		bool inside = m.currentContext.isHovered() * !areChildrenHovered(m.currentContext);
+		m.setColor(MurkaColor(90 / 255.0, 90 / 255.0, 90 / 255.0) * (0.5 + 0.3 * inside()));
+		m.drawRectangle(0, 0, getSize().x, getSize().y);
 
-		m.setColor(MurkaColor(90 / 255.0, 90 / 255.0, 90 / 255.0) * (0.5 + 0.3 * inside));
-		m.drawRectangle(0, 0, m.currentContext.getSize().x, m.currentContext.getSize().y);
-
-		if ((m.currentContext.mouseDownPressed[0]) && (inside)) {
+		if ((mouseDownPressed(0)) && (inside())) {
 			if (!showingTheDropdown) {
 				showingTheDropdown = true;
 			}
@@ -252,8 +243,8 @@ public:
 		m.drawString(options[selectedOption], 5, 5);
 
 		if (showingTheDropdown) {
-			contextPosition = m.currentContext.currentViewShape.position;
-			m.currentContext.addOverlay([&]() {
+			contextPosition = getAbsoluteViewPosition();
+			addOverlay([&]() {
 				//                         ofLog() << m.currentContext.currentViewShape.position.x;
 				for (int i = 0; i < options.size(); i++) {
 					std::string buttonLabel = options[i];
@@ -307,12 +298,10 @@ class BlankPanel : public View<BlankPanel> {
 public:
     void internalDraw(Murka & m) {
         
-        bool inside = m.currentContext.isHovered() * !areInteractiveChildrenHovered(m.currentContext);
-        
         bool gonnaResize = false;
         if (moveable) {
-            if ((m.currentContext.mousePosition.x < m.currentContext.currentViewShape.size.x - 30) &&
-                (m.currentContext.mousePosition.y < m.currentContext.currentViewShape.size.y - 30)) {
+            if ((mousePosition().x < getSize().x - 30) &&
+                (mousePosition().y < getSize().y - 30)) {
                 gonnaResize = false;
             } else gonnaResize = true;
         }
@@ -320,11 +309,11 @@ public:
         m.pushStyle();
         m.enableFill();
         m.setColor(r, g, b, a);
-        m.drawRectangle(0, 0, m.currentContext.getSize().x, m.currentContext.getSize().y);
+        m.drawRectangle(0, 0, getSize().x, getSize().y);
         if (drawBorder) {
             m.setColor(30);
             m.disableFill();
-            m.drawRectangle(0, 0, m.currentContext.getSize().x, m.currentContext.getSize().y);
+            m.drawRectangle(0, 0, getSize().x, getSize().y);
         }
         
         m.setColor(255);
@@ -332,36 +321,36 @@ public:
         font->drawString(label, 0, 0);
         
         // Drawing symbols to show that we're going to resize this widget
-        if ((gonnaResize) && (inside)) {
-            m.drawLine(m.currentContext.currentViewShape.size.x - 5, m.currentContext.currentViewShape.size.y - 5,
-                       m.currentContext.currentViewShape.size.x - 15, m.currentContext.currentViewShape.size.y - 5);
-            m.drawLine(m.currentContext.currentViewShape.size.x - 5, m.currentContext.currentViewShape.size.y - 5,
-                       m.currentContext.currentViewShape.size.x - 5, m.currentContext.currentViewShape.size.y - 15);
+        if ((gonnaResize) && (inside())) {
+            m.drawLine(getSize().x - 5, getSize().y - 5,
+                       getSize().x - 15, getSize().y - 5);
+            m.drawLine(getSize().x - 5, getSize().y - 5,
+                       getSize().x - 5, getSize().y - 15);
         }
         m.popStyle();
 
         // Moving & resizing logic
         
         if (moveable)
-        if (inside && m.currentContext.mouseDownPressed[0] && (!dragging) && (!resizing)) {
+        if (inside() && mouseDownPressed(0) && (!dragging) && (!resizing)) {
             if (gonnaResize) resizing = true;
             else dragging = true;
         }
         
         if (((dragging) || (resizing))  &&
-            !m.currentContext.mouseDown[0]) {
+            !mouseDown(0)) {
             dragging = false;
             resizing = false;
         }
         
         if (dragging) {
-            shape.position.x -= m.currentContext.mouseDelta.x;
-            shape.position.y -= m.currentContext.mouseDelta.y;
+            shape.position.x -= mouseDelta().x;
+            shape.position.y -= mouseDelta().y;
         }
         
         if (resizing) {
-            shape.size.x -= m.currentContext.mouseDelta.x;
-            shape.size.y -= m.currentContext.mouseDelta.y;
+            shape.size.x -= mouseDelta().x;
+            shape.size.y -= mouseDelta().y;
             
             if (shape.size.x < minimumWidth) {
                 shape.size.x = minimumWidth;
@@ -392,9 +381,9 @@ class Button : public View<Button> {
 public:
     void internalDraw(Murka & m) {
          
-         bool inside = m.currentContext.isHovered();
+         bool inside = isHovered();
 
-         if ((m.currentContext.mouseDownPressed[0]) && (m.currentContext.isHovered())) {
+         if ((mouseDownPressed(0)) && (isHovered())) {
 			 pressed = true;
             lastTimeClicked = m.getElapsedTime();
          } else pressed = false;
@@ -410,17 +399,17 @@ public:
 			if (inside) {
 			 m.setColor(MurkaColor(r, g, b) * (1.0 + 0.2 * pushed));
 			} else m.setColor(75 * (1.0 + 0.2 * pushed));
-			m.drawRectangle(0, 0, m.currentContext.getSize().x, m.currentContext.getSize().y);
+			m.drawRectangle(0, 0, getSize().x, getSize().y);
 			m.setColor(30);
 			m.disableFill();
-			m.drawRectangle(0, 0, m.currentContext.getSize().x, m.currentContext.getSize().y);
+			m.drawRectangle(0, 0, getSize().x, getSize().y);
 
 			m.setColor(255);
 			m.drawRectangle(0, 0, 2,2);
 
 			float offset = (font->stringWidth(label) / 2);
 
-			font->drawString(label, m.currentContext.getSize().x / 2 - offset, m.currentContext.getSize().y / 2 - font->getLineHeight() / 2);
+			font->drawString(label, getSize().x / 2 - offset, getSize().y / 2 - font->getLineHeight() / 2);
 
 			m.popStyle();
     };
@@ -452,20 +441,20 @@ public:
     void internalDraw(Murka & m) {
         results = false;
         
-        bool inside = m.currentContext.isHovered();
+        bool inside = isHovered();
         
-        if ((m.currentContext.mouseDownPressed[0]) && (m.currentContext.isHovered())) {
+        if ((mouseDownPressed(0)) && (isHovered())) {
             dragging = true;
         }
         
-        if ((dragging) && (!m.currentContext.mouseDown[0])) {
+        if ((dragging) && (!mouseDown(0))) {
             dragging = false;
             
             results = true;
         }
         
         if (dragging) {
-            float newValue = (m.currentContext.mousePosition.x / m.currentContext.currentViewShape.size.x) * (maxValue - minValue) + minValue;
+            float newValue = (mousePosition().x / getSize().x) * (maxValue - minValue) + minValue;
             
             if (newValue > maxValue) newValue = maxValue;
             if (newValue < minValue) newValue = minValue;
@@ -481,7 +470,7 @@ public:
         m.pushStyle();
         m.enableFill();
         m.setColor(15);
-        m.drawRectangle(0, 0, m.currentContext.getSize().x, m.currentContext.getSize().y);
+        m.drawRectangle(0, 0, getSize().x, getSize().y);
         
         m.setColor(r + (inside ? 20 : 0),
                    g + (inside ? 20 : 0),
@@ -493,11 +482,11 @@ public:
         if (currentValue < minValue) {
             currentValue = minValue;
         }
-        m.drawRectangle(0, 0, m.currentContext.getSize().x * ((currentValue - minValue) / (maxValue - minValue)), m.currentContext.getSize().y);
+        m.drawRectangle(0, 0, getSize().x * ((currentValue - minValue) / (maxValue - minValue)), getSize().y);
         m.setColor(80);
 		m.disableFill();
         if (inside) {
-            m.drawRectangle(0, 0, m.currentContext.getSize().x, m.currentContext.getSize().y);
+            m.drawRectangle(0, 0, getSize().x, getSize().y);
         }
         
         m.setColor(inside ? fgColor : fgColor / 2);
@@ -506,7 +495,7 @@ public:
 
         float offset = font->stringWidth(resultString) / 2;
         
-        font->drawString(resultString, m.currentContext.getSize().x / 2 - offset, m.currentContext.getSize().y / 2 - font->getLineHeight()/2);
+        font->drawString(resultString, getSize().x / 2 - offset, getSize().y / 2 - font->getLineHeight()/2);
         m.popStyle();
     };
     

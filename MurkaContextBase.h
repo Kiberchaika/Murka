@@ -10,6 +10,7 @@ class MurkaContextBase: public MurkaEventState {
 public:
     MurkaOverlayHolder* overlayHolder;
     
+    
     MurkaShape getParentContextShape() const {
         return getParentContextShapeInternal();
     }

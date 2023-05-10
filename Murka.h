@@ -103,7 +103,9 @@ private:
                 
                 widgetObjectCopy->animationRestart();
                 widgetObjectCopy->mosaicLayout.restart();
+                widgetObjectCopy->updateEvents(currentContext);
                 
+                widgetObjectCopy->registerCurrentContext(currentContext);
                 widgetObjectCopy->internalDraw(*this);
 
                 
@@ -168,6 +170,14 @@ private:
     
     View* keyboardFocusHaver = nullptr;
     
+    // A lambda functions that the plugins or hosts should fill in
+    // to make the keyboard work in case they need to react to Murka
+    // asking for keyboard focus (i.e. Juce wants the component to
+    // ask for focus to send it keyboard events)
+    
+    std::function<void()> keyboardFocusGrabExternal = [](){};
+    std::function<void()> keyboardFocusReleaseExternal = [](){};
+
     void setKeyboardFocusHaver(View* newOwner) {
         keyboardFocusHaver = newOwner;
     }
@@ -193,23 +203,16 @@ private:
     }
     
     
-    // This function gets called in the beginning of the step. It clears everything and initialises context.
+    // This function gets called in the beginning of the rendering. It clears everything and initialises context.
     // it also packs the user input into the context and clears the user input buffer data.
     // It should also free the memory used for function responses.
     void restartContext () {
-//        if (currentContext.parentContext != NULL) {
-//            delete currentContext.parentContext;
-//        }
-        
         contextStack.resize(0);
         
         
         currentContext = MurkaContext();
         
         *((MurkaEventState*)&currentContext) = eventState; // copying eventState
-//        MurkaRenderer* pointerToRenderer = (MurkaRenderer*)&currentContext;
-//        pointerToRenderer = this; // Switching this MurkaContext's Renderer base class for a pointer to this renderer
-
         
         currentContext.linkedView = this;
         currentContext.linkedView = this;
@@ -243,11 +246,13 @@ private:
         
         currentContext.claimKeyboardFocus = [&](void* asker) {
             setKeyboardFocusHaver((View*)asker);
+            keyboardFocusGrabExternal();
             return;
         };
         
         currentContext.resetKeyboardFocus = [&](void* asker) {
             resetKeyboardFocus((View*)asker);
+            keyboardFocusReleaseExternal();
             return;
         };
         
@@ -255,19 +260,8 @@ private:
             return allowedToUseKeyboard((View*)asker);
         };
         
-//        latestContext = currentContext;
-
     }
 
-    MurkaContext getContextFromMurkaView(View* view) {
-//        view->latestContext.resetImCounter();
-        return view->latestContext;
-    }
-
-    void beginDrawingInView(View* view) {
-        currentContext = getContextFromMurkaView(view);
-    }
-    
     void beginDrawingInLatestView() {
         currentContext = latestChildContext;
     }
@@ -282,7 +276,9 @@ private:
         return ((ViewBase*)latestChildContext.linkedView)->shape;
     }
 
-
+    MurkaContext currentContext; // MOVE TO PRIVATE
+    std::vector<MurkaContext> contextStack; // MOVE TO PRIVATE
+    
 
 public:
 	Murka() {
@@ -308,9 +304,6 @@ public:
         return MurkaRenderer::getScreenScale();
     }
 
-	MurkaContext currentContext; // MOVE TO PRIVATE
-    std::vector<MurkaContext> contextStack; // MOVE TO PRIVATE
-    
 
 
     void begin() { // this version is without arguments cause it creates the context
@@ -326,8 +319,6 @@ public:
     }
     
     void end() {
-        
-
         disableViewportCrop = true;
         for (auto &overlay: overlays) {
             overlay.func();
@@ -371,6 +362,12 @@ public:
 
     
     ///////////////////
+    
+    void setKeyboardFocusRequestCallbacks(std::function<void()> grabCallback, std::function<void()> releaseCallback) {
+        keyboardFocusGrabExternal = grabCallback;
+        releaseCallback = keyboardFocusReleaseExternal;
+
+    }
     
     View* getRootView() {
 		return (View*)this;

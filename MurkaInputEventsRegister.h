@@ -33,6 +33,7 @@ struct MurkaEventState {
     float pinchMagnification = 0;
     
     std::vector<int> keyPresses; // The keys that were just pressed
+    std::vector<int> keyReleases; // The keys that were just released
     std::vector<int> keyHolds; // The keys that were presed in the past frames and not yet released
 
     bool isKeyHeld(int key) {
@@ -42,7 +43,11 @@ struct MurkaEventState {
     bool isKeyPressed(int key) {
         return std::find(std::begin(keyPresses), std::end(keyPresses), key) != std::end(keyPresses);
     }
-    
+
+    bool isKeyReleased(int key) {
+        return std::find(std::begin(keyReleases), std::end(keyReleases), key) != std::end(keyReleases);
+    }
+
     MurkaEventState transformedWith(MurkaPoint translatePosition, float scale) {
         MurkaEventState newState = *this;
 		
@@ -115,6 +120,7 @@ public:
     }
     
     void registerKeyReleased(int key) {
+        eventState.keyReleases.push_back(key);
         eventState.keyHolds.erase(std::remove(eventState.keyHolds.begin(),
                                               eventState.keyHolds.end(), key),
                                               eventState.keyHolds.end());
@@ -186,6 +192,7 @@ public:
     }
     
     void keyReleased(ofKeyEventArgs & args) {
+        eventState.keyReleases.push_back(args.key);
     }
     
     // oF Trackpad events

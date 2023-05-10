@@ -62,7 +62,7 @@ public:
         imCounter = 0;
     }
 
-    void pushContext_NEW(ViewBase* viewSource) {
+    void pushContext(ViewBase* viewSource) {
         pushContextInternal(viewSource);
     }
 
