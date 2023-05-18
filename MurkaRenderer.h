@@ -460,7 +460,9 @@ public:
 	}
 
 	void unbindShader() {
-		shaderMain.use();
+		if (shaderMain.isLoaded()) {
+			shaderMain.use();
+		}
 
 		currentShader = &shaderMain;
 	}
