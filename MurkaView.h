@@ -130,14 +130,14 @@ public:
     }
     
     bool inside(bool includingAllChildren = false,
-                bool includingInteractiveChildrenButNotAll = false) {
+                bool includingAllChildrenButInteractive = true) {
         bool result = false;
-        if (!includingAllChildren && !includingInteractiveChildrenButNotAll) {
+        if (!includingAllChildren && !includingAllChildrenButInteractive) {
             result = currentContext.isHovered() * !areChildrenHovered();
         } else if (includingAllChildren) {
             result = currentContext.isHovered();
-        } else if (includingInteractiveChildrenButNotAll) {
-            result = areInteractiveChildrenHovered();
+        } else if (includingAllChildrenButInteractive) {
+            result = !areInteractiveChildrenHovered() + currentContext.isHovered();
         }
         
         if (wantsClicks()) result *= hasMouseFocus(currentContext);
