@@ -23,6 +23,36 @@ public:
     
     MurkaContext currentContext = MurkaContext();
     
+    bool currentlyHasMouseFocus = false;
+    
+    // This function is used to prevent hover if one of the children is hovered.
+    bool hasMouseFocus(MurkaChildContextHolder& m) {
+        bool pass = false;
+        if (inside() && wantsClicks()) {
+            auto itr = m.latestChildContext.iterateHoverIndex();
+            if (hoverIndexCache != m.latestChildContext.getMaxHoverIndex()) pass = false;
+                else pass = true;
+                
+            hoverIndexCache = itr;
+        }
+        
+        return pass;
+    }
+
+    // This function is used to prevent hover if one of the children is hovered.
+    bool hasMouseFocus(MurkaContext& c) {
+        bool pass = false;
+        if (isHovered() && wantsClicks()) {
+            auto itr = c.iterateHoverIndex();
+            if (hoverIndexCache != c.getMaxHoverIndex()) pass = false;
+                else pass = true;
+                
+            hoverIndexCache = itr;
+        }
+        
+        return pass;
+    }
+    
 public:
     View() {
     }
@@ -37,6 +67,8 @@ public:
     }
 
     T& draw() {
+        currentlyHasMouseFocus = hasMouseFocus(currentContext);
+        
         defferedViewDrawFunc();
         return *(static_cast<T*>(this));
     }
@@ -66,33 +98,7 @@ public:
         currentContext.overlayHolder->addOverlay(func, object);
     }
     
-    // This function is used to prevent hover if one of the children is hovered.
-    bool hasMouseFocus(MurkaChildContextHolder& m) {
-        bool pass = false;
-        if (inside() && wantsClicks()) {
-            auto itr = m.latestChildContext.iterateHoverIndex();
-            if (hoverIndexCache != m.latestChildContext.getMaxHoverIndex()) pass = false;
-                else pass = true;
-                
-            hoverIndexCache = itr;
-        }
-        
-        return pass;
-    }
 
-    // This function is used to prevent hover if one of the children is hovered.
-    bool hasMouseFocus(MurkaContext& c) {
-        bool pass = false;
-        if (isHovered() && wantsClicks()) {
-            auto itr = c.iterateHoverIndex();
-            if (hoverIndexCache != c.getMaxHoverIndex()) pass = false;
-                else pass = true;
-                
-            hoverIndexCache = itr;
-        }
-        
-        return pass;
-    }
 
 
     bool areInteractiveChildrenHovered() {
@@ -137,10 +143,11 @@ public:
         } else if (includingAllChildren) {
             result = currentContext.isHovered();
         } else if (includingAllChildrenButInteractive) {
+            auto currentContextHovered = currentContext.isHovered();
             result = !areInteractiveChildrenHovered() + currentContext.isHovered();
         }
         
-        if (wantsClicks()) result *= hasMouseFocus(currentContext);
+        if (wantsClicks()) result *= currentlyHasMouseFocus;
         
         return result;
     }
