@@ -212,7 +212,7 @@ private:
         
         currentContext = MurkaContext();
         
-        *((MurkaEventState*)&currentContext) = getEventState(); // copying eventState
+        *((MurkaEventState*)&currentContext) = eventState; // copying eventState
         
         currentContext.linkedView = this;
         currentContext.linkedView = this;

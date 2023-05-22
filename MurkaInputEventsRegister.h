@@ -66,18 +66,14 @@ class MurkaInputEventsRegister {
 	std::chrono::steady_clock::time_point lastLeftMousebuttonClicktime;
 	MurkaPoint mousePositionWhenMouseLeftPressed = {0, 0};
 
-    MurkaEventState eventState;
-
 protected:
+	MurkaEventState eventState;
+
 	void setInputEventsScale(float newInputEventsScale) {
 		inputEventsScale = newInputEventsScale;
 	}
 
 public:
-
-    MurkaEventState getEventState() {
-        return eventState;
-    }
     
     void setupEvents() {
     #if defined(MURKA_OF) && !defined(MURKA_OFFSCREEN)
