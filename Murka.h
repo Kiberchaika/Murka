@@ -278,12 +278,12 @@ private:
 
     std::vector<MurkaContext> contextStack; // MOVE TO PRIVATE
     
+	MurkaContext currentContext; // MOVE TO PRIVATE
 
 public:
 	Murka() {
         setupEvents();
 	}
-	MurkaContext currentContext; // MOVE TO PRIVATE
 
     //////////////////////////////////////////////////////////////////
 
