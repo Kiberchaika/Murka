@@ -67,15 +67,16 @@ class MurkaInputEventsRegister {
 	MurkaPoint mousePositionWhenMouseLeftPressed = {0, 0};
 
 protected:
-	MurkaEventState eventState;
+
 
 	void setInputEventsScale(float newInputEventsScale) {
 		inputEventsScale = newInputEventsScale;
 	}
 
 public:
-    
-    void setupEvents() {
+	MurkaEventState eventState;
+	
+	void setupEvents() {
     #if defined(MURKA_OF) && !defined(MURKA_OFFSCREEN)
             ofRegisterKeyEvents(this);
             ofRegisterMouseEvents(this);

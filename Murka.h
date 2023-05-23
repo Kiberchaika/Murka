@@ -276,7 +276,6 @@ private:
         return ((ViewBase*)latestChildContext.linkedView)->shape;
     }
 
-    MurkaContext currentContext; // MOVE TO PRIVATE
     std::vector<MurkaContext> contextStack; // MOVE TO PRIVATE
     
 
@@ -284,7 +283,8 @@ public:
 	Murka() {
         setupEvents();
 	}
-    
+	MurkaContext currentContext; // MOVE TO PRIVATE
+
     //////////////////////////////////////////////////////////////////
 
     bool doesHaveAWidgetThatHoldsKeyboardFocus() {
