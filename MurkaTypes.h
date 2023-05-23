@@ -340,6 +340,10 @@ struct MurkaPoint3D {
 		return { x - p2.x, y - p2.y, z - p2.z };
 	}
 
+	MurkaPoint3D operator + (const MurkaPoint3D & p2) const {
+		return { x + p2.x, y + p2.y, z + p2.z };
+	}
+
 	float length() const {
 		return sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
 	}
