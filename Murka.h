@@ -314,6 +314,8 @@ public:
         
 		currentContext.mousePosition /= getScreenScale();
 
+        updateEvents(currentContext);
+        
         hoverIndex = 0;
         
     }
