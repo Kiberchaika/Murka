@@ -75,7 +75,7 @@ public:
         m.enableFill();
         
         auto font = m.getCurrentFont();
-        font->drawString(label, 30, 0);
+        font->drawString(label, 30, font->getStringBoundingBox(label, 0, 0).height / 2);
         
         if (inside() && mouseDownPressed(0)) {
             *booleanToControl = !*booleanToControl;
@@ -405,7 +405,6 @@ public:
 			m.drawRectangle(0, 0, getSize().x, getSize().y);
 
 			m.setColor(255);
-			m.drawRectangle(0, 0, 2,2);
 
 			float offset = (font->stringWidth(label) / 2);
 
