@@ -71,8 +71,7 @@ public:
     
     void internalDraw(Murka & m) {
 
-        bool isInside = inside() *
-            hasMouseFocus(m);
+        bool isInside = inside();
 
         std::string* stringData;
         float* floatData;
