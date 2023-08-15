@@ -1011,7 +1011,7 @@ public:
 		vboCircle.internalDraw(currentStyle.fill ? GL_TRIANGLE_FAN : GL_LINE_LOOP, 0, circleResolution);
 	}
 
-	void drawLineNew(float x1, float y1, float x2, float y2) {
+	void drawLine(float x1, float y1, float x2, float y2) {
 		x1 = x1 * getScreenScale();
 		y1 = y1 * getScreenScale();
 		x2 = x2 * getScreenScale();
@@ -1044,16 +1044,6 @@ public:
 
 	int getMainShaderAttribLocation(std::string name) {
 		return shaderMain.getAttributeLocation(name);
-	}
-
-	void drawLine(float x1, float y1, float x2, float y2) override {
-		std::vector<MurkaPoint3D> verts(2);
-		verts[0] = (MurkaPoint3D(x1, y1, 0));
-		verts[1] = (MurkaPoint3D(x2, y2, 0));
-		vboLineOld.setVertexData(verts.data(), verts.size());
-
-		updateVbo(vboLineOld);
-		drawVbo(vboLineOld, GL_LINES, 0, verts.size());
 	}
 
 	void drawPath(const std::vector<MurkaPoint3D> & verts) override {
