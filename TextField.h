@@ -681,14 +681,21 @@ public:
 
 //    bool shouldForceEditorToSelectAll = false;
         
-    TextField & controlling(float* dataToControl_) {
-        dataToControl = dataToControl_;
-        dataTypeName = typeid(float*).name();
+	TextField & controlling(std::string* dataToControl_) {
+		dataToControl = dataToControl_;
+		dataTypeName = typeid(std::string*).name();
 
-        return *this;
-    }
+		return *this;
+	}
 
-    TextField & controlling(double* dataToControl_) {
+	TextField & controlling(float* dataToControl_) {
+		dataToControl = dataToControl_;
+		dataTypeName = typeid(float*).name();
+
+		return *this;
+	}
+
+	TextField & controlling(double* dataToControl_) {
         dataToControl = dataToControl_;
         dataTypeName = typeid(double*).name();
 
