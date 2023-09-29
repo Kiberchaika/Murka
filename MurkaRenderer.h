@@ -833,12 +833,12 @@ public:
 
 	void enableFill() override {
 		currentStyle.fill = true;
-		glEnable(GL_FILL);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	};
 
 	void disableFill() override {
 		currentStyle.fill = false;
-		glDisable(GL_FILL);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	};
 
 	void setLineSmoothing(bool smooth) override {
