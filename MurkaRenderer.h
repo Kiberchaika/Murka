@@ -1088,7 +1088,7 @@ public:
 		}
 
 		MurkaShape view = getCurrentViewport();
-		currentProjectionMatrix = vflipMatrix * cam.getProjectionMatrix(view.size.x / view.size.y);
+		currentProjectionMatrix = vflipMatrix * cam.getProjectionMatrix(2 * view.size.x / view.size.y);
 		currentViewMatrix = cam.getViewMatrix();
 		currentModelMatrix = MurMatrix<float>().scaled(juce::Vector3D<float>(1/ getScreenScale(), 1/ getScreenScale(), 1 / getScreenScale()));
 
