@@ -106,7 +106,7 @@ public:
 
 	MurMatrix<float> getViewMatrix() {
 		MurMatrix<float> m_inv = transformMatrix.inverted();
-		return transformMatrix.inverted();
+		return m_inv;
 	}
 
 	MurMatrix<float> getProjectionMatrix(float aspect) { 
@@ -120,7 +120,7 @@ public:
 		projectionMatrix.mat[0] = 1 / (aspect * tanHalfFovy); // [0][0]
 		projectionMatrix.mat[5] = 1 / (tanHalfFovy); // [1][1]
 		projectionMatrix.mat[11] = -1; // [2][3] 14
-
+		 
 		projectionMatrix.mat[10] = -(zFar + zNear) / (zFar - zNear); // [2][2] 
 		projectionMatrix.mat[14] = -(2 * zFar * zNear) / (zFar - zNear); // [3][2] 11
 		projectionMatrix.mat[15] = 0;

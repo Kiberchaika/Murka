@@ -123,9 +123,13 @@ public:
 		ofRenderer->translate(x * getScreenScale(), y * getScreenScale(), z * getScreenScale());
 	}
     
-    void rotateZRad(float radians) override {
-        ofRenderer->rotateZRad(radians);
-    }
+	void rotateZRad(float radians) override {
+		ofRenderer->rotateZRad(radians);
+	}
+
+	void rotateRad(float x, float y, float z) override {
+		ofRenderer->rotateRad(x, y, z);
+	}
 
 	void scale(float x, float y, float z) override {
 		ofRenderer->scale(x * getScreenScale(), y * getScreenScale(), z * getScreenScale());
@@ -641,10 +645,10 @@ public:
 		std::cout << "TODO" << std::endl;
 #endif
 	}
-	
+
 	void drawVbo(const MurVbo & vbo, GLuint drawMode, int first, int total) override {
 		MurMatrix<float> modelMatrix;
-		modelMatrix = modelMatrix.scaled(juce::Vector3D<float>(getScreenScale(), getScreenScale(), 1.0));
+		modelMatrix = modelMatrix.scaled(juce::Vector3D<float>(getScreenScale(), getScreenScale(), getScreenScale()));
 		modelMatrix = modelMatrix * stackedMatrix * currentMatrix;
 
 		MurMatrix<float> vflipMatrix;
@@ -657,6 +661,7 @@ public:
 		currentShader->setUniformMatrix4f(currentShader->uniformMatrixProj, vflipMatrix * currentProjectionMatrix);
 		
 		currentShader->setUniform1i(currentShader->uniformUseTexture, useTexture);
+		currentShader->setUniform1i(currentShader->uniformVflip, useCamera);
 		currentShader->setUniform4f(currentShader->uniformColor, currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
 		vbo.internalDraw(drawMode, first, total);
 	}
@@ -773,6 +778,10 @@ public:
 
 	void translate(float x, float y, float z) override {
 		currentMatrix = MurMatrix<float>::translation(juce::Vector3D<float>(x * getScreenScale(), y * getScreenScale(), z * getScreenScale())) * currentMatrix;
+	}
+
+	void rotateRad(float x, float y, float z) override {
+		currentMatrix = MurMatrix<float>().rotated(juce::Vector3D<float>(x, y, z)) * currentMatrix;
 	}
 
 	void rotateZRad(float radians) override {
@@ -1088,7 +1097,7 @@ public:
 		}
 
 		MurkaShape view = getCurrentViewport();
-		currentProjectionMatrix = vflipMatrix * cam.getProjectionMatrix(2 * view.size.x / view.size.y);
+		currentProjectionMatrix = vflipMatrix * cam.getProjectionMatrix(view.size.x / view.size.y);
 		currentViewMatrix = cam.getViewMatrix();
 		currentModelMatrix = MurMatrix<float>().scaled(juce::Vector3D<float>(1/ getScreenScale(), 1/ getScreenScale(), 1 / getScreenScale()));
 

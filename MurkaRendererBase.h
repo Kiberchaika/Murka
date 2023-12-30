@@ -54,6 +54,7 @@ public:
 	virtual void translate(float x, float y, float z) = 0;
 	virtual void scale(float x, float y, float z) = 0;
     virtual void rotateZRad(float radians) = 0;
+	virtual void rotateRad(float x, float y, float z) = 0;
 
     // setup matrices and viewport (upto you to push and pop view before and after)
     virtual void viewport(MurkaShape viewport) = 0;
