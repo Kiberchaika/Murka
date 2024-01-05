@@ -614,13 +614,13 @@ public:
         if (dataTypeName == typeid(int*).name()) {
             int* intData = ((int*)dataToControl);
 
-            displayString = to_string_with_precision(*intData);
+            displayString = to_string_with_precision(*intData, precision, fillWidth);
             if (clamp) {
                 if (*intData < min) {
-                    displayString = to_string_with_precision(int(min));
+                    displayString = to_string_with_precision(int(min), precision, fillWidth);
                 }
                 if (*intData > max) {
-                    displayString = to_string_with_precision(int(max));
+                    displayString = to_string_with_precision(int(max), precision, fillWidth);
                 }
             }
         }
@@ -664,6 +664,12 @@ public:
                     false // default
     )
 
+    MURKA_PARAMETER(TextField, // class name
+        int, // parameter type
+        fillWidth, // parameter variable name
+        fillWidthWithZeroes, // setter
+        0 // default
+    )
     
     MURKA_PARAMETER(TextField, // class name
                     int, // parameter type

@@ -55,11 +55,13 @@ typedef juceFontStash FontObject; // It's important for this object to exist in 
 #include <cmath>
 
 template <typename T>
-std::string to_string_with_precision(const T a_value, const int n = 6)
+std::string to_string_with_precision(const T a_value, const int n = 6, const int fillWidth = 0)
 {
     std::ostringstream out;
     out.precision(n);
-    out << std::fixed << a_value;
+    out << std::fixed;
+    if (fillWidth > 0) out << std::setw(fillWidth) << std::setfill('0');
+    out << a_value;
     return out.str();
 }
 
