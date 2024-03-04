@@ -94,6 +94,7 @@ public:
 
     virtual void drawRectangle(MurkaShape s) = 0;
 	virtual void drawRectangle(float x, float y, float w, float h) = 0;
+	virtual void drawCircle(float x, float y, float z, float radius) = 0;
 	virtual void drawCircle(float x, float y, float radius) = 0;
 	virtual void drawLine(float x1, float y1, float x2, float y2) = 0;
 	virtual void drawPath(const std::vector<MurkaPoint3D> & verts) = 0;
@@ -109,6 +110,7 @@ public:
 	virtual uint64_t getFrameNum() = 0;
 	virtual float getElapsedTime() = 0;
 
+	virtual MurkaPoint getScreenPoint(MurCamera cam, MurkaPoint3D p) = 0;
 	virtual void beginCamera(MurCamera cam) = 0;
 	virtual void endCamera(MurCamera cam) = 0;
 };
