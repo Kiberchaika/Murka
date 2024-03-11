@@ -1103,6 +1103,11 @@ public:
 		MurkaPoint4D p4(p.x, p.y, p.z, 1.0f);
 		MurkaPoint4D projectedP4 = viewProjectionMatrix * p4;
 
+		// Clip the point if it's behind the camera
+		if (projectedP4.z > 0.0f) {
+			return MurkaPoint(-1, -1); // Return an invalid point
+		}
+
 		float invW = 1.0f / projectedP4.w;
 		projectedP4.x *= invW;
 		projectedP4.y *= invW;
