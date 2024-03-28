@@ -94,9 +94,9 @@ public:
         return currentContext.currentViewShape.position;
     }
 
-    void addOverlay(std::function<void()> func, void* object) {
-        currentContext.overlayHolder->addOverlay(func, object);
-    }
+//    void addOverlay(std::function<void()> func, void* object) {
+//        currentContext.overlayHolder->addOverlay(func, object);
+//    }
     
 
 
