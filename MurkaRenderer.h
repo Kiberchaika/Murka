@@ -973,8 +973,6 @@ public:
 		MurMatrix<float> modelMatrix;
 		modelMatrix = modelMatrix * MurMatrix<float>::translation(juce::Vector3D<float>(x * getScreenScale(), y * getScreenScale(), 0.0));
 		modelMatrix = modelMatrix.scaled(juce::Vector3D<float>(w * getScreenScale(), h * getScreenScale(), 1.0));
-
-
 		modelMatrix = modelMatrix * stackedMatrix * currentMatrix;
 
 		MurMatrix<float> vflipMatrix;
@@ -997,9 +995,9 @@ public:
 		drawRectangle(s.position.x, s.position.y, s.size.x, s.size.y);
 	}
 
-	void drawCircle(float x, float y, float radius) override {
+	void drawCircle(float x, float y, float z, float radius) override {
 		MurMatrix<float> modelMatrix;
-		modelMatrix = modelMatrix * MurMatrix<float>::translation(juce::Vector3D<float>(x * getScreenScale(), y * getScreenScale(), 0.0));
+		modelMatrix = modelMatrix * MurMatrix<float>::translation(juce::Vector3D<float>(x * getScreenScale(), y * getScreenScale(), z * getScreenScale()));
 		modelMatrix = modelMatrix.scaled(juce::Vector3D<float>(radius * getScreenScale(), radius * getScreenScale(), 1.0));
 
 		modelMatrix = modelMatrix * stackedMatrix * currentMatrix;
@@ -1020,6 +1018,10 @@ public:
 		vboCircle.internalDraw(currentStyle.fill ? GL_TRIANGLE_FAN : GL_LINE_LOOP, 0, circleResolution);
 	}
 
+	void drawCircle(float x, float y, float radius) override {
+		drawCircle(x, y, 0, radius);
+	}
+
 	void drawLine(float x1, float y1, float x2, float y2) {
 		x1 = x1 * getScreenScale();
 		y1 = y1 * getScreenScale();
@@ -1034,6 +1036,7 @@ public:
 		modelMatrix = modelMatrix.scaled(juce::Vector3D<float>(dist, lineWidth * getScreenScale(), 1.0));
 		modelMatrix = modelMatrix * MurMatrix<float>().rotated(juce::Vector3D<float>(0.0, 0.0, a));
 		modelMatrix = modelMatrix * MurMatrix<float>::translation(juce::Vector3D<float>(x1, y1, 0.0));
+		modelMatrix = modelMatrix * stackedMatrix * currentMatrix;
 
 		MurMatrix<float> vflipMatrix;
 		if (vflip && !useFbo) {
@@ -1086,6 +1089,34 @@ public:
 
 	float getElapsedTime() override {
 		return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - begin).count() / 1000.0;
+	}
+
+	MurkaPoint getScreenPoint(MurCamera cam, MurkaPoint3D p) override {
+		MurMatrix<float> vflipMatrix;
+		if (vflip && !useFbo) {
+			vflipMatrix.scale(juce::Vector3D<float>(1, -1, 1));
+		}
+		MurkaShape view = getCurrentViewport();
+
+		MurMatrix<float> viewProjectionMatrix = vflipMatrix * cam.getViewMatrix() * cam.getProjectionMatrix(view.size.x / view.size.y);
+
+		MurkaPoint4D p4(p.x, p.y, p.z, 1.0f);
+		MurkaPoint4D projectedP4 = viewProjectionMatrix * p4;
+
+		// Clip the point if it's behind the camera
+		if (projectedP4.z > 0.0f) {
+			return MurkaPoint(-1, -1); // Return an invalid point
+		}
+
+		float invW = 1.0f / projectedP4.w;
+		projectedP4.x *= invW;
+		projectedP4.y *= invW;
+		projectedP4.z *= invW;
+
+		MurkaPoint p2;
+		p2.x = static_cast<int>((projectedP4.x + 1.0f) * 0.5f * view.size.x / getScreenScale());
+		p2.y = static_cast<int>((1.0f - projectedP4.y) * 0.5f * view.size.y / getScreenScale());
+		return p2;
 	}
 
 	void beginCamera(MurCamera cam) {
