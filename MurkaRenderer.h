@@ -3,6 +3,7 @@
 #include "MurkaRendererBase.h"
 #include "MurMatrix.h"
 #include "MurShader.h"
+#include "delaunator/delaunator.h"
 
 #if defined(MURKA_OF)
 #include "ofMain.h"
@@ -1059,10 +1060,31 @@ public:
 	}
 
 	void drawPath(const std::vector<MurkaPoint3D> & verts) override {
-		vboLineOld.setVertexData(verts.data(), verts.size());
+		if (currentStyle.fill) {
+			std::vector<float> points;
+			for (int i = 0; i < verts.size(); i++) {
+				points.push_back(verts[i].x);
+				points.push_back(verts[i].y);
+			}
 
-		updateVbo(vboLineOld);
-		drawVbo(vboLineOld, GL_LINE_STRIP, 0, verts.size());
+			Delaunator d(points);
+
+			std::vector<unsigned int> indices;
+			for (std::size_t i = 0; i < d.triangles.size(); i++) {
+				indices.push_back(d.triangles[i]);
+			}
+
+			vboLineOld.setVertexData(verts.data(), verts.size());
+			vboLineOld.setIndexData(indices.data(), indices.size());
+			updateVbo(vboLineOld);
+			drawVbo(vboLineOld, GL_TRIANGLES, 0, indices.size());
+		}
+		else {
+			vboLineOld.setVertexData(verts.data(), verts.size());
+			vboLineOld.setIndexData(nullptr, 0);
+			updateVbo(vboLineOld);
+			drawVbo(vboLineOld, GL_LINE_STRIP, 0, verts.size());
+		}
 	}
 
 	int getWindowWidth() override {
