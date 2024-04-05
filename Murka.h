@@ -367,8 +367,7 @@ public:
     
     void setKeyboardFocusRequestCallbacks(std::function<void()> grabCallback, std::function<void()> releaseCallback) {
         keyboardFocusGrabExternal = grabCallback;
-        releaseCallback = keyboardFocusReleaseExternal;
-
+        keyboardFocusReleaseExternal = releaseCallback;
     }
     
     View* getRootView() {

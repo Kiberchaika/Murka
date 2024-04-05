@@ -157,8 +157,9 @@ public:
         currentContext.claimKeyboardFocus(view);
     }
     
-    void resetKeyboardFocus() {
-        currentContext.resetKeyboardFocus(this);
+    void resetKeyboardFocus(void* view = nullptr) {
+		if (view == nullptr) view = this;
+		currentContext.resetKeyboardFocus(view);
     }
 
     bool areChildrenHovered() {
