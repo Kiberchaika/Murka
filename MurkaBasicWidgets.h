@@ -244,7 +244,7 @@ public:
 
 		if (showingTheDropdown) {
 			contextPosition = getAbsoluteViewPosition();
-			addOverlay([&]() {
+			m.addOverlay([&]() {
 				//                         ofLog() << m.currentContext.currentViewShape.position.x;
 				for (int i = 0; i < options.size(); i++) {
 					std::string buttonLabel = options[i];
