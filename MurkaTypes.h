@@ -269,7 +269,6 @@ struct MurkaPoint {
         return ((x == right.x) && (y == right.y));
     }
 
-
     bool operator == (const MurkaPoint& p2) const {
         return (x == p2.x) && (y == p2.y);
     }
@@ -277,7 +276,7 @@ struct MurkaPoint {
     bool operator != (const MurkaPoint& p2) const {
         return !(*this == p2);
     }
-
+	
 	friend std::ostream& operator<<(std::ostream& os, const MurkaPoint& p) {
 		os << p.x << '/' << p.y;
 		return os;
@@ -297,6 +296,12 @@ struct MurkaPoint {
         y = 0;
     }
     
+    template<typename A, typename B>
+    MurkaPoint(A x_, B y_) {
+        x = x_;
+        y = y_;
+    }
+
     float length() const  {
         return sqrt(pow(x, 2) + pow(y, 2));
     }
