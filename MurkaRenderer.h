@@ -346,7 +346,7 @@ class MurkaRenderer : public MurkaRendererBase {
 	MurMatrix<float> currentProjectionMatrix;
 
 	struct Style {
-		MurkaColor color = MurkaColor(1.0f, 1.0f, 1.0f, 1.0f);
+		MurkaColor color = MurkaColor(255, 255, 255, 255);
 		bool fill = true;
 	};
 	std::vector<Style> styleStack;
@@ -663,7 +663,7 @@ public:
 		
 		currentShader->setUniform1i(currentShader->uniformUseTexture, useTexture);
 		currentShader->setUniform1i(currentShader->uniformVflip, useCamera);
-		currentShader->setUniform4f(currentShader->uniformColor, currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
+		currentShader->setUniform4f(currentShader->uniformColor, currentStyle.color.getNormalisedRed(), currentStyle.color.getNormalisedGreen(), currentStyle.color.getNormalisedBlue(), currentStyle.color.getNormalisedAlpha());
 		vbo.internalDraw(drawMode, first, total);
 	}
 
@@ -929,44 +929,47 @@ public:
 		return currentStyle.color;
 	}
 	 
-	void setColor(int r, int g, int b) override {
-		currentStyle.color = MurkaColor(1.0 * r / 255, 1.0 * g / 255, 1.0 * b / 255);
+	void setColor(int red, int green, int blue) override {
+		currentStyle.color = MurkaColor(red, green, blue);
 	}; // 0-255
 
-	void setColor(int r, int g, int b, int a) override {
-		currentStyle.color = MurkaColor(1.0 * r / 255, 1.0 * g / 255, 1.0 * b / 255, 1.0 * a / 255);
+	void setColor(int red, int green, int blue, int alpha) override {
+		currentStyle.color = MurkaColor(red, green, blue, alpha);
 	}; // 0-255
 
 	void setColor(const MurkaColor & color) override {
-		currentStyle.color = MurkaColor(color.r, color.g, color.b, color.a);
+		currentStyle.color = color;
 	};
 
 	void setColor(const MurkaColor & color, int _a) override {
-		currentStyle.color = MurkaColor(color.r, color.g, color.b, 1.0 * _a / 255);
+        currentStyle.color = color;
+        currentStyle.color.setAlpha(_a);
 	};
 
 	void setColor(int gray) override {
-		currentStyle.color = MurkaColor(1.0 * gray / 255, 1.0 * gray / 255, 1.0 * gray / 255);
+		currentStyle.color.setFromGray(gray);
 	}; // 0 - 255
 
 	void setColor(int gray, int _a) override {
-		currentStyle.color = MurkaColor(1.0 * gray / 255, 1.0 * gray / 255, 1.0 * gray / 255, 1.0 * _a / 255);
+        currentStyle.color.setFromGray(gray);
+        currentStyle.color.setAlpha(_a);
 	}; // 0-255
 
 	void clear() override {
-		glClearColor(currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
+		glClearColor(currentStyle.color.getNormalisedRed(),
+                     currentStyle.color.getNormalisedGreen(), currentStyle.color.getNormalisedBlue(), currentStyle.color.getNormalisedAlpha());
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	};
 
 	void clear(int r, int g, int b, int a = 0) override {
-		MurkaColor col(1.0 * r / 255, 1.0 * g / 255, 1.0 * b / 255, 1.0 * a / 255);
-		glClearColor(col.r, col.g, col.b, col.a);
+		MurkaColor col(1.0 * r, 1.0 * g, 1.0 * b, 1.0 * a);
+		glClearColor(col.getNormalisedRed(), col.getNormalisedGreen(), col.getNormalisedBlue(), col.getNormalisedAlpha());
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	};
 
 	void clear(int gray, int a = 0) override {
-		MurkaColor col(1.0 * gray / 255, 1.0 * gray / 255, 1.0 * gray / 255, 1.0 * a / 255);
-		glClearColor(col.r, col.g, col.b, col.a);
+		MurkaColor col(gray);
+		glClearColor(col.getNormalisedRed(), col.getNormalisedGreen(), col.getNormalisedBlue(), col.getNormalisedAlpha());
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	};
 
@@ -987,7 +990,7 @@ public:
 
 		currentShader->setUniform1i(currentShader->uniformUseTexture, useTexture);
 		currentShader->setUniform1i(currentShader->uniformVflip, useCamera);
-		currentShader->setUniform4f(currentShader->uniformColor, currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
+		currentShader->setUniform4f(currentShader->uniformColor, currentStyle.color.getNormalisedRed(), currentStyle.color.getNormalisedGreen(), currentStyle.color.getNormalisedBlue(), currentStyle.color.getNormalisedAlpha());
 		updateVbo(vboRect);
 		vboRect.internalDraw(currentStyle.fill ? GL_TRIANGLE_FAN : GL_LINE_LOOP, 0, 4);
 	}
@@ -1014,7 +1017,7 @@ public:
 
 		currentShader->setUniform1i(currentShader->uniformUseTexture, useTexture);
 		currentShader->setUniform1i(currentShader->uniformVflip, useCamera);
-		currentShader->setUniform4f(currentShader->uniformColor, currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
+		currentShader->setUniform4f(currentShader->uniformColor, currentStyle.color.getNormalisedRed(), currentStyle.color.getNormalisedGreen(), currentStyle.color.getNormalisedBlue(), currentStyle.color.getNormalisedAlpha());
 
 		vboCircle.internalDraw(currentStyle.fill ? GL_TRIANGLE_FAN : GL_LINE_LOOP, 0, circleResolution);
 	}
@@ -1050,7 +1053,7 @@ public:
 
 		currentShader->setUniform1i(currentShader->uniformUseTexture, useTexture);
 		currentShader->setUniform1i(currentShader->uniformVflip, useCamera);
-		currentShader->setUniform4f(currentShader->uniformColor, currentStyle.color.r, currentStyle.color.g, currentStyle.color.b, currentStyle.color.a);
+        currentShader->setUniform4f(currentShader->uniformColor, currentStyle.color.getNormalisedRed(), currentStyle.color.getNormalisedGreen(), currentStyle.color.getNormalisedBlue(), currentStyle.color.getNormalisedAlpha());
 
 		vboLine.internalDraw(GL_TRIANGLE_FAN, 0, 4);
 	}

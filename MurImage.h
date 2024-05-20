@@ -190,10 +190,10 @@ public:
 
 	void setColor(int x, int y, const MurkaColor col) {
 		int idx = y * width * 4 + x * 4;
-		data[idx + 0] = col.r;
-		data[idx + 1] = col.g;
-		data[idx + 2] = col.b;
-		data[idx + 3] = col.a;
+		data[idx + 0] = col.getNormalisedRed();
+		data[idx + 1] = col.getNormalisedGreen();
+		data[idx + 2] = col.getNormalisedBlue();
+		data[idx + 3] = col.getNormalisedAlpha();
 	}
 
 	void setData(float *data) {
