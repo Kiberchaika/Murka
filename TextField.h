@@ -655,8 +655,8 @@ public:
     
     std::string hint = "";
     
-    MurkaColor widgetFgColor = {0.98, 0.98, 0.98};
-    MurkaColor widgetBgColor = {0.1, 0.1, 0.1};
+    MurkaColor widgetFgColor = {0.98 * 255, 0.98 * 255, 0.98 * 255 };
+    MurkaColor widgetBgColor = {0.1 * 255, 0.1 * 255, 0.1 * 255 };
 
 //    bool numbersOnly = false;
     MURKA_PARAMETER(TextField, // class name
