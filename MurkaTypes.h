@@ -105,13 +105,18 @@ enum MurkaKey {
 };
 
 struct MurkaColor {
-    float r = 1, g = 1, b = 1, a = 1;
-   
+public:
 	MurkaColor() { }
 
 	MurkaColor(float gray) { r = gray; g = gray; b = gray; }
 	MurkaColor(float R, float G, float B) { r = R; g = G; b = B; }
 	MurkaColor(float R, float G, float B, float A) {r = R; g = G; b = B; a = A;}
+
+    void setFromGray(float gray) {
+        r = gray;
+        g = gray;
+        b = gray;
+    }
 
     MurkaColor operator *(int multiplier) const {
         return MurkaColor(r * float(multiplier), g * float(multiplier), b * float(multiplier), a * float(multiplier));
@@ -203,6 +208,74 @@ struct MurkaColor {
         // finally assign the alpha
         a = alpha;
     }
+    
+    void setRed(double red) {
+        r = red;
+    }
+
+    void setGreen(double green) {
+        g = green;
+    }
+
+    void setBlue(double blue) {
+        b = blue;
+    }
+    
+    void setAlpha(double alpha) {
+        a = alpha;
+    }
+    
+    double getRed() {
+        return r;
+    }
+
+    double getGreen() {
+        return g;
+    }
+
+    double getBlue() {
+        return b;
+    }
+
+    double getAlpha() {
+        return a;
+    }
+
+    void setNormalisedRed(double red) {
+        r = red * 255.0;
+    }
+
+    void setNormalisedGreen(double green) {
+        g = green * 255.0;
+    }
+
+    void setNormalisedBlue(double blue) {
+        b = blue * 255.0;
+    }
+    
+    void setNormalisedAlpha(double alpha) {
+        a = alpha * 255.0;
+    }
+
+    double getNormalisedRed() const {
+        return r / 255;
+    }
+
+    double getNormalisedGreen() const {
+        return g / 255;
+    }
+
+    double getNormalisedBlue() const {
+        return b / 255;
+    }
+
+    double getNormalisedAlpha() const {
+        return a / 255;
+    }
+
+private:
+    double r = 255, g = 255, b = 255, a = 255;
+
 
 #ifdef MURKA_OF
     operator ofColor() const { return ofColor(r * 255.0, g * 255.0, b * 255.0, a * 255.0); }
