@@ -532,7 +532,9 @@ public:
             activated = false;
             cameraPanInsideWidget = 0;
             
-            resetKeyboardFocus();
+			if (hasKeyboardFocus()) {
+				resetKeyboardFocus();
+			}
             
             updateExternalData(dataToControl, clampNumber);
             

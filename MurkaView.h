@@ -152,26 +152,20 @@ public:
         return result;
     }
     
-    void claimKeyboardFocus(void* view = nullptr) {
-        if (view == nullptr) view = this;
-        currentContext.claimKeyboardFocus(view);
+    void claimKeyboardFocus() {
+        currentContext.claimKeyboardFocus(this);
     }
     
-    void resetKeyboardFocus(void* view = nullptr) {
-		if (view == nullptr) view = this;
-		if (currentContext.hasKeyboardFocus(view)) {
-			currentContext.resetKeyboardFocus(view);
-		}
+    void resetKeyboardFocus() {
+		currentContext.resetKeyboardFocus(this);
     }
 
-	bool allowedToUseKeyboard(void* view = nullptr) {
-		if (view == nullptr) view = this;
-		return currentContext.allowedToUseKeyboard(view);
+	bool allowedToUseKeyboard() {
+		return currentContext.allowedToUseKeyboard(this);
 	}
 
-	bool hasKeyboardFocus(void* view = nullptr) {
-		if (view == nullptr) view = this;
-		return currentContext.hasKeyboardFocus(view);
+	bool hasKeyboardFocus() {
+		return currentContext.hasKeyboardFocus(this);
 	}
 
 	bool areChildrenHovered() {
