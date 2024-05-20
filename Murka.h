@@ -182,10 +182,14 @@ private:
         keyboardFocusHaver = newOwner;
     }
     
-    bool allowedToUseKeyboard(View* asker) {
-        return ((keyboardFocusHaver == asker) || (keyboardFocusHaver == nullptr));
-    }
-    
+	bool allowedToUseKeyboard(View* asker) {
+		return ((keyboardFocusHaver == asker) || (keyboardFocusHaver == nullptr));
+	}
+
+	bool hasKeyboardFocus(View* asker) {
+		return (keyboardFocusHaver == asker);
+	}
+
     void resetKeyboardFocus(View* asker) {
         if (asker == keyboardFocusHaver) {
             keyboardFocusHaver = nullptr;
@@ -256,11 +260,15 @@ private:
             return;
         };
         
-        currentContext.checkKeyboardFocus = [&](void* asker)->bool {
-            return allowedToUseKeyboard((View*)asker);
-        };
-        
-    }
+		currentContext.allowedToUseKeyboard = [&](void* asker)->bool {
+			return allowedToUseKeyboard((View*)asker);
+		};
+
+		currentContext.hasKeyboardFocus = [&](void* asker)->bool {
+			return hasKeyboardFocus((View*)asker);
+		};
+
+	}
 
     void beginDrawingInLatestView() {
         currentContext = latestChildContext;

@@ -159,10 +159,22 @@ public:
     
     void resetKeyboardFocus(void* view = nullptr) {
 		if (view == nullptr) view = this;
-		currentContext.resetKeyboardFocus(view);
+		if (currentContext.hasKeyboardFocus(view)) {
+			currentContext.resetKeyboardFocus(view);
+		}
     }
 
-    bool areChildrenHovered() {
+	bool allowedToUseKeyboard(void* view = nullptr) {
+		if (view == nullptr) view = this;
+		return currentContext.allowedToUseKeyboard(view);
+	}
+
+	bool hasKeyboardFocus(void* view = nullptr) {
+		if (view == nullptr) view = this;
+		return currentContext.hasKeyboardFocus(view);
+	}
+
+	bool areChildrenHovered() {
         if (!currentContext.isHovered()) {
             return false;
         }

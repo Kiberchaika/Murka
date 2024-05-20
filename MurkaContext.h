@@ -70,9 +70,18 @@ public:
         popContextInternal();
     }
     
-    std::function<void(void*)> claimKeyboardFocus = [](void*) {return; };
-    std::function<void(void*)> resetKeyboardFocus = [](void*) {return; };
-    std::function<bool(void*)> checkKeyboardFocus = [](void*)->bool {return true; }; // aka "widget is allowed to use keyboard"
+    std::function<void(void*)> claimKeyboardFocus = [&](void*) {
+		return; 
+	};
+    std::function<void(void*)> resetKeyboardFocus = [&](void*) {
+		return;
+	};
+	std::function<bool(void*)> allowedToUseKeyboard = [&](void*)->bool {
+		return false;
+	}; // aka "widget is allowed to use keyboard"
+	std::function<bool(void*)> hasKeyboardFocus = [&](void*)->bool {
+		return false;
+	}; // aka "widget is captured keyboard"
 
     // This uses Animator class because you can't include View from here
     std::function<void(ViewBase*)> pushContextInternal = [](ViewBase* v) {};
