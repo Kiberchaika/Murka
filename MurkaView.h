@@ -53,6 +53,22 @@ public:
         return pass;
     }
     
+	void claimKeyboardFocus() {
+		currentContext.claimKeyboardFocus(this);
+	}
+
+	void resetKeyboardFocus() {
+		currentContext.resetKeyboardFocus(this);
+	}
+
+	bool allowedToUseKeyboard() {
+		return currentContext.allowedToUseKeyboard(this);
+	}
+
+	bool hasKeyboardFocus() {
+		return currentContext.hasKeyboardFocus(this);
+	}
+
 public:
     View() {
     }
@@ -152,22 +168,6 @@ public:
         return result;
     }
     
-    void claimKeyboardFocus() {
-        currentContext.claimKeyboardFocus(this);
-    }
-    
-    void resetKeyboardFocus() {
-		currentContext.resetKeyboardFocus(this);
-    }
-
-	bool allowedToUseKeyboard() {
-		return currentContext.allowedToUseKeyboard(this);
-	}
-
-	bool hasKeyboardFocus() {
-		return currentContext.hasKeyboardFocus(this);
-	}
-
 	bool areChildrenHovered() {
         if (!currentContext.isHovered()) {
             return false;
