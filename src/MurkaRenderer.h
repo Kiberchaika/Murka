@@ -3,7 +3,7 @@
 #include "MurkaRendererBase.h"
 #include "MurMatrix.h"
 #include "MurShader.h"
-#include "delaunator/delaunator.h"
+#include "../libs/delaunator/delaunator.h"
 
 #if defined(MURKA_OF)
 #include "ofMain.h"
