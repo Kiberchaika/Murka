@@ -113,9 +113,16 @@ public:
             claimKeyboardFocus();
         }
 
+		bool forceSelectAll = false;
+
         // activation & deactivation & doubleclick
         if (mouseDownPressed(0)) {
             if (isInside && !activated) {
+
+				if (shouldSelectAllWhenClicked) {
+					forceSelectAll = true;
+				}
+
                 if (activateByDoubleClickOnly) {
                     activated = doubleClick();
                 } else { // activate by any click
@@ -268,11 +275,11 @@ public:
         }
 
         bool enterPressed = false;
-        
+
         // Text editing logic
         if (activated) { // remember that drawing occurs even if its not activated
 
-            if (doubleClicked) {
+            if (doubleClicked || forceSelectAll) {
                 updateTextSelectionFirst(0);
                 updateTextSelectionSecond(displayString.length());
                 updateTextSelectionRange();
@@ -557,7 +564,7 @@ public:
             if (dataTypeName == typeid(float*).name()) {
                 float* floatData = ((float*)dataToControl);
 
-				*floatData = std::stof(displayString);
+				*floatData = !displayString.empty() ? std::stof(displayString) : 0;
                 
 #ifdef MURKA_DEBUG
 				std::cout << "setting it to " << *floatData << std::endl;
@@ -566,12 +573,12 @@ public:
             if (dataTypeName == typeid(double*).name()) {
                 double* doubleData = ((double*)dataToControl);
                 
-				*doubleData = std::stod(displayString);
+				*doubleData = !displayString.empty() ? std::stod(displayString) : 0;
             }
             if (dataTypeName == typeid(int*).name()) {
                 int* intData = ((int*)dataToControl);
 
-                *intData = std::stoi(displayString);
+                *intData = !displayString.empty() ? std::stoi(displayString) : 0;
             }
     }
     
@@ -837,6 +844,8 @@ public:
     int cursorPosition = 0;
     bool activated = false;
     
+	bool shouldSelectAllWhenClicked = false;
+
     double lastLeftMousebuttonClicktime = 0;
     
     float textHeight;
