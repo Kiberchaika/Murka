@@ -962,13 +962,13 @@ public:
 	};
 
 	void clear(int r, int g, int b, int a = 0) override {
-		MurkaColor col(1.0 * r, 1.0 * g, 1.0 * b, 1.0 * a);
+		MurkaColor col(r, g, b, a);
 		glClearColor(col.getNormalisedRed(), col.getNormalisedGreen(), col.getNormalisedBlue(), col.getNormalisedAlpha());
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	};
 
 	void clear(int gray, int a = 0) override {
-		MurkaColor col(gray);
+		MurkaColor col(gray, gray, gray, a);
 		glClearColor(col.getNormalisedRed(), col.getNormalisedGreen(), col.getNormalisedBlue(), col.getNormalisedAlpha());
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	};

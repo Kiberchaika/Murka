@@ -209,20 +209,24 @@ public:
 	}
 
 	void update() {
-		glBindTexture(gltype, textureID);
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-		glTexImage2D(gltype, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, data.data());
-		//glTexSubImage2D(gltype, 0, 0, 0, width, height, GL_RGBA, GL_FLOAT, image.getPixelData());
-		glBindTexture(gltype, 0);
+		if (width > 0 && height > 0) {
+			glBindTexture(gltype, textureID);
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+			glTexImage2D(gltype, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, data.data());
+			//glTexSubImage2D(gltype, 0, 0, 0, width, height, GL_RGBA, GL_FLOAT, image.getPixelData());
+			glBindTexture(gltype, 0);
+		}
 	}
 
 	void loadData(juce::uint8* data, int glFormat) {
-		glBindTexture(gltype, textureID);
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		if (width > 0 && height > 0) {
+			glBindTexture(gltype, textureID);
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-		glTexImage2D(gltype, 0, GL_RGBA32F, width, height, 0, glFormat, GL_UNSIGNED_BYTE, data);
-		//glTexSubImage2D(gltype, 0, 0, 0, width, height, GL_RGBA, GL_FLOAT, image.getPixelData());
-		glBindTexture(gltype, 0);
+			glTexImage2D(gltype, 0, GL_RGBA32F, width, height, 0, glFormat, GL_UNSIGNED_BYTE, data);
+			//glTexSubImage2D(gltype, 0, 0, 0, width, height, GL_RGBA, GL_FLOAT, image.getPixelData());
+			glBindTexture(gltype, 0);
+		}
 	}
 
 	void clear() {
