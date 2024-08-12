@@ -203,10 +203,10 @@ public:
 		}
 
 		for (int i = 0; i < colors.size(); i++) {
-			vboData[i].col.r = colors[i].r;
-			vboData[i].col.g = colors[i].g;
-			vboData[i].col.b = colors[i].b;
-			vboData[i].col.a = colors[i].a;
+			vboData[i].col.r = colors[i].getNormalisedRed();
+			vboData[i].col.g = colors[i].getNormalisedGreen();
+			vboData[i].col.b = colors[i].getNormalisedBlue();
+			vboData[i].col.a = colors[i].getNormalisedAlpha();
 		}
 
 		openGLContext->extensions.glBindVertexArray(VAO);

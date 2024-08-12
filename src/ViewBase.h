@@ -4,7 +4,7 @@
 #include "MurkaLinearLayoutGenerator.h"
 #include "MosaicLayout.h"
 #include "MurkaAnimator.h"
-#include "parallel_hashmap/phmap.h"
+#include "../libs/parallel_hashmap/phmap.h"
 
 #define MURKA_PARAMETER(typename, parameterType, parameterName, setterName, default) \
 parameterType parameterName = default; \

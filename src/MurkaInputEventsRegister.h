@@ -181,8 +181,12 @@ public:
             }
     }
     
-    // oF event registration
-    
+	void registerMouseScrolled(float mouseScrollDeltaX, float mouseScrollDeltaY) {
+		eventState.mouseScroll += { mouseScrollDeltaX, mouseScrollDeltaY };
+	}
+
+	// oF event registration
+
 #ifdef MURKA_OF
 
 

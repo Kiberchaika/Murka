@@ -190,10 +190,10 @@ public:
 
 	void setColor(int x, int y, const MurkaColor col) {
 		int idx = y * width * 4 + x * 4;
-		data[idx + 0] = col.r;
-		data[idx + 1] = col.g;
-		data[idx + 2] = col.b;
-		data[idx + 3] = col.a;
+		data[idx + 0] = col.getNormalisedRed();
+		data[idx + 1] = col.getNormalisedGreen();
+		data[idx + 2] = col.getNormalisedBlue();
+		data[idx + 3] = col.getNormalisedAlpha();
 	}
 
 	void setData(float *data) {
@@ -209,20 +209,24 @@ public:
 	}
 
 	void update() {
-		glBindTexture(gltype, textureID);
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-		glTexImage2D(gltype, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, data.data());
-		//glTexSubImage2D(gltype, 0, 0, 0, width, height, GL_RGBA, GL_FLOAT, image.getPixelData());
-		glBindTexture(gltype, 0);
+		if (width > 0 && height > 0) {
+			glBindTexture(gltype, textureID);
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+			glTexImage2D(gltype, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, data.data());
+			//glTexSubImage2D(gltype, 0, 0, 0, width, height, GL_RGBA, GL_FLOAT, image.getPixelData());
+			glBindTexture(gltype, 0);
+		}
 	}
 
 	void loadData(juce::uint8* data, int glFormat) {
-		glBindTexture(gltype, textureID);
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		if (width > 0 && height > 0) {
+			glBindTexture(gltype, textureID);
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-		glTexImage2D(gltype, 0, GL_RGBA32F, width, height, 0, glFormat, GL_UNSIGNED_BYTE, data);
-		//glTexSubImage2D(gltype, 0, 0, 0, width, height, GL_RGBA, GL_FLOAT, image.getPixelData());
-		glBindTexture(gltype, 0);
+			glTexImage2D(gltype, 0, GL_RGBA32F, width, height, 0, glFormat, GL_UNSIGNED_BYTE, data);
+			//glTexSubImage2D(gltype, 0, 0, 0, width, height, GL_RGBA, GL_FLOAT, image.getPixelData());
+			glBindTexture(gltype, 0);
+		}
 	}
 
 	void clear() {

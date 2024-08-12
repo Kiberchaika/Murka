@@ -78,6 +78,8 @@ public:
         double* doubleData;
         int* intData;
         
+		boundReached = false;
+
         // Handling "wants clicks"
         if (!activateByDoubleClickOnly) {
             thisWantsClicks = true;
@@ -97,6 +99,8 @@ public:
             updateTextSelectionFirst(0);
             updateTextSelectionSecond(displayString.length());
             lastLeftMousebuttonClicktime = m.getElapsedTime();
+
+			shouldForceEditorToSelectAll = false;
         }
         
         // grabbing focus is asked to explicitly
@@ -107,15 +111,23 @@ public:
         
         // activating if always selected
         
-        if (alwaysActivated) {
+        if (alwaysActivated || forceActivate) {
             activated = true;
             updateExternalData(dataToControl, clampNumber);
             claimKeyboardFocus();
+			forceActivate = false;
         }
+
+		bool forceSelectAll = false;
 
         // activation & deactivation & doubleclick
         if (mouseDownPressed(0)) {
             if (isInside && !activated) {
+
+				if (shouldSelectAllWhenClicked) {
+					forceSelectAll = true;
+				}
+
                 if (activateByDoubleClickOnly) {
                     activated = doubleClick();
                 } else { // activate by any click
@@ -268,11 +280,11 @@ public:
         }
 
         bool enterPressed = false;
-        
+
         // Text editing logic
         if (activated) { // remember that drawing occurs even if its not activated
 
-            if (doubleClicked) {
+            if (doubleClicked || forceSelectAll) {
                 updateTextSelectionFirst(0);
                 updateTextSelectionSecond(displayString.length());
                 updateTextSelectionRange();
@@ -455,6 +467,9 @@ public:
                                 updateTextSelectionRangeToIncludeCursor();
                             }
                         }
+						else {
+							boundReached = true;
+						}
                         
                     }
                     else if (key == MURKA_KEY_RIGHT) { // right
@@ -479,6 +494,9 @@ public:
                                 updateTextSelectionRangeToIncludeCursor();
                             }
                         }
+						else {
+							boundReached = true;
+						}
                         
                     }
                     else if (key >= 45 && key <= 57) { // number keys, - and .
@@ -496,6 +514,10 @@ public:
                         displayString.insert(displayString.begin() + cursorPosition, char(key));
 
                         cursorPosition += 1;
+
+						if (cursorPosition >= fillWidth || displayString.size() >= fillWidth) {
+							boundReached = true;
+						}
 
                         updateTextSelectionFirst(cursorPosition);
                         updateTextSelectionSecond(cursorPosition);
@@ -528,16 +550,21 @@ public:
         editingFinished = false;
         
         if ((activated) && (!alwaysActivated))
-        if ((enterPressed) || (mouseDownPressed(0) && !isInside)) {
+        if (enterPressed || (mouseDownPressed(0) && !isInside) || forceDeactivate) {
             activated = false;
             cameraPanInsideWidget = 0;
             
-            resetKeyboardFocus();
+			if (hasKeyboardFocus()) {
+				resetKeyboardFocus();
+			}
             
             updateExternalData(dataToControl, clampNumber);
             
             editingFinished = true;
+
+			forceDeactivate = false;
         }
+		 
 
 //            drawWidget<Label>(ctx, {""});
     };
@@ -555,7 +582,7 @@ public:
             if (dataTypeName == typeid(float*).name()) {
                 float* floatData = ((float*)dataToControl);
 
-				*floatData = std::stof(displayString);
+				*floatData = !displayString.empty() ? std::stof(displayString) : 0;
                 
 #ifdef MURKA_DEBUG
 				std::cout << "setting it to " << *floatData << std::endl;
@@ -564,75 +591,75 @@ public:
             if (dataTypeName == typeid(double*).name()) {
                 double* doubleData = ((double*)dataToControl);
                 
-				*doubleData = std::stod(displayString);
+				*doubleData = !displayString.empty() ? std::stod(displayString) : 0;
             }
             if (dataTypeName == typeid(int*).name()) {
                 int* intData = ((int*)dataToControl);
 
-                *intData = std::stoi(displayString);
+                *intData = !displayString.empty() ? std::stoi(displayString) : 0;
             }
     }
     
-    void updateInternalRepresenation(void* dataToControl, int precision, bool clamp = false, double min = 0, double max = 0) {
+	void updateInternalRepresenation(void* dataToControl, int precision, bool clamp = false, double min = 0, double max = 0) {
 
-        bool isItStringData = false;
-        
-        // Updating the internal representation now
-        if (dataTypeName == typeid(std::string*).name()) {
-            std::string* stringData = ((std::string*)dataToControl);
-            std::string xxx = *stringData;
-            displayString = xxx;
-            
-            isItStringData = true;
-        }
-        
-        if (dataTypeName == typeid(float*).name()) {
-            float* floatData = ((float*)dataToControl);
-            displayString = to_string_with_precision(*floatData, precision);
-            if (clamp) {
-                if (*floatData < min) {
-                    displayString = to_string_with_precision(min, precision);
-                }
-                if (*floatData > max) {
-                    displayString = to_string_with_precision(max, precision);
-                }
-            }
-        }
-        if (dataTypeName == typeid(double*).name()) {
-            double* doubleData = ((double*)dataToControl);
+		bool isItStringData = false;
+
+		// Updating the internal representation now
+		if (dataTypeName == typeid(std::string*).name()) {
+			std::string* stringData = ((std::string*)dataToControl);
+			std::string xxx = *stringData;
+			displayString = xxx;
+
+			isItStringData = true;
+		}
+
+		if (dataTypeName == typeid(float*).name()) {
+			float* floatData = ((float*)dataToControl);
+			displayString = to_string_with_precision(*floatData, precision);
+			if (clamp) {
+				if (*floatData < min) {
+					displayString = to_string_with_precision(min, precision);
+				}
+				if (*floatData > max) {
+					displayString = to_string_with_precision(max, precision);
+				}
+			}
+		}
+		if (dataTypeName == typeid(double*).name()) {
+			double* doubleData = ((double*)dataToControl);
 
 			displayString = to_string_with_precision(*doubleData);
-            if (clamp) {
-                if (*doubleData < min) {
-                    displayString = to_string_with_precision(min, precision);
-                }
-                if (*doubleData > max) {
-                    displayString = to_string_with_precision(max, precision);
-                }
-            }
-        }
-        if (dataTypeName == typeid(int*).name()) {
-            int* intData = ((int*)dataToControl);
+			if (clamp) {
+				if (*doubleData < min) {
+					displayString = to_string_with_precision(min, precision);
+				}
+				if (*doubleData > max) {
+					displayString = to_string_with_precision(max, precision);
+				}
+			}
+		}
+		if (dataTypeName == typeid(int*).name()) {
+			int* intData = ((int*)dataToControl);
 
-            displayString = to_string_with_precision(*intData, precision, fillWidth);
-            if (clamp) {
-                if (*intData < min) {
-                    displayString = to_string_with_precision(int(min), precision, fillWidth);
-                }
-                if (*intData > max) {
-                    displayString = to_string_with_precision(int(max), precision, fillWidth);
-                }
-            }
-        }
-        
-        if (!isItStringData) {
-            if (displayString.find('.') != std::string::npos) {
-                displayString.erase ( displayString.find_last_not_of('0') + 1, std::string::npos );
-                if (displayString[displayString.length() - 1] == '.') {
-                    displayString.erase(displayString.length() - 1, 1);
-                }
-            }
-        }
+			displayString = to_string_with_precision(*intData, precision, fillWidth);
+			if (clamp) {
+				if (*intData < min) {
+					displayString = to_string_with_precision(int(min), precision, fillWidth);
+				}
+				if (*intData > max) {
+					displayString = to_string_with_precision(int(max), precision, fillWidth);
+				}
+			}
+		}
+
+		if (!isItStringData) {
+			if (displayString.find('.') != std::string::npos) {
+				displayString.erase(displayString.find_last_not_of('0') + 1, std::string::npos);
+				if (displayString[displayString.length() - 1] == '.') {
+					displayString.erase(displayString.length() - 1, 1);
+				}
+			}
+		}
     }
     
     void* dataToControl = nullptr;
@@ -649,12 +676,27 @@ public:
 //    int precision = -1;
     
     bool activateByDoubleClickOnly = false;
-    bool alwaysActivated = false;
-    
+	bool alwaysActivated = false;
+
+	bool boundReached = false;
+
+	bool forceActivate = false;
+	bool forceDeactivate = false;
+
+	TextField & activate() {
+		forceActivate = true;
+		return *this;
+	}
+
+	TextField & deactivate() {
+		forceDeactivate = true;
+		return *this;
+	}
+
     std::string hint = "";
     
-    MurkaColor widgetFgColor = {0.98, 0.98, 0.98};
-    MurkaColor widgetBgColor = {0.1, 0.1, 0.1};
+    MurkaColor widgetFgColor = {0.98 * 255, 0.98 * 255, 0.98 * 255 };
+    MurkaColor widgetBgColor = {0.1 * 255, 0.1 * 255, 0.1 * 255 };
 
 //    bool numbersOnly = false;
     MURKA_PARAMETER(TextField, // class name
@@ -684,6 +726,7 @@ public:
                     forcingEditorToSelectAll, // setter
                     false // default
     )
+
 
 //    bool shouldForceEditorToSelectAll = false;
         
@@ -835,6 +878,8 @@ public:
     int cursorPosition = 0;
     bool activated = false;
     
+	bool shouldSelectAllWhenClicked = false;
+
     double lastLeftMousebuttonClicktime = 0;
     
     float textHeight;
