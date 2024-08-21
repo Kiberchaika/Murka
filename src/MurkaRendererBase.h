@@ -24,10 +24,12 @@ struct MurStyle {
 struct MurRendererState {
 	std::vector<MurStyle> styleStack;
 	std::vector<MurMatrix<float>> matrixStack;
+	MurMatrix<float> stackedMatrix;
+
 	int circleResolution = 0;
 	float lineWidth = 0;
 
-	MurMatrix<float> stackedMatrix;
+	MurBlendMode blendMode;
 	MurStyle currentStyle;
 };
 

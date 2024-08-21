@@ -347,7 +347,8 @@ class MurkaRenderer : public MurkaRendererBase {
 
 	std::vector<MurStyle> styleStack;
 	MurStyle currentStyle;
-
+	MurBlendMode blendMode;
+	
 	float lineWidth = 1;
 	float circleResolution = 32;
 
@@ -905,6 +906,8 @@ public:
 
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 		}
+
+		this->blendMode = blendMode;
 	}
 
 	void updateVbo(MurVbo& vbo) override {
@@ -933,10 +936,12 @@ public:
 		MurRendererState rendererState;
 		rendererState.styleStack = styleStack;
 		rendererState.matrixStack = matrixStack;
-		rendererState.lineWidth = lineWidth;
-
 		rendererState.stackedMatrix = stackedMatrix;
 		rendererState.currentStyle = currentStyle;
+
+		rendererState.lineWidth = lineWidth;
+		rendererState.blendMode = blendMode;
+		rendererState.circleResolution = circleResolution;
 
 		return rendererState;
 	}
@@ -944,11 +949,12 @@ public:
 	void setRendererState(MurRendererState rendererState) override {
 		this->styleStack = rendererState.styleStack;
 		this->matrixStack = rendererState.matrixStack;
-		this->setLineWidth(rendererState.lineWidth);
-		this->setCircleResolution(rendererState.circleResolution);
-
 		this->stackedMatrix = rendererState.stackedMatrix;
 		this->currentStyle = rendererState.currentStyle;
+
+		this->setLineWidth(rendererState.lineWidth);
+		this->setCircleResolution(rendererState.circleResolution);
+		this->setBlendMode(rendererState.blendMode);
 	}
 
 	// color operations
