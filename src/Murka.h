@@ -106,7 +106,11 @@ private:
                 widgetObjectCopy->updateEvents(currentContext);
                 
                 widgetObjectCopy->registerCurrentContext(currentContext);
-                widgetObjectCopy->internalDraw(*this);
+                
+				MurRendererState rendererState = this->getRendererState();
+				widgetObjectCopy->internalDraw(*this);
+				this->setRendererState(rendererState);
+
 
                 
 //                //DEBUG - drawing the children frame that we had at the last frame end
@@ -329,6 +333,9 @@ public:
     }
     
     void end() {
+		endFrame();
+
+
         disableViewportCrop = true;
         for (auto &overlay: overlays) {
             overlay.func();

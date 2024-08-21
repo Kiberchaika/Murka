@@ -16,6 +16,21 @@ enum MurBlendMode {
 	MUR_BLENDMODE_ADD = 2,
 };
 
+struct MurStyle {
+	MurkaColor color = MurkaColor(255, 255, 255, 255);
+	bool fill = true;
+};
+
+struct MurRendererState {
+	std::vector<MurStyle> styleStack;
+	std::vector<MurMatrix<float>> matrixStack;
+	int circleResolution = 0;
+	float lineWidth = 0;
+
+	MurMatrix<float> stackedMatrix;
+	MurStyle currentStyle;
+};
+
 class MurkaRendererBase : public MurkaAssets {
 	float screenScale = 1.0;
 
@@ -65,7 +80,11 @@ public:
     // rendering setup
     virtual void setCircleResolution(int resolution) = 0;
     virtual void setLineWidth(float lineWidth) = 0;
-    virtual void enableFill() = 0;
+
+	virtual MurRendererState getRendererState() = 0;
+	virtual void setRendererState(MurRendererState rendererState) = 0;
+
+	virtual void enableFill() = 0;
     virtual void disableFill() = 0;
     virtual void setLineSmoothing(bool smooth) = 0;
     virtual void enableAntiAliasing() = 0;

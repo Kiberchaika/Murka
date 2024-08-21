@@ -345,12 +345,8 @@ class MurkaRenderer : public MurkaRendererBase {
 	std::vector<MurMatrix<float>> projectionStack;
 	MurMatrix<float> currentProjectionMatrix;
 
-	struct Style {
-		MurkaColor color = MurkaColor(255, 255, 255, 255);
-		bool fill = true;
-	};
-	std::vector<Style> styleStack;
-	Style currentStyle;
+	std::vector<MurStyle> styleStack;
+	MurStyle currentStyle;
 
 	float lineWidth = 1;
 	float circleResolution = 32;
@@ -557,7 +553,7 @@ public:
 		currentMatrix = MurMatrix<float>();
 
 		styleStack.clear();
-		currentStyle = Style();
+		currentStyle = MurStyle();
 
 		viewportStack.clear();
         currentViewport = MurkaShape(0, 0, glAppComp->getWidth() * openGLContext->getRenderingScale(), glAppComp->getHeight() *  openGLContext->getRenderingScale());
@@ -579,7 +575,16 @@ public:
 
         setupScreen();
 	}
-	
+
+	void endFrame() {
+		if (matrixStack.size() > 0) {
+			throw std::runtime_error("Check the count of push/popMatrix calls");
+		}
+		if (styleStack.size() > 0) {
+			throw std::runtime_error("Check the count of push/popStyle calls");
+		}
+	}
+
 	// Clipboard
 	void setClipboardCallbacks(std::function<std::string(void)> getCallback, std::function<void(std::string)> setCallback) {
 		getClipboardCallback = getCallback;
@@ -840,7 +845,7 @@ public:
 	void setLineWidth(float lineWidth) override {
 		this->lineWidth = lineWidth;
 	};
-
+	 
 	void enableFill() override {
 		currentStyle.fill = true;
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -923,6 +928,28 @@ public:
 			throw std::runtime_error("Check the count of push/popStyle calls");
 		}
 	};
+
+	MurRendererState getRendererState() override {
+		MurRendererState rendererState;
+		rendererState.styleStack = styleStack;
+		rendererState.matrixStack = matrixStack;
+		rendererState.lineWidth = lineWidth;
+
+		rendererState.stackedMatrix = stackedMatrix;
+		rendererState.currentStyle = currentStyle;
+
+		return rendererState;
+	}
+
+	void setRendererState(MurRendererState rendererState) override {
+		this->styleStack = rendererState.styleStack;
+		this->matrixStack = rendererState.matrixStack;
+		this->setLineWidth(rendererState.lineWidth);
+		this->setCircleResolution(rendererState.circleResolution);
+
+		this->stackedMatrix = rendererState.stackedMatrix;
+		this->currentStyle = rendererState.currentStyle;
+	}
 
 	// color operations
 	MurkaColor getColor() override {
