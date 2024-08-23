@@ -347,7 +347,7 @@ class MurkaRenderer : public MurkaRendererBase {
 
 	std::vector<MurStyle> styleStack;
 	MurStyle currentStyle;
-	MurBlendMode blendMode;
+	MurBlendMode blendMode = MUR_BLENDMODE_ALPHA;
 	
 	float lineWidth = 1;
 	float circleResolution = 32;
