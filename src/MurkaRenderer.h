@@ -10,9 +10,9 @@
 #elif defined(MURKA_JUCE) && !defined(WIN32) || !defined(_WIN32) || !defined(__WIN32__) || !defined(__WINDOWS__)
 #ifdef __APPLE__
 #include <GLUT/glut.h>
+#include <OpenGL/OpenGL.h>
 #else
 #include <GL/glut.h>
-#include <OpenGL/OpenGL.h>
 #endif
 
 namespace murka {
