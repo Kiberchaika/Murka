@@ -5,7 +5,9 @@
 
 #if defined(MURKA_OF)
 #include "ofMain.h"
-#elif defined(MURKA_JUCE) && !defined(WIN32)
+#elif defined(MURKA_JUCE) && defined(__linux__)
+#include <GL/glut.h>
+#elif defined(MURKA_JUCE) && defined(__APPLE__)
 #include <GLUT/glut.h>
 #include <OpenGL/OpenGL.h>
 #endif
