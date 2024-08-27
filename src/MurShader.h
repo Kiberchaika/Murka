@@ -5,13 +5,11 @@
 
 #if defined(MURKA_OF)
 #include "ofMain.h"
-#elif defined(MURKA_JUCE) && !defined(WIN32) || !defined(_WIN32) || !defined(__WIN32__) || !defined(__WINDOWS__)
-#ifdef __APPLE__
+#elif defined(MURKA_JUCE) && defined(__linux__)
+#include <GL/glut.h>
+#elif defined(MURKA_JUCE) && defined(__APPLE__)
 #include <GLUT/glut.h>
 #include <OpenGL/OpenGL.h>
-#else
-#include <GL/glut.h>
-#endif
 #endif
 
 namespace murka {
