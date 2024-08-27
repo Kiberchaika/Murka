@@ -14,6 +14,7 @@
 #else
 #include <GL/glut.h>
 #endif
+#endif
 
 namespace murka {
 
