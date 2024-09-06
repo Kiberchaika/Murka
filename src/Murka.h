@@ -300,6 +300,7 @@ public:
     //////////////////////////////////////////////////////////////////
 
     bool doesHaveAWidgetThatHoldsKeyboardFocus() {
+        return true;
         return keyboardFocusHaver != nullptr;
     }
 
@@ -390,6 +391,8 @@ public:
 	}
 
     struct Parameters {};
+    
+    bool isPlugin = true; // TEMPORARY! If it's instantiated in a standalone application, it should be set to false for the keyboard events to not be passed through
 
 private:
     
