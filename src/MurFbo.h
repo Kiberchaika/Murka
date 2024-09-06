@@ -86,14 +86,13 @@ protected:
 public:
 
 	MurFbo() {
-
-	};
+	}
 
 	~MurFbo() {
 		if (bAllocated) {
 			openGLFrameBuffer.release();
 		}
-	};
+	}
 
 	bool isAllocated() const {
 		return bAllocated;

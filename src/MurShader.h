@@ -122,12 +122,11 @@ public:
 	int attributeCol = -1;
 
 	MurShader() {
-
-	};
+	}
 	
 	~MurShader() {
 		unload();
-	};
+	}
 
 	void setOpenGLContext(juce::OpenGLContext* ctx) {
 		openGLContext = ctx;

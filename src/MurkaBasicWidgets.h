@@ -32,13 +32,13 @@ public:
             float textX = (shape.size.x - 10) - font->getStringBoundingBox(label, 0, 0).width;
             font->drawString(label, textX, 5);
         }
-    };
+    }
 
 	std::string label;
 
 	TextAlignment alignment = TextAlignment::TEXT_LEFT;
 
-	MurkaColor color = { 0.98, 0.98, 0.98 };
+	MurkaColor color = { 0.98f, 0.98f, 0.98f };
 
 	bool customColor = false;
    
@@ -57,9 +57,9 @@ public:
 
 		MurkaColor fgColor = m.getColor();
 
-        float pushed = 0.2 - (m.getElapsedTime() - lastTimeClicked);
+        float pushed = 0.2f - (float)(m.getElapsedTime() - lastTimeClicked);
         if (pushed < 0) pushed = 0;
-        pushed /= 0.2;
+        pushed /= 0.2f;
 
         m.pushStyle();
         m.setColor((inside() ? fgColor : fgColor / 2) * (1.0 + 0.2 * pushed));
@@ -85,7 +85,7 @@ public:
 		else results = false;
 
         m.popStyle();
-    };
+    }
     
 	std::string label;
 
@@ -118,9 +118,9 @@ public:
 
 		MurkaColor fgColor = m.getColor();
 
-		float pushed = 0.2 - (m.getElapsedTime() - lastTimeClicked);
+		float pushed = 0.2f - (float)(m.getElapsedTime() - lastTimeClicked);
 		if (pushed < 0) pushed = 0;
-		pushed /= 0.2;
+		pushed /= 0.2f;
             
         int lineHeight = 25;
 
@@ -131,7 +131,7 @@ public:
 			MurkaShape rowShape = { 0, lineHeight * i, getSize().x, lineHeight };
 			bool rowHover = rowShape.inside(mousePosition());
 
-			m.setColor((rowHover * inside() ? fgColor : fgColor / 2) * (1.0 + 0.2 * pushed));
+            m.setColor(((rowHover * inside()) ? fgColor : fgColor / 2) * (1.0f + 0.2f * pushed));
 
 			m.disableFill();
 			m.drawCircle(5 + 20 / 2, 5 + 20 / 2, 10);
@@ -153,7 +153,7 @@ public:
 			m.popStyle();
 			m.popMatrix();
 		}
-	};
+	}
 
 	MURKA_PARAMETER(Radiobutton, // class name
 		int*, // parameter type
@@ -175,7 +175,7 @@ public:
 	void internalDraw(Murka & m) {
 
 
-		m.setColor(MurkaColor(90 / 255.0, 90 / 255.0, 90 / 255.0) * (0.8 + 0.2 * inside()));
+		m.setColor(MurkaColor(90 / 255.0f, 90 / 255.0f, 90 / 255.0f) * (0.8f + 0.2f * inside()));
 		m.drawRectangle(0, 0, getSize().x, getSize().y);
 
 		if (justInitialised) {
@@ -206,15 +206,11 @@ public:
 
 		pressed = false;
 		return;
-	};
-
+	}
 
 	std::string label;
-
 	uint64_t lastFrameItWasRendered = -1;
-
 	bool pressed;
-
 	bool justInitialised = true;
 };
 
@@ -223,7 +219,7 @@ class DropdownButton : public View<DropdownButton> {
 public:
 	void internalDraw(Murka & m) {
 
-		m.setColor(MurkaColor(90 / 255.0, 90 / 255.0, 90 / 255.0) * (0.5 + 0.3 * inside()));
+		m.setColor(MurkaColor(90 / 255.0f, 90 / 255.0f, 90 / 255.0f) * (0.5f + 0.3f * inside()));
 		m.drawRectangle(0, 0, getSize().x, getSize().y);
 
 		if ((mouseDownPressed(0)) && (inside())) {
@@ -239,7 +235,7 @@ public:
 
 		options = options;
 
-		m.setColor(MurkaColor(66 / 255.0, 67 / 255.0, 71 / 255.0) * 3.2);
+		m.setColor(MurkaColor(66 / 255.0f, 67 / 255.0f, 71 / 255.0f) * 3.2f);
 		m.drawString(options[selectedOption], 5, 5);
 
 		if (showingTheDropdown) {
@@ -269,7 +265,7 @@ public:
 			*dataToControl = selectedOption;
 			changedSelection = false;
 		}
-	};
+	}
 
 	MURKA_PARAMETER(DropdownButton, // class name
 		int*, // parameter type
@@ -278,18 +274,12 @@ public:
 		nullptr
 	) // default
 
-		
     std::vector<std::string> options = {};
 	int selectedOption = 0;
-
 	bool results;
-
 	MurkaPoint contextPosition = { 0,0 };
-
 	bool initialised = false;
-
 	bool showingTheDropdown = false;
-
 	bool changedSelection = false;
 };
 
@@ -359,7 +349,7 @@ public:
                 shape.size.y = minimumHeight;
             }
         }
-    };
+    }
     
     
     ///
@@ -390,15 +380,15 @@ public:
         
          auto font = m.getCurrentFont();
         
-			float pushed = 0.2 - (m.getElapsedTime() - lastTimeClicked);
+			float pushed = 0.2f - (float)(m.getElapsedTime() - lastTimeClicked);
 			if (pushed < 0) pushed = 0;
-			pushed /= 0.2;
+			pushed /= 0.2f;
 
 			m.pushStyle();
 			m.enableFill();
 			if (inside) {
 			 m.setColor(MurkaColor(r, g, b) * (1.0 + 0.2 * pushed));
-			} else m.setColor(75 * (1.0 + 0.2 * pushed));
+			} else m.setColor(75 * (1.0f + 0.2f * pushed));
 			m.drawRectangle(0, 0, getSize().x, getSize().y);
 			m.setColor(30);
 			m.disableFill();
@@ -411,7 +401,7 @@ public:
 			font->drawString(label, getSize().x / 2 - offset, getSize().y / 2 - font->getLineHeight() / 2);
 
 			m.popStyle();
-    };
+    }
 
     
 	MURKA_PARAMETER(Button, // class name
@@ -423,13 +413,9 @@ public:
 
     // Whatever the parameters and the results are, the functions have to be defined here
 	float r = 80, g = 80, b = 80;
-	
 	std::function<void()> Callback;
-
 	bool pressed;
-    
     // Internal state
-
 	std::string Label;
     float lastTimeClicked = 0;
 };
@@ -461,9 +447,6 @@ public:
         }
         
         auto font = m.getCurrentFont();
-        
-
-        
 		MurkaColor fgColor = m.getColor();
 
         m.pushStyle();
@@ -496,7 +479,7 @@ public:
         
         font->drawString(resultString, getSize().x / 2 - offset, getSize().y / 2 - font->getLineHeight()/2);
         m.popStyle();
-    };
+    }
     
     
 	MURKA_PARAMETER(SliderFloat, // class name

@@ -1,7 +1,8 @@
 #pragma once
 
-enum TextAlignment {TEXT_LEFT, TEXT_CENTER, TEXT_RIGHT};
+#include "MurkaUtility.h"
 
+enum TextAlignment {TEXT_LEFT, TEXT_CENTER, TEXT_RIGHT};
 
 #if defined(MURKA_OF)
 #include "ofMain.h"
@@ -156,11 +157,11 @@ public:
     void setHsb(float hue, float saturation, float brightness, float alpha) {
 //        saturation = glm::clamp(saturation, 0.f, limit());
 //        brightness = glm::clamp(brightness, 0.f, limit());
-        if(brightness == 0) { // black
+        if(IsApproximatelyEqual(brightness, 0.0f)) { // black
             r = 0;
             g = 0;
             b = 0;
-        } else if(saturation == 0) { // grays
+        } else if(IsApproximatelyEqual(saturation, 0.0f)) { // grays
             r = brightness;
             g = brightness;
             b = brightness;
@@ -340,11 +341,11 @@ struct MurkaPoint {
     }
     
     bool operator== (MurkaPoint & right) {
-        return ((x == right.x) && (y == right.y));
+        return ((IsApproximatelyEqual(x, right.x)) && (IsApproximatelyEqual(y, right.y)));
     }
 
     bool operator == (const MurkaPoint& p2) const {
-        return (x == p2.x) && (y == p2.y);
+        return IsApproximatelyEqual(x, p2.x) && IsApproximatelyEqual(y, p2.y);
     }
 
     bool operator != (const MurkaPoint& p2) const {
@@ -428,7 +429,7 @@ struct MurkaPoint3D {
     }
 
     bool operator == (const MurkaPoint3D& p2) const {
-        return (x == p2.x) && (y == p2.y) && (z == p2.z);
+        return IsApproximatelyEqual(x, p2.x) && IsApproximatelyEqual(y, p2.y) && IsApproximatelyEqual(z, p2.z);
     }
 
     bool operator != (const MurkaPoint3D& p2) const {
@@ -474,7 +475,7 @@ struct MurkaPoint4D {
 	}
 
     bool operator == (const MurkaPoint4D& p2) const {
-        return (x == p2.x) && (y == p2.y) && (z == p2.z) && (w == p2.w);
+        return IsApproximatelyEqual(x, p2.x) && IsApproximatelyEqual(y, p2.y) && IsApproximatelyEqual(z, p2.z) && IsApproximatelyEqual(w, p2.w);
     }
 
     bool operator != (const MurkaPoint4D& p2) const {
@@ -512,19 +513,19 @@ struct MurkaShape {
     }
 
     bool operator != (MurkaShape b) {
-        if ((position.x != b.position.x) ||
-            (position.y != b.position.y) ||
-            (size.x != b.size.x) ||
-            (size.y != b.size.y)) {
+        if (!IsApproximatelyEqual(position.x, b.position.x) ||
+            !IsApproximatelyEqual(position.y, b.position.y) ||
+            !IsApproximatelyEqual(size.x, b.size.x) ||
+            IsApproximatelyEqual!(size.y, b.size.y)) {
             return true;
         } else return false;
     }
 
     bool operator == (const MurkaShape b) const {
-        if ((position.x == b.position.x) &&
-            (position.y == b.position.y) &&
-            (size.x == b.size.x) &&
-            (size.y == b.size.y)) {
+        if (IsApproximatelyEqual(position.x, b.position.x) &&
+            IsApproximatelyEqual(position.y, b.position.y) &&
+            IsApproximatelyEqual(size.x, b.size.x) &&
+            IsApproximatelyEqual(size.y, b.size.y)) {
             return true;
         } else return false;
     }

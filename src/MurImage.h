@@ -129,12 +129,11 @@ protected:
 public:
 
 	MurImage() {
-
-	};
+	}
 
 	~MurImage() {
 		clear();
-	};
+	}
 
 	void setOpenGLContext(juce::OpenGLContext* openGLContext) {
 		this->openGLContext = openGLContext;

@@ -159,8 +159,8 @@ public:
             }
             
             // Doubleclick support
-			float t = (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - lastLeftMousebuttonClicktime).count() / 1000.0);
-            if ((std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - lastLeftMousebuttonClicktime).count() / 1000.0) < 0.2) {
+			float t = (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - lastLeftMousebuttonClicktime).count() / 1000.0f);
+            if ((std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - lastLeftMousebuttonClicktime).count() / 1000.0f) < 0.2f) {
                 eventState.doubleClick = true;
 			}
 			else {

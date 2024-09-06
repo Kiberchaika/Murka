@@ -15,7 +15,7 @@ class TextField : public murka::View<TextField> {
 		std::chrono::steady_clock::time_point timeItFired;
     public:
         
-        operator std::vector<int>() { return keys; };
+        operator std::vector<int>() { return keys; }
         
         KeyStroke(const std::initializer_list<int> &il) {
             for (auto x: il) { keys.push_back(x); }
@@ -564,10 +564,9 @@ public:
 
 			forceDeactivate = false;
         }
-		 
 
 //            drawWidget<Label>(ctx, {""});
-    };
+    }
     
     bool editingFinished = false;
     

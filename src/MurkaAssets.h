@@ -100,7 +100,7 @@ public:
     }
 
     float getFontLineHeight(FontObject* font) {
-        if (font == NULL) {
+        if (font == nullptr) {
             return DEFAULT_LINE_HEIGHT;
         } else {
             return font->getLineHeight();

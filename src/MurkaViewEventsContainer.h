@@ -78,7 +78,7 @@ public:
     // The keys that were presed in the past frames and not yet released
     std::vector<int> keyHolds() {
         return viewEventsState.keyHolds;
-    };
+    }
 
     bool isKeyHeld(int key) {
         return std::find(std::begin(viewEventsState.keyHolds), std::end(viewEventsState.keyHolds), key) != std::end(viewEventsState.keyHolds);

@@ -78,7 +78,6 @@ public:
             (toTheRightOfAllFour(rightTopPointA, bottomRightPointB, leftTopPointB, rightTopPointB, bottomLeftPointB)) &&
             (toTheRightOfAllFour(bottomRightPointA, bottomRightPointB, leftTopPointB, rightTopPointB, bottomLeftPointB))) {
                         
-            float xComponent = 0;
             if (abs(bottomLeftPointA.x - bottomRightPointB.x) <
                 abs(bottomRightPointA.x - bottomLeftPointB.x)) {
                 // moving it to the right
@@ -230,12 +229,9 @@ public:
                     // first option is original
                     thisStageAttempts[i]  = input.position;
                 } else {
-                
-					
                     thisStageAttempts[i] = MurkaPoint((noise(thisFrameShapes.size() + float(i / 5.), 0) * 2. - 1.) * input.size.length() * stage,
                                                       (noise(thisFrameShapes.size() + float(i / 5.) + 25, 0) * 2. - 1.) * input.size.length() * stage) + input.position;
                 }
-                    
                 fitToOuterBounds(thisStageAttempts[i], input);
             }
 
@@ -250,11 +246,11 @@ public:
                     auto thisOfferOverlapFactor = overlapAreaOfOneToAll(offer, thisFrameShapes);
                     
                     if (foundZeroOverlapOption) {
-                        if (thisOfferOverlapFactor == 0) {
+                        if (IsApproximatelyEqual(thisOfferOverlapFactor, 0.0f)) {
                             validOptions.push_back(offer);
                         }
                     } else { // didn't find zero yet...
-                        if (thisOfferOverlapFactor == 0) { // this was the first zero overlap!
+                        if (IsApproximatelyEqual(thisOfferOverlapFactor, 0.0f)) { // this was the first zero overlap!
                             validOptions.clear();
                             validOptions.push_back(offer);
                             
@@ -264,7 +260,6 @@ public:
                         }
                     }
             }
-            
             stage++;
             currentDepth--;
         }
@@ -296,32 +291,30 @@ public:
         
         MurkaShape step3Option = step2Option;
         
-//        compactnessShapes.resize(compactnessDepth * 2);
-        
-
         for (int c = 0; c < 3; c++) {
             MurkaShape initialOffer = step3Option;
             
             MurkaPoint compactnessVector = initialOffer.position - input.position;
-            double compactnessStep = 1. / double(compactnessDepth);
+            float compactnessStep = 1.0f / float(compactnessDepth);
             
             for (int i = 0; i < compactnessDepth; i++) {
                 MurkaShape compactnessOfferX = initialOffer;
-                compactnessOfferX.position.x -= double(i) * compactnessStep * compactnessVector.x;
+                compactnessOfferX.position.x -= float(i) * compactnessStep * compactnessVector.x;
 
                 MurkaShape compactnessOfferY = initialOffer;
-                compactnessOfferY.position.y -= double(i) * compactnessStep * compactnessVector.y;
+                compactnessOfferY.position.y -= float(i) * compactnessStep * compactnessVector.y;
                 
-                if (overlapAreaOfOneToAll(compactnessOfferX, thisFrameShapes) == 0) step3Option = compactnessOfferX;
-                if (overlapAreaOfOneToAll(compactnessOfferY, thisFrameShapes) == 0) step3Option = compactnessOfferY;
+                if (IsApproximatelyEqual(overlapAreaOfOneToAll(compactnessOfferX, thisFrameShapes), 0.0f)) {
+                    step3Option = compactnessOfferX;
+                }
+                if (IsApproximatelyEqual(overlapAreaOfOneToAll(compactnessOfferY, thisFrameShapes), 0.0f)) {
+                    step3Option = compactnessOfferY;
+                }
             }
         }
-
         thisFrameShapes.push_back(step3Option);
         return step3Option;
     }
-    
-
 };
 
 }

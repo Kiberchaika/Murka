@@ -1,5 +1,6 @@
 #pragma once
 
+#include "MurkaUtility.h"
 #include "MurkaRendererBase.h"
 #include "MurMatrix.h"
 #include "MurShader.h"
@@ -368,8 +369,8 @@ class MurkaRenderer : public MurkaRendererBase {
 		for (int i = 0; i < circleResolution; i++)
 		{
 			float theta = 2.0f * juce::MathConstants<float>::pi * float(i) / float(circleResolution);
-			float x = 1.0 * cosf(theta);
-			float y = 1.0 * sinf(theta);
+			float x = 1.0f * cosf(theta);
+			float y = 1.0f * sinf(theta);
 			verts[i] = (MurkaPoint3D(x, y, 0));
 		}
 
@@ -839,7 +840,7 @@ public:
 
 	// rendering setup
 	void setCircleResolution(int resolution) override {
-		if (this->circleResolution != resolution) {
+        if (!IsApproximatelyEqual(this->circleResolution, resolution)) {
 			this->circleResolution = resolution;
 			recreateCircleVbo();
 		}
@@ -847,36 +848,36 @@ public:
 
 	void setLineWidth(float lineWidth) override {
 		this->lineWidth = lineWidth;
-	};
+	}
 	 
 	void enableFill() override {
 		currentStyle.fill = true;
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	};
+	}
 
 	void disableFill() override {
 		currentStyle.fill = false;
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	};
+	}
 
 	void setLineSmoothing(bool smooth) override {
 		glEnable(GL_LINE_SMOOTH);
-	};
+	}
 
 	void enableAntiAliasing() override {
 		glEnable(GL_POLYGON_SMOOTH);
 		glEnable(GL_POINT_SMOOTH);
-	};
+	}
 
 	void disableAntiAliasing() override {
 		glDisable(GL_POLYGON_SMOOTH);
 		glDisable(GL_POINT_SMOOTH);
-	};
+	}
 
 	void enableAlphaBlending() override {
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	};
+	}
 
 	void setBlendMode(MurBlendMode blendMode) override {
 		if (blendMode == MUR_BLENDMODE_DISABLED) {
@@ -918,11 +919,11 @@ public:
 
 	void disableAlphaBlending() override {
 		glDisable(GL_BLEND);
-	};
+	}
 
 	void pushStyle() override {
 		styleStack.push_back(currentStyle);
-	};
+	}
 
 	void popStyle() override {
 		if (styleStack.size() > 0) {
@@ -932,7 +933,7 @@ public:
 		else {
 			throw std::runtime_error("Check the count of push/popStyle calls");
 		}
-	};
+	}
 
 	MurRendererState getRendererState() override {
 		MurRendererState rendererState;
@@ -966,47 +967,47 @@ public:
 	 
 	void setColor(int red, int green, int blue) override {
 		currentStyle.color = MurkaColor(red, green, blue);
-	}; // 0-255
+	} // 0-255
 
 	void setColor(int red, int green, int blue, int alpha) override {
 		currentStyle.color = MurkaColor(red, green, blue, alpha);
-	}; // 0-255
+	} // 0-255
 
 	void setColor(const MurkaColor & color) override {
 		currentStyle.color = color;
-	};
+	}
 
 	void setColor(const MurkaColor & color, int _a) override {
         currentStyle.color = color;
         currentStyle.color.setAlpha(_a);
-	};
+	}
 
 	void setColor(int gray) override {
 		currentStyle.color.setFromGray(gray);
-	}; // 0 - 255
+	} // 0 - 255
 
 	void setColor(int gray, int _a) override {
         currentStyle.color.setFromGray(gray);
         currentStyle.color.setAlpha(_a);
-	}; // 0-255
+	} // 0-255
 
 	void clear() override {
 		glClearColor(currentStyle.color.getNormalisedRed(),
                      currentStyle.color.getNormalisedGreen(), currentStyle.color.getNormalisedBlue(), currentStyle.color.getNormalisedAlpha());
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	};
+	}
 
 	void clear(int r, int g, int b, int a = 0) override {
 		MurkaColor col(r, g, b, a);
 		glClearColor(col.getNormalisedRed(), col.getNormalisedGreen(), col.getNormalisedBlue(), col.getNormalisedAlpha());
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	};
+	}
 
 	void clear(int gray, int a = 0) override {
 		MurkaColor col(gray, gray, gray, a);
 		glClearColor(col.getNormalisedRed(), col.getNormalisedGreen(), col.getNormalisedBlue(), col.getNormalisedAlpha());
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	};
+	}
 
 	void drawRectangle(float x, float y, float w, float h) override {
 		MurMatrix<float> modelMatrix;
@@ -1148,7 +1149,7 @@ public:
 	}
 
 	float getElapsedTime() override {
-		return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - begin).count() / 1000.0;
+		return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - begin).count() / 1000.0f;
 	}
 
 	MurkaPoint getScreenPoint(MurCamera cam, MurkaPoint3D p) override {

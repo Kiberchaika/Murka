@@ -42,7 +42,7 @@ public:
 
         AIndex++;
         return animationsMap[AIndex].value;
-    };
+    }
     
     /* // boolean non-struct version
     double A(bool X) {

@@ -68,7 +68,7 @@ class MurCamera {
 		transformMatrix = transformMatrix.scaled(juce::Vector3D<float>(1, 1, 1));
 		transformMatrix = transformMatrix * m;
 
-		transformMatrix = transformMatrix * MurMatrix<float>::rotation(juce::Vector3D<float>(rotation.x, rotation.y, rotation.z) * M_PI / 180);
+		transformMatrix = transformMatrix * MurMatrix<float>::rotation(juce::Vector3D<float>(rotation.x, rotation.y, rotation.z) * (float)M_PI / 180);
 		transformMatrix = transformMatrix * MurMatrix<float>::translation(juce::Vector3D<float>(position.x, position.y, position.z));
 	}
 
@@ -111,7 +111,7 @@ public:
 
 	MurMatrix<float> getProjectionMatrix(float aspect) { 
 		float zFar = 1000;
-		float zNear = 0.001;
+		float zNear = 0.001f;
 		 
 		float tanHalfFovy = tan((fov * (float)(M_PI) / 180) / 2);
 

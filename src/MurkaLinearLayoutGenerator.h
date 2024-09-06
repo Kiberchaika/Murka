@@ -12,8 +12,7 @@ enum LayoutAnchoring {TOP, BOTTOM, LEFT, RIGHT};
 class MurkaLinearLayoutGenerator {
 public:
 	MurkaLinearLayoutGenerator() {
-
-	};
+	}
 
 	MurkaShape boundingShape;
     MurkaShape externalShape;
@@ -61,12 +60,12 @@ public:
 
         ShapePartDescriptor(double v) {
             kind = Proportion;
-            value = v;
+            value = (float)v;
         }
         
         ShapePartDescriptor(double v, ShapeAlignment align) {
             kind = Proportion;
-            value = v;
+            value = (float)v;
             alignment = align;
         }
     };
@@ -194,7 +193,6 @@ public:
     MurkaShape getNextShape(MurkaShape desiredShape) {
         
     }
-
 };
 
 }
