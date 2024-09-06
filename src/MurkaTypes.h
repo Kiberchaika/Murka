@@ -516,7 +516,7 @@ struct MurkaShape {
         if (!IsApproximatelyEqual(position.x, b.position.x) ||
             !IsApproximatelyEqual(position.y, b.position.y) ||
             !IsApproximatelyEqual(size.x, b.size.x) ||
-            IsApproximatelyEqual!(size.y, b.size.y)) {
+            !IsApproximatelyEqual(size.y, b.size.y)) {
             return true;
         } else return false;
     }
