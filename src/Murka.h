@@ -200,7 +200,6 @@ private:
         }
     }
     
-    
     int getMaxHoverIndex() {
         return maxHoverIndex;
     }
@@ -210,13 +209,11 @@ private:
         return hoverIndex;
     }
     
-    
     // This function gets called in the beginning of the rendering. It clears everything and initialises context.
     // it also packs the user input into the context and clears the user input buffer data.
     // It should also free the memory used for function responses.
     void restartContext () {
         contextStack.resize(0);
-        
         
         currentContext = MurkaContext();
         
@@ -300,7 +297,6 @@ public:
     //////////////////////////////////////////////////////////////////
 
     bool doesHaveAWidgetThatHoldsKeyboardFocus() {
-        return true;
         return keyboardFocusHaver != nullptr;
     }
 
@@ -316,8 +312,6 @@ public:
     float getScreenScale() override {
         return MurkaRenderer::getScreenScale();
     }
-
-
 
     void begin() { // this version is without arguments cause it creates the context
         startFrame();
@@ -336,7 +330,6 @@ public:
     void end() {
 		endFrame();
 
-
         disableViewportCrop = true;
         for (auto &overlay: overlays) {
             overlay.func();
@@ -346,18 +339,15 @@ public:
         overlays.clear();
         
         maxHoverIndex = hoverIndex;
-
 	}
     
     template<typename T>
     T& prepare(MurkaShape place) {
         return prepareWidget<T>(place);
     }
-
     
     operator MurkaContext&() { return currentContext; }
     
-
     void setCurrentLayoutStructure(std::initializer_list<MurkaLinearLayoutGenerator::ShapePartDescriptor> list) {
        ((View*)currentContext.linkedView)->linearLayout.setLayoutStructure(list);
     }
@@ -377,7 +367,6 @@ public:
     void addLayoutSpacing(float spacing) {
         ((View*)currentContext.linkedView)->linearLayout.addSpacing(spacing);
     }
-
     
     ///////////////////
     
@@ -392,6 +381,7 @@ public:
 
     struct Parameters {};
     
+    // TODO: set this automatically via JUCE macro
     bool isPlugin = true; // TEMPORARY! If it's instantiated in a standalone application, it should be set to false for the keyboard events to not be passed through
 
 private:
