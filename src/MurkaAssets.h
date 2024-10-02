@@ -33,6 +33,8 @@ struct FontInfo {
         }
     }
 
+    FontInfo(const FontInfo& other) : FontInfo(other.fontName, other.fontSize, other.data, other.dataSize) {}
+
     ~FontInfo() {
         if (data) {
             delete[] data;
@@ -127,7 +129,11 @@ public:
         }
         else {
             auto fontObj = new FontObject();
-            if (!fontObj->load(data, dataSize, size, true, renderer)) {
+           
+            char* fontData = new char[dataSize];
+            std::memcpy(fontData, data, dataSize);
+
+            if (!fontObj->load(fontData, dataSize, size, true, renderer)) {
                 jassertfalse; // can't load font
                 res = false;
                 delete fontObj;
