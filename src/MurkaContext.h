@@ -45,13 +45,10 @@ public:
         return std::make_pair(MurkaShape(pos.x, pos.y, size.x, size.y), negativePosition);
     }
     
-    
     // All shapes are absolute coordinates
     MurkaShape* currentWidgetShapeSource; // this shape pointer points to a shape of the current
     // view that you could use inside the widget to reshape it if needed // TODO: get rid of this (v1.0)
     ViewBase* linkedView = nullptr; // the MurkaView that this context last represented
-    
-
 
     int getImCounter() {
         imCounter++;
@@ -93,4 +90,4 @@ private:
      
 };
 
-}
+} // end of namespace Murka

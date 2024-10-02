@@ -317,7 +317,6 @@ public:
 	}
 };
 
-
 #elif defined(MURKA_JUCE)
 
 #define GL_FUNC_ADD 0x8006
@@ -354,7 +353,6 @@ class MurkaRenderer : public MurkaRendererBase {
 	
 	float lineWidth = 1;
 	float circleResolution = 32;
-
 
 	MurShader shaderMain;
 	MurShader* currentShader = nullptr;
@@ -396,7 +394,6 @@ class MurkaRenderer : public MurkaRendererBase {
 	std::chrono::steady_clock::time_point begin;
 
 public:
-
 	std::string vertexShaderBase = R"(
 		varying vec2 vUv;
 		varying vec4 vCol;
@@ -571,12 +568,9 @@ public:
 	
 		projectionStack.clear();
 		currentProjectionMatrix = MurMatrix<float>();
-
 		frameNum++;
 		enableAlphaBlending();
-        
 		unbindShader();
-
         setupScreen();
 	}
 
@@ -1203,14 +1197,12 @@ public:
 	}
 };
 
-
-
 #else // "Default" render version
 
 class MurkaRender: public MurkaRenderBase {
-    
+
 };
 
 #endif
 
-}
+} // end of namespace Murka

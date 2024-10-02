@@ -25,7 +25,5 @@ public:
                     lambda, // setter
                     [](const MurkaContextBase&){} // default
     )
-
-
 };
-}
+} // end of namespace Murka

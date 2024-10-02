@@ -6,11 +6,9 @@
 
 namespace murka {
 
-
 class Header : public View<Header> {
 public:
     Header() {
-
     }
 
     void internalDraw(Murka & m) {
@@ -35,15 +33,10 @@ public:
     }
 
 	std::string label;
-
 	TextAlignment alignment = TextAlignment::TEXT_LEFT;
-
 	MurkaColor color = { 0.98f, 0.98f, 0.98f };
-
 	bool customColor = false;
-   
     virtual bool wantsClicks() override { return false; } // override this if you want to signal that you don't want clicks
-
 };
 
 
@@ -88,12 +81,8 @@ public:
     }
     
 	std::string label;
-
 	bool pressed;
-
-
 	bool results;
-
 
 	MURKA_PARAMETER(Checkbox, // class name
 		bool*, // parameter type
@@ -109,7 +98,6 @@ public:
     // Everything else in the class is for handling the internal state. It persistant.
     double lastTimeClicked = 0;
 };
-
 
 class Radiobutton : public View<Radiobutton> {
 public:
@@ -149,7 +137,6 @@ public:
 				results = true;
 				lastTimeClicked = m.getElapsedTime();
 			}
-
 			m.popStyle();
 			m.popMatrix();
 		}
@@ -174,7 +161,6 @@ class DropdownElementButton : public View<DropdownElementButton> {
 public:
 	void internalDraw(Murka & m) {
 
-
 		m.setColor(MurkaColor(90 / 255.0f, 90 / 255.0f, 90 / 255.0f) * (0.8f + 0.2f * inside()));
 		m.drawRectangle(0, 0, getSize().x, getSize().y);
 
@@ -197,7 +183,6 @@ public:
 				std::cout << "btn pressd. justInitialised? " << justInitialised << std::endl;
 #endif
 				pressed = true;
-
 				return;
 			}
 		}
@@ -283,7 +268,6 @@ public:
 	bool changedSelection = false;
 };
 
-
 class BlankPanel : public View<BlankPanel> {
 public:
     void internalDraw(Murka & m) {
@@ -351,7 +335,6 @@ public:
         }
     }
     
-    
     ///
 	float r = 45, g = 45, b = 45, a = 255;
 	bool drawBorder = true;
@@ -365,7 +348,6 @@ public:
 	MurkaPoint initialPosition, initialMousePosition;
     bool dragging = false, resizing = false;
 };
-
 
 class Button : public View<Button> {
 public:
@@ -399,7 +381,6 @@ public:
 			float offset = (font->stringWidth(label) / 2);
 
 			font->drawString(label, getSize().x / 2 - offset, getSize().y / 2 - font->getLineHeight() / 2);
-
 			m.popStyle();
     }
 
@@ -409,7 +390,6 @@ public:
 		label, // parameter variable name
 		text, // setter
 		"") // default
-
 
     // Whatever the parameters and the results are, the functions have to be defined here
 	float r = 80, g = 80, b = 80;
@@ -481,14 +461,12 @@ public:
         m.popStyle();
     }
     
-    
 	MURKA_PARAMETER(SliderFloat, // class name
 		float*, // parameter type
 		dataToControl, // parameter variable name
 		setDataToControl, // setter
 		nullptr
 	) // default
-
 
     // Whatever the parameters and the results are, the functions have to be defined here
 	float r = 80, g = 80, b = 80;
@@ -499,7 +477,7 @@ public:
     bool results;
     
     // Internal state
-    
+
     std::string Label;
     float lastTimeClicked = 0;
     bool dragging = false;
@@ -507,4 +485,4 @@ public:
     // Helpers that didn't work in templated class yet :(
 };
 
-}
+} // end of namespace Murka

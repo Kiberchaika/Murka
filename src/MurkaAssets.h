@@ -5,7 +5,6 @@
 
 namespace murka {
 
-
 // Global defines
 
 #define DEFAULT_LINE_HEIGHT 20
@@ -108,4 +107,4 @@ public:
     }
 };
 
-}
+} // end of namespace Murka

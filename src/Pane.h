@@ -36,13 +36,9 @@ public:
                                                      paneSplitValue - paneControlWidth / 2, 0,
                                                      paneControlWidth, c.getSize().y);
             
-            
-            
 //            params->drawPaneControl(c, paneControlShape,
 //                                    paneControlShape.inside(c.mousePosition, 5), draggingNow);
-             
         }
-        
         
         if (paneKind == PaneKind::VERTICAL) { // vertical drawing
 
@@ -64,8 +60,6 @@ public:
             
 //            params->drawPaneControl(c, paneControlShape,
 //                                    paneControlShape.inside(c.mousePosition, 5), draggingNow);
-
-
         }
         
         if ((!draggingNow) && (!areInteractiveChildrenHovered(c)) && (paneControlShape.inside(c.mousePosition, 5)) && (c.mouseDownPressed[0])) {
@@ -100,8 +94,6 @@ public:
                 }
             }
         }
-         
-         
     };
     
     bool draggingNow = false;
@@ -159,4 +151,4 @@ public:
 
 };
 
-}
+} // end of namespace Murka

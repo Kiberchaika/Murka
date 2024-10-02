@@ -10,7 +10,6 @@ class MurkaContextBase: public MurkaEventState {
 public:
     MurkaOverlayHolder* overlayHolder;
     
-    
     MurkaShape getParentContextShape() const {
         return getParentContextShapeInternal();
     }
@@ -44,4 +43,4 @@ public:
     std::function<int()> getMaxHoverIndex = []()->int {return 0;};
 };
 
-}
+} // end of namespace Murka

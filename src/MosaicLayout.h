@@ -9,7 +9,6 @@ namespace murka {
 
 #define MURKA_MOSAIC_LAYOUT_DEF
 class MosaicLayout {
-    ///
     
 public:
     
@@ -104,7 +103,6 @@ public:
                 }
                 return {0, yComponent};
             }
-            
         }
         
         if (upperThanAllFour(leftTopPointA, bottomRightPointB, leftTopPointB, rightTopPointB, bottomLeftPointB) &&
@@ -122,7 +120,6 @@ public:
             
             return {bottomLeftPointB.x - rightTopPointA.x, 0};
         }
-
         return {0, 0};
     }
     
@@ -317,5 +314,5 @@ public:
     }
 };
 
-}
+} // end of namespace Murka
 #endif

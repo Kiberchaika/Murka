@@ -22,7 +22,6 @@ public:
         float monospaceSymbolWidth = float(font->stringWidth("x"));
         int highlightedNumber = (c.mousePosition.x - float(10)) / monospaceSymbolWidth;
 
-
         std::string numberString = to_string_with_precision(*numberData, floatPrecision);
         int dotIndex = numberString.size();
         for (int i = 0; i < numberString.size(); i++) {
@@ -33,7 +32,6 @@ public:
         
         if (highlightedNumber == dotIndex) highlightedNumber = dotIndex + 1;
         if (highlightedNumber >= numberString.size()) highlightedNumber = numberString.size() - 1;
-        
 
         MurkaColor col = c.pointerToRenderer->getColor();
 		MurkaColor bgColor = c.pointerToRenderer->getColor();
@@ -62,7 +60,6 @@ public:
         }
 		c.pointerToRenderer->enableFill();
 		c.pointerToRenderer->popStyle();
-
 
         // text editing logic
         
@@ -116,16 +113,10 @@ public:
     // Everything else in the class is for handling the internal state. It persist.
     
     bool activated = false;
-    
     MurkaPoint initialPosition, initialMousePosition;
     bool dragging = false;
     int draggingNubmerIndex = 0;
     float changeScale = 1.0;
 };
- 
- 
 
-
-
-}
-
+} // end of namespace Murka

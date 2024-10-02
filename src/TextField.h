@@ -559,12 +559,9 @@ public:
 			}
             
             updateExternalData(dataToControl, clampNumber);
-            
             editingFinished = true;
-
 			forceDeactivate = false;
         }
-
 //            drawWidget<Label>(ctx, {""});
     }
     
@@ -870,17 +867,13 @@ public:
     
     int selectionSymbol1Index = 0, selectionSymbol2Index = 0; // 2 selection symbols, the first is where selection was started, the second is where it is "now"
     std::pair<int, int> selectionSymbolsRange = {0, 0}; // Range of symbols is calculated from symbols 1 & 2, the lesser of those becomes the beginning of the range, the bigger becomes the end
-    
     std::string displayString;
-    
     std::vector<float> currentGlyphLengths;
     int cursorPosition = 0;
     bool activated = false;
-    
 	bool shouldSelectAllWhenClicked = false;
-
     double lastLeftMousebuttonClicktime = 0;
-    
     float textHeight;
 };
-}
+
+} // end of namespace Murka

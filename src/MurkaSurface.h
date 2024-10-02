@@ -11,7 +11,6 @@ namespace murka {
 class MurkaSurface {
 public:
     MurkaSurface() {
-        
     }
     
     struct GestureContext {
@@ -140,8 +139,7 @@ public:
                 limitPan();
             }
         }
-         
-        
+
         latestContextDebug = c;
         surface = SurfaceControl();
     }
@@ -273,16 +271,12 @@ public:
         }
     
     bool performingMultitouchZoomNow = false;
-    
     MurkaPoint panOffset = {0, 0};
     float scale = 1.0;
-    
     float zoomSpeed = 0.01;
-    
     double lastClickTime = 0; // TODO: this, but for multitouch
     double lastMouseScrollTime = 0;
-    
     GestureContext draggingData;
 };
 
-}
+} // end of namespace Murka

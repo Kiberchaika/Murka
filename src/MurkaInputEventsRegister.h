@@ -13,8 +13,6 @@
 
 #endif
 
-
-
 namespace murka {
 
 struct MurkaEventState {
@@ -50,25 +48,20 @@ struct MurkaEventState {
 
     MurkaEventState transformedWith(MurkaPoint translatePosition, float scale) {
         MurkaEventState newState = *this;
-		
 		newState.mousePosition += translatePosition;
 		//newState.mousePosition *= scale;
 //        newState.mouseDraggedStartPoint += translatePosition;
-        
         return newState;
         // TODO: multiplied by scale?
     }
 };
 
 class MurkaInputEventsRegister {
-
 	float inputEventsScale = 1.0;
 	std::chrono::steady_clock::time_point lastLeftMousebuttonClicktime;
 	MurkaPoint mousePositionWhenMouseLeftPressed = {0, 0};
 
 protected:
-
-
 	void setInputEventsScale(float newInputEventsScale) {
 		inputEventsScale = newInputEventsScale;
 	}
@@ -189,7 +182,6 @@ public:
 
 #ifdef MURKA_OF
 
-
     // oF Keyboard events
     
     void keyPressed(ofKeyEventArgs & args) {
@@ -273,13 +265,9 @@ public:
     }
     
     void mouseEntered(ofMouseEventArgs & args) {
-
-                
 #ifdef TARGET_OSX
         ofxMacTrackpad::startListening();
 #endif
-        
-        
     }
     
     void mouseExited(ofMouseEventArgs & args) {}
@@ -287,17 +275,13 @@ public:
     // oF Touch events
     
     void touchDown(ofTouchEventArgs & args) {}
-    
     void touchMoved(ofTouchEventArgs & args) {}
-    
     void touchUp(ofTouchEventArgs & args) {}
-    
     void touchCancelled(ofTouchEventArgs & args) {}
-    
     void touchDoubleTap(ofTouchEventArgs & args) {}
     
 #endif // MURKA_OF
 
 };
 
-}
+} // end of namespace Murka

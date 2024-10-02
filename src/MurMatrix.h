@@ -4,7 +4,6 @@
 
 namespace murka {
 
-
 //==============================================================================
 /**
 	A 4x4 3D transformation matrix.
@@ -396,8 +395,6 @@ public:
 	Type mat[16];
 };
 
-}
+} // end of namespace Murka
 
 #endif
-
-

@@ -16,7 +16,6 @@ namespace murka {
 
 class MurkaRenderer;
 
-
 #if defined(MURKA_OF)
 
 class MurShader {
@@ -276,4 +275,4 @@ public:
 #else // Default version
 #endif
 
-}
+} // end of namespace Murka
