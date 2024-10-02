@@ -21,10 +21,14 @@ struct FontInfo {
 
     FontInfo(const std::string& name, int size, char* fontData = nullptr, int fontDataSize = 0)
         : fontName(name), fontSize(size), fromData(fontData != nullptr), dataSize(fontDataSize) {
-        if (fromData && fontData && fontDataSize > 0) {
+        if (fromData && fontDataSize > 0) {
+            fromData = true;
+            dataSize = fontDataSize;
             data = new char[fontDataSize];
             std::memcpy(data, fontData, fontDataSize);
         } else {
+            fromData = false;
+            dataSize = 0;
             data = nullptr;
         }
     }
