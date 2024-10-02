@@ -44,4 +44,4 @@ static bool IsApproximatelyEqual(float a, float b) {
     return std::abs(a - b) < tolerance;
 }
 
-} // namespace murka
+} // end of namespace Murka

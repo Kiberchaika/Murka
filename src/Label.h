@@ -3,7 +3,6 @@
 
 namespace murka {
 
-
 class Label : public View<Label> {
 public:
 	void internalDraw(Murka & m) {
@@ -72,4 +71,4 @@ public:
 
 };
 
-}
+} // end of namespace Murka

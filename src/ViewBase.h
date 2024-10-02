@@ -45,14 +45,10 @@ public:
     }
 
     MurkaShape shape = {0, 0, 1, 2};
-    
-
     MurkaLinearLayoutGenerator linearLayout;
     MosaicLayout mosaicLayout;
-    
     std::function<void()> defferedViewDrawFunc;
-
 
 };
 
-}
+} // end of namespace Murka

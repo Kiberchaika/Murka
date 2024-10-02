@@ -4,7 +4,6 @@
 // TODO: add easings from this site by converting them to functions of input
 // https://easings.net/#
 
-
 namespace murka {
 
 class MurkaAnimator {
@@ -64,4 +63,4 @@ public:
      */
 };
 
-}
+} // end of namespace Murka

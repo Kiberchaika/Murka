@@ -11,7 +11,6 @@
 #include "MurkaRenderer.h"
 #include "MurkaChildContextHolder.h"
 
-
 namespace murka {
 
 class Murka : public View<Murka>, public MurkaInputEventsRegister, public MurkaRenderer, public MurkaOverlayHolder, public MurkaChildContextHolder {
@@ -110,8 +109,6 @@ private:
 				MurRendererState rendererState = this->getRendererState();
 				widgetObjectCopy->internalDraw(*this);
 				this->setRendererState(rendererState);
-
-
                 
 //                //DEBUG - drawing the children frame that we had at the last frame end
 //                setColor(255, 100, 0);
@@ -125,12 +122,8 @@ private:
                 transformTheRenderBackFromThisContextShape();
             }
             popContext();
-                
             widgetObjectCopy->resetChildrenBounds();
-
-            
         };
-
         return *((T*)widgetObject);
     }
     
@@ -268,7 +261,6 @@ private:
 		currentContext.hasKeyboardFocus = [&](void* asker)->bool {
 			return hasKeyboardFocus((View*)asker);
 		};
-
 	}
 
     void beginDrawingInLatestView() {
@@ -315,29 +307,21 @@ public:
 
     void begin() { // this version is without arguments cause it creates the context
         startFrame();
-        
         restartContext();
         clearEvents();
-        
 		currentContext.mousePosition /= getScreenScale();
-
         updateEvents(currentContext);
-        
         hoverIndex = 0;
-        
     }
     
     void end() {
 		endFrame();
-
         disableViewportCrop = true;
         for (auto &overlay: overlays) {
             overlay.func();
         }
-
         disableViewportCrop = false;
         overlays.clear();
-        
         maxHoverIndex = hoverIndex;
 	}
     
@@ -385,10 +369,9 @@ public:
     bool isPlugin = true; // TEMPORARY! If it's instantiated in a standalone application, it should be set to false for the keyboard events to not be passed through
 
 private:
-    
     int hoverIndex = 0;
     int maxHoverIndex = 0;
 
 };
 
-}
+} // end of namespace Murka

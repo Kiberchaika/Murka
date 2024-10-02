@@ -2,7 +2,6 @@
 
 #include "MurkaTypes.h"
 
-
 namespace murka {
 
 class MurkaOverlayHolder {
@@ -35,4 +34,4 @@ public:
     }
 };
 
-}
+} // end of namespace Murka

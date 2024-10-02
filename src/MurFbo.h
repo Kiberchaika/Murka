@@ -121,6 +121,6 @@ public:
 	}
 };
 
-}
+} // end of namespace Murka
 
 #endif

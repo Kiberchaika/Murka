@@ -48,7 +48,6 @@ namespace murka {
 					}
 
 					lastFrameMousePosition = c.mousePosition;
-
 				}
 			}
         
@@ -72,7 +71,6 @@ namespace murka {
 						surfaceToControl->panOffset.x += (lastFrameMousePosition.x - c.mousePosition.x) * (c.getSize().x / scrollbarWidth);
 						if (surfaceToControl->panOffset.x < 0) surfaceToControl->panOffset.x = 0;
 						if (surfaceToControl->panOffset.x > surfaceToControl->panLimits.size.x) surfaceToControl->panOffset.x = surfaceToControl->panLimits.size.x;
-
 					}
                 
 					if ((handleShape.inside(c.mousePosition)) && inside && c.mouseDownPressed[0]) {
@@ -84,7 +82,6 @@ namespace murka {
 					}
 
 					lastFrameMousePosition = c.mousePosition;
-
 				}
 			}
 		};
@@ -106,10 +103,7 @@ namespace murka {
 		};
 		int kind = 0; // 0 = vertical
 					  // 1 = horizontal
-
 		bool results;
-
-
 	};
 
-}
+} // end of namespace Murka

@@ -113,9 +113,6 @@ public:
 //    void addOverlay(std::function<void()> func, void* object) {
 //        currentContext.overlayHolder->addOverlay(func, object);
 //    }
-    
-
-
 
     bool areInteractiveChildrenHovered() {
         if (!currentContext.isHovered()) {
@@ -143,7 +140,6 @@ public:
                 return true;
             }
         }
-        
         return false;
     }
     
@@ -164,7 +160,7 @@ public:
         }
         
         if (wantsClicks()) result *= currentlyHasMouseFocus;
-        
+
         return result;
     }
     
@@ -183,10 +179,8 @@ public:
                 return true;
             }
         }
-
         return false;
     }
-
     
     void* returnNewResultsObject() {
         return new bool(false);
@@ -276,4 +270,4 @@ public:
     }
 //    MurkaContext latestContext;
 };
-}
+} // end of namespace Murka

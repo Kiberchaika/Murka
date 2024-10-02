@@ -32,7 +32,6 @@ class MurCamera {
 		ofMatrix4x4 getProjectionMatrix(float aspect) {
 			return camera.getProjectionMatrix();
 		}
-
 };
 
 #elif defined(MURKA_JUCE)
@@ -127,10 +126,9 @@ public:
 
 		return projectionMatrix;
 	}
-
 };
 
 #else // Default version
 #endif
 
-}
+} // end of namespace Murka

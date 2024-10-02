@@ -136,4 +136,4 @@ public:
 	virtual void endCamera(MurCamera cam) = 0;
 };
 
-}
+} // end of namespace Murka

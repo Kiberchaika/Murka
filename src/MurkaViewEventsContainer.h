@@ -6,7 +6,6 @@ class MurkaViewEventsContainer {
     
 public:
     MurkaViewEventsContainer() {
-        
     }
     
     void updateEvents(MurkaEventState e) {

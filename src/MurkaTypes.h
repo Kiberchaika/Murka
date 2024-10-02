@@ -22,7 +22,6 @@ enum TextAlignment {TEXT_LEFT, TEXT_CENTER, TEXT_RIGHT};
 #define M_PI           3.14159265358979323846264338327950288  /* pi */
 #endif
 
-
 #include <stdint.h>
 #include <filesystem>
 #include <limits>
@@ -595,4 +594,4 @@ struct MurkaShape {
 #endif
 };
 
-}
+} // end of namespace Murka

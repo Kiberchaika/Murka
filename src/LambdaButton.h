@@ -11,16 +11,11 @@ namespace murka {
 class LambdaButton : public View<LambdaButton> {
 public:
     MURKA_VIEW_DRAW_FUNCTION  {
-
                 auto params = (Parameters*)parametersObject;
-                auto &castedResults = *(castResults(resultObject)); 
-
+                auto &castedResults = *(castResults(resultObject));
                 LambdaButton* thisWidget = (LambdaButton*)thisWidgetObject;
-
                 bool inside = context.isHovered() * !areChildrenHovered(context);
-
                 castedResults = params->lambda(context, this);
-
     }
     
     bool wantsClicks() override {
@@ -29,14 +24,11 @@ public:
     
     // The results type, you also need to define it even if it's nothing.
     typedef bool Results;
-
-
     
     Results* castResults(void* results) {
         auto resultsPointer = (Results*)results;
         return resultsPointer;
     }
-
 
     struct Parameters {
         function<bool(MurkaContext, LambdaButton*)> lambda;
@@ -44,7 +36,6 @@ public:
         Parameters() {}
         Parameters(function<bool(MurkaContext, LambdaButton*)> Lambda) { lambda = Lambda; } // a convenience initializer
     };
-
 };
 
-}
+} // end of namespace Murka

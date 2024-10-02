@@ -6,7 +6,6 @@ namespace murka {
 
 #if defined(MURKA_OF)
 
-
 class MurVbo {
     vector<MurkaPoint3D> verts;
     vector<MurkaPoint> texCoords;
@@ -92,10 +91,8 @@ class MurVbo {
 	bool loaded = false;
     bool inited = false;
 
-
 public:
 	MurVbo() {
-
 	}
 
 	~MurVbo() {
@@ -114,7 +111,6 @@ public:
 		openGLContext->extensions.glGenVertexArrays(1, &VAO);
 		openGLContext->extensions.glGenBuffers(1, &VBO);
 		openGLContext->extensions.glGenBuffers(1, &VBOID);
-
         inited = true;
 	}
 
@@ -123,7 +119,6 @@ public:
             openGLContext->extensions.glDeleteVertexArrays(1, &VAO);
             openGLContext->extensions.glDeleteBuffers(1, &VBO);
 			openGLContext->extensions.glDeleteBuffers(1, &VBOID);
-
             inited = false;
         }
 	}
@@ -266,7 +261,6 @@ public:
 		}
 		openGLContext->extensions.glBindVertexArray(0);
 	}
-    
 };
 
 #else // Default version
@@ -278,4 +272,4 @@ public:
 
 #endif
 
-}
+} // end of namespace Murka

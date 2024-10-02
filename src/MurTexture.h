@@ -23,4 +23,4 @@ public:
 #else // Default version
 #endif
 
-}
+} // end of namespace Murka

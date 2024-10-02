@@ -74,7 +74,7 @@ public:
 	}
 };
 
-}
+} // end of namespace Murka
 
 #elif defined(MURKA_JUCE) 
 
@@ -112,7 +112,6 @@ class MurImage {
 				data[idx + 3] = col.getFloatAlpha();
 			}
 		}
-
 		update();
 	}
 
@@ -124,7 +123,6 @@ protected:
 	void unbind() const {
 		glBindTexture(gltype, 0);
 	}
-
 
 public:
 
@@ -171,19 +169,14 @@ public:
 
 	bool load(const std::string& fileName) {
         if(!juce::File(fileName).exists()) return false;
-        
 		juce::Image image = juce::ImageFileFormat::loadFrom(juce::File(fileName));
-
 		loadInternal(image);
-
 		return true;
 	}
 
 	bool loadFromRawData(const char* data, int dataSize) {
 		juce::Image image = juce::ImageFileFormat::loadFrom(data, dataSize);
-
 		loadInternal(image);
-
 		return true;
 	}
 
@@ -248,6 +241,6 @@ public:
 	}
 };
 
-}
+} // end of namespace Murka
 
 #endif
