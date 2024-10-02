@@ -2,16 +2,44 @@
 
 #include "MurkaTypes.h"
 #include <map>
+#include <string>
+#include <cstring>
 
 namespace murka {
 
-
 // Global defines
-
 #define DEFAULT_LINE_HEIGHT 20
 
 class MurkaRendererBase;
 
+struct FontInfo {
+    std::string fontName;
+    int fontSize;
+    bool fromData;
+    char* data;
+    int dataSize;
+
+    FontInfo(const std::string& name, int size, char* fontData = nullptr, int fontDataSize = 0)
+        : fontName(name), fontSize(size), fromData(fontData != nullptr), dataSize(fontDataSize) {
+        if (fromData && fontData && fontDataSize > 0) {
+            data = new char[fontDataSize];
+            std::memcpy(data, fontData, fontDataSize);
+        } else {
+            data = nullptr;
+        }
+    }
+
+    ~FontInfo() {
+        if (data) {
+            delete[] data;
+        }
+    }
+
+    bool operator<(const FontInfo& other) const {
+        return std::tie(fontName, fontSize) < 
+               std::tie(other.fontName, other.fontSize);
+    }
+};
 
 class MurkaAssets {
 public:
@@ -26,32 +54,38 @@ public:
         return resourcesPath;
     }
     
-    typedef std::tuple<std::string /* fontName */, int /* fontSize */> FontInfo;
-    
     std::map<FontInfo, FontObject*> fonts;
     std::map<FontInfo, FontObject*>::iterator currentFont;
 
-     FontObject* getCurrentFont() {
-        if (fonts.size() == 0) {
+    FontObject* getCurrentFont() {
+        if (fonts.empty()) {
             jassertfalse; // you need to load font
         }
         return currentFont->second;
     }
 
     void clearFontsCache() {
-        fonts.clear();
-        currentFont = fonts.begin();
-    }
-    
-    void updateFontsTextures(MurkaRendererBase* renderer) {
-        for (auto const& font : fonts) {
-            font.second->updateTexture(renderer);
+        for (auto& font : fonts) {
+            delete font.second;
         }
+        fonts.clear();
+        currentFont = fonts.end();
     }
     
-    void clearFontsTextures() {
-        for (auto const& font : fonts) {
-            font.second->clearTexture();
+    void reloadFonts(MurkaRendererBase* renderer) {
+        std::vector<FontInfo> fontsToReload;
+        for (const auto& font : fonts) {
+            fontsToReload.push_back(font.first);
+        }
+        
+        clearFontsCache();
+        
+        for (const auto& fontInfo : fontsToReload) {
+            if (fontInfo.fromData) {
+                setFont(fontInfo.fontName, fontInfo.data, fontInfo.dataSize, fontInfo.fontSize, renderer);
+            } else {
+                setFont(fontInfo.fontName, fontInfo.fontSize, renderer);
+            }
         }
     }
     
@@ -66,21 +100,21 @@ public:
             currentFont = font;
         }
         else {
-            auto font = new FontObject(); 
-            if (resourcesPath.length() == 0 || !font->load(resourcesPath + (resourcesPath[resourcesPath.length() - 1] == '/' ? "" : "/") + name, size, true, renderer)) {
+            auto fontObj = new FontObject(); 
+            if (resourcesPath.empty() || !fontObj->load(resourcesPath + (resourcesPath.back() == '/' ? "" : "/") + name, size, true, renderer)) {
                 jassertfalse; // can't load font
                 res = false;
+                delete fontObj;
+            } else {
+                fonts[fontId] = fontObj;
+                currentFont = fonts.find(fontId);
             }
-            fonts[fontId] = font;
-            currentFont = fonts.find(fontId);
         }
         return res;
     }
 
     bool setFont(std::string name, const char* data, int dataSize, int size, MurkaRendererBase* renderer) {
-        // todo: get scale from renderer
-
-        FontInfo fontId = { name, size };
+        FontInfo fontId(name, size, const_cast<char*>(data), dataSize);
         auto font = fonts.find(fontId);
         bool res = true;
 
@@ -88,13 +122,15 @@ public:
             currentFont = font;
         }
         else {
-            auto font = new FontObject();
-            if (!font->load(data, dataSize, size, true, renderer)) {
+            auto fontObj = new FontObject();
+            if (!fontObj->load(data, dataSize, size, true, renderer)) {
                 jassertfalse; // can't load font
                 res = false;
+                delete fontObj;
+            } else {
+                fonts[fontId] = fontObj;
+                currentFont = fonts.find(fontId);
             }
-            fonts[fontId] = font;
-            currentFont = fonts.find(fontId);
         }
         return res;
     }
