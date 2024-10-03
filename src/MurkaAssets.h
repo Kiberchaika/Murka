@@ -96,8 +96,6 @@ public:
     }
     
     bool setFont(std::string name, int size, MurkaRendererBase* renderer) {
-        // todo: get scale from renderer
-
         FontInfo fontId = { name, size };
         auto font = fonts.find(fontId);
         bool res = true;
