@@ -222,6 +222,8 @@ public:
 	}
 
 	void clear() {
+		width = 0;
+		height = 0;
 		clearTexture();
 	}
 
