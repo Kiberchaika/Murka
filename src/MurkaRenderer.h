@@ -363,6 +363,8 @@ class MurkaRenderer : public MurkaRendererBase {
 	MurVbo vboCircle;
 
 	void recreateCircleVbo() {
+		if (openGLContext == nullptr || currentShader == nullptr) return;
+
 		std::vector<MurkaPoint3D> verts(circleResolution);
 		for (int i = 0; i < circleResolution; i++)
 		{
@@ -373,7 +375,9 @@ class MurkaRenderer : public MurkaRendererBase {
 		}
 
 		vboCircle.setOpenGLContext(openGLContext);
-		vboCircle.setup();
+		if (!vboCircle.isInited()) {
+			vboCircle.setup();
+		}
 		vboCircle.setVertexData(verts.data(), verts.size());
 		vboCircle.update(GL_STREAM_DRAW, currentShader->attributePosition, currentShader->attributeUv, currentShader->attributeCol);
 	}
@@ -391,6 +395,7 @@ class MurkaRenderer : public MurkaRendererBase {
 	bool useCamera = false;
 
 	uint64_t frameNum = 0;
+	uint64_t contextGeneration = 0;
 	std::chrono::steady_clock::time_point begin;
 
 public:
@@ -450,9 +455,19 @@ public:
 	}
 
 	void closeOpenGLContext() {
+		vboCircle.clear();
+		vboLineOld.clear();
+		vboLine.clear();
+		vboRect.clear();
+		clearFontsCache();
+
 		if (shaderMain.isLoaded()) {
 			shaderMain.unload();
 		}
+		currentShader = nullptr;
+		useTexture = false;
+		useFbo = false;
+		useCamera = false;
 	}
    
 	void bindShader(MurShader* shader) {
@@ -473,7 +488,14 @@ public:
 		return openGLContext;
 	}
 
+	uint64_t getContextGeneration() const {
+		return contextGeneration;
+	}
+
 	void setup() {
+		closeOpenGLContext();
+		++contextGeneration;
+
         // create main shader
         {
 			shaderMain.setOpenGLContext(openGLContext);

@@ -83,7 +83,7 @@ namespace murka {
 class MurImage {
 	friend class MurkaRenderer;
 
-	GLuint textureID;
+	GLuint textureID = 0;
 	int width = 0, height = 0;
 
 	juce::OpenGLContext* openGLContext = nullptr;
@@ -92,6 +92,10 @@ class MurImage {
 	std::vector<float> data;
 	bool arb = false;
 	int gltype = 0;
+
+	bool hasActiveContext() const {
+		return openGLContext != nullptr && juce::OpenGLContext::getCurrentContext() == openGLContext;
+	}
 
 	void loadInternal(juce::Image& image) {
 		clearTexture();
@@ -138,6 +142,9 @@ public:
 	}
 
 	void allocate(int w, int h) {
+		if (openGLContext == nullptr || !hasActiveContext()) return;
+		if (bAllocated) clearTexture();
+
 		gltype = !arb ? GL_TEXTURE_2D : GL_TEXTURE_RECTANGLE;
 
 		width = w;
@@ -159,12 +166,13 @@ public:
 #endif
 		glTexParameteri(gltype, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(gltype, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(gltype, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(gltype, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(gltype, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(gltype, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexImage2D(gltype, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, data.data());
 
 		glBindTexture(gltype, 0);
 
-		bAllocated = true;
+		bAllocated = textureID != 0;
 	}
 
 	bool load(const std::string& fileName) {
@@ -181,11 +189,21 @@ public:
 	}
 
 	void setColor(int x, int y, const MurkaColor col) {
+		if (x < 0 || x >= width || y < 0 || y >= height) return;
 		int idx = y * width * 4 + x * 4;
 		data[idx + 0] = col.getNormalisedRed();
 		data[idx + 1] = col.getNormalisedGreen();
 		data[idx + 2] = col.getNormalisedBlue();
 		data[idx + 3] = col.getNormalisedAlpha();
+	}
+
+	void setWhiteAlpha(int x, int y, unsigned char alpha) {
+		if (x < 0 || x >= width || y < 0 || y >= height) return;
+		int idx = y * width * 4 + x * 4;
+		data[idx + 0] = 1.0f;
+		data[idx + 1] = 1.0f;
+		data[idx + 2] = 1.0f;
+		data[idx + 3] = static_cast<float>(alpha) / 255.0f;
 	}
 
 	void setData(float *data) {
@@ -201,22 +219,20 @@ public:
 	}
 
 	void update() {
-		if (width > 0 && height > 0) {
+		if (bAllocated && hasActiveContext() && width > 0 && height > 0) {
 			glBindTexture(gltype, textureID);
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-			glTexImage2D(gltype, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, data.data());
-			//glTexSubImage2D(gltype, 0, 0, 0, width, height, GL_RGBA, GL_FLOAT, image.getPixelData());
+			glTexSubImage2D(gltype, 0, 0, 0, width, height, GL_RGBA, GL_FLOAT, data.data());
 			glBindTexture(gltype, 0);
 		}
 	}
 
 	void loadData(juce::uint8* data, int glFormat) {
-		if (width > 0 && height > 0) {
+		if (bAllocated && hasActiveContext() && width > 0 && height > 0) {
 			glBindTexture(gltype, textureID);
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-			glTexImage2D(gltype, 0, GL_RGBA32F, width, height, 0, glFormat, GL_UNSIGNED_BYTE, data);
-			//glTexSubImage2D(gltype, 0, 0, 0, width, height, GL_RGBA, GL_FLOAT, image.getPixelData());
+			glTexSubImage2D(gltype, 0, 0, 0, width, height, glFormat, GL_UNSIGNED_BYTE, data);
 			glBindTexture(gltype, 0);
 		}
 	}
@@ -228,10 +244,11 @@ public:
 	}
 
 	void clearTexture() {
-        if (bAllocated) {
-            glDeleteTextures(1, &textureID);
-            bAllocated = false;
-        }
+		if (bAllocated && hasActiveContext()) {
+			glDeleteTextures(1, &textureID);
+		}
+		textureID = 0;
+		bAllocated = false;
 	}
 
 	int getWidth() const {

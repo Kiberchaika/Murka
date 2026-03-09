@@ -91,12 +91,24 @@ class MurVbo {
 	bool loaded = false;
     bool inited = false;
 
+	bool hasActiveContext() const {
+		return openGLContext != nullptr && juce::OpenGLContext::getCurrentContext() == openGLContext;
+	}
+
+	void resetHandles() {
+		VAO = 0;
+		VBO = 0;
+		VBOID = 0;
+		loaded = false;
+		inited = false;
+	}
+
 public:
 	MurVbo() {
 	}
 
 	~MurVbo() {
-		if (isInited()) clear();
+		clear();
 	}
 
 	bool isInited() {
@@ -104,23 +116,30 @@ public:
 	}
 
 	void setOpenGLContext(juce::OpenGLContext* openGLContext) {
+		if (this->openGLContext != openGLContext) {
+			resetHandles();
+		}
 		this->openGLContext = openGLContext;
 	}
 
 	void setup() {
+		if (openGLContext == nullptr || !hasActiveContext()) return;
+		if (inited) clear();
+
 		openGLContext->extensions.glGenVertexArrays(1, &VAO);
 		openGLContext->extensions.glGenBuffers(1, &VBO);
 		openGLContext->extensions.glGenBuffers(1, &VBOID);
-        inited = true;
+		inited = (VAO != 0 && VBO != 0);
+		loaded = false;
 	}
 
 	void clear() {
-        if(inited) {
-            openGLContext->extensions.glDeleteVertexArrays(1, &VAO);
-            openGLContext->extensions.glDeleteBuffers(1, &VBO);
+		if (inited && hasActiveContext()) {
+			openGLContext->extensions.glDeleteVertexArrays(1, &VAO);
+			openGLContext->extensions.glDeleteBuffers(1, &VBO);
 			openGLContext->extensions.glDeleteBuffers(1, &VBOID);
-            inited = false;
-        }
+		}
+		resetHandles();
 	}
 
 	void setVertexData(const MurkaPoint3D* verts, int total) {
@@ -176,7 +195,7 @@ public:
 	}
 
 	void update(int usage, int attribLocationPosition, int attribLocationUv, int attribLocationCol) {
-		if (!inited) return;
+		if (!inited || !hasActiveContext() || VAO == 0 || VBO == 0) return;
 
 		int size = (std::max)(verts.size(), (std::max)(texCoords.size(), colors.size()));
 
@@ -234,14 +253,14 @@ public:
 			openGLContext->extensions.glBufferData(GL_ARRAY_BUFFER, size * sizeof(VboData), vboData.data(), usage);
             //openGLContext->extensions.glBufferSubData(GL_ARRAY_BUFFER, 0, size * sizeof(VboData), vboData.data());
 		}
-
+	
 		openGLContext->extensions.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         openGLContext->extensions.glBindBuffer(GL_ARRAY_BUFFER, 0);
 		openGLContext->extensions.glBindVertexArray(0);
 	}
 
 	void internalDraw(GLuint drawMode, int first, int total) const {
-		if (!inited) return;
+		if (!inited || !hasActiveContext() || VAO == 0 || VBO == 0 || total <= 0) return;
 
 		openGLContext->extensions.glBindVertexArray(VAO);
 		openGLContext->extensions.glBindBuffer(GL_ARRAY_BUFFER, VBO);

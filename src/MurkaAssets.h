@@ -49,6 +49,13 @@ struct FontInfo {
 
 class MurkaAssets {
 public:
+    MurkaAssets() {
+        currentFont = fonts.end();
+    }
+
+    ~MurkaAssets() {
+        clearFontsCache();
+    }
     
     std::string resourcesPath;
 
@@ -64,8 +71,9 @@ public:
     std::map<FontInfo, FontObject*>::iterator currentFont;
 
     FontObject* getCurrentFont() {
-        if (fonts.empty()) {
+        if (fonts.empty() || currentFont == fonts.end()) {
             jassertfalse; // you need to load font
+            return nullptr;
         }
         return currentFont->second;
     }
